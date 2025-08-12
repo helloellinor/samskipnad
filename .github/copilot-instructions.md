@@ -27,9 +27,25 @@ All of these commands have been validated to work in the current repository stat
 - No tests to run
 - No application to start or deploy
 
-## Future Development Guidelines
+## Example: When Package.json is Added
 
-When actual code is added to this repository, update these instructions accordingly:
+If a package.json file is added to the repository, update these instructions to include:
+
+```bash
+# Install dependencies (NEVER CANCEL - may take 10+ minutes for large projects)
+npm install
+
+# Build the project (NEVER CANCEL - set timeout to 60+ minutes)
+npm run build
+
+# Run tests (NEVER CANCEL - set timeout to 30+ minutes)  
+npm run test
+
+# Start development server
+npm run dev
+```
+
+And update the file structure documentation accordingly.
 
 ### For Node.js/JavaScript Projects
 When package.json is added:
@@ -86,6 +102,34 @@ When the repository contains actual application code, always test:
 - API endpoints if it's a web service
 - CLI commands if it's a command-line tool
 - UI interactions if it has a frontend
+
+**Example validation for a web application:**
+```bash
+# Start the development server
+npm run dev
+
+# In another terminal, test basic functionality
+curl http://localhost:3000/health
+# OR navigate to http://localhost:3000 in browser and take screenshot
+
+# Test API endpoints
+curl http://localhost:3000/api/status
+
+# Stop the server gracefully
+# Use Ctrl+C in the terminal running the dev server
+```
+
+**Example validation for a CLI tool:**
+```bash
+# Test help command
+./tool --help
+
+# Test basic functionality with sample input
+./tool process sample.txt
+
+# Verify output file was created correctly
+cat output.txt
+```
 
 ## Common File Locations and Conventions
 
