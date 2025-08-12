@@ -96,6 +96,9 @@ func getFuncMap() template.FuncMap {
 		"sub1": func(i int) int {
 			return i - 1
 		},
+		"upper": func(s string) string {
+			return strings.ToUpper(s)
+		},
 	}
 }
 
@@ -116,7 +119,7 @@ func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) Login(w http.ResponseWriter, r *http.Request) {
 	community := config.GetCurrent()
-	
+
 	if r.Method == "GET" {
 		data := map[string]interface{}{
 			"Title":     "Login",
@@ -308,7 +311,7 @@ func (h *Handlers) BookClass(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Failed to book class", http.StatusInternalServerError)
 			return
 		}
-		
+
 		w.Header().Set("Content-Type", "text/html")
 		w.Header().Set("HX-Trigger", "booking-updated")
 		w.Write([]byte(`<div class="booking-success">Successfully booked ` + class.Name + `!</div>`))
@@ -481,11 +484,11 @@ func (h *Handlers) KlippekortPurchase(w http.ResponseWriter, r *http.Request) {
 	}
 
 	community := config.GetCurrent()
-	
+
 	// Find the category and package
 	var selectedCategory *config.KlippekortCategory
 	var selectedPackage *config.CardPackage
-	
+
 	for _, category := range community.Pricing.Klippekort.Categories {
 		if category.ID == categoryID {
 			selectedCategory = &category
@@ -495,7 +498,7 @@ func (h *Handlers) KlippekortPurchase(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-	
+
 	if selectedCategory == nil || selectedPackage == nil {
 		http.Error(w, "Invalid category or package", http.StatusBadRequest)
 		return
@@ -503,8 +506,8 @@ func (h *Handlers) KlippekortPurchase(w http.ResponseWriter, r *http.Request) {
 
 	// Create payment intent for klippekort purchase
 	paymentIntent, err := h.paymentService.CreateKlippekortPaymentIntent(
-		user.ID, 
-		categoryID, 
+		user.ID,
+		categoryID,
 		selectedPackage.Klipp,
 		int64(selectedPackage.Price),
 	)
@@ -670,16 +673,16 @@ func (h *Handlers) Calendar(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	yearStr := r.URL.Query().Get("year")
 	monthStr := r.URL.Query().Get("month")
-	
+
 	year := now.Year()
 	month := now.Month()
-	
+
 	if yearStr != "" {
 		if y, err := strconv.Atoi(yearStr); err == nil {
 			year = y
 		}
 	}
-	
+
 	if monthStr != "" {
 		if m, err := strconv.Atoi(monthStr); err == nil && m >= 1 && m <= 12 {
 			month = time.Month(m)
@@ -689,7 +692,7 @@ func (h *Handlers) Calendar(w http.ResponseWriter, r *http.Request) {
 	// Get classes for the month
 	startOfMonth := time.Date(year, month, 1, 0, 0, 0, 0, time.UTC)
 	endOfMonth := startOfMonth.AddDate(0, 1, -1)
-	
+
 	classes, err := h.getClassesForDateRange(user.TenantID, startOfMonth, endOfMonth)
 	if err != nil {
 		http.Error(w, "Failed to get classes", http.StatusInternalServerError)
@@ -719,37 +722,37 @@ func (h *Handlers) Calendar(w http.ResponseWriter, r *http.Request) {
 }
 
 type CalendarData struct {
-	Year     int
-	Month    time.Month
-	Days     []CalendarDay
-	Classes  []models.Class
+	Year    int
+	Month   time.Month
+	Days    []CalendarDay
+	Classes []models.Class
 }
 
 type CalendarDay struct {
-	Day        int
-	Date       time.Time
-	IsToday    bool
+	Day          int
+	Date         time.Time
+	IsToday      bool
 	IsOtherMonth bool
-	Classes    []models.Class
+	Classes      []models.Class
 }
 
 func (h *Handlers) buildCalendarData(year int, month time.Month, classes []models.Class) CalendarData {
 	firstDay := time.Date(year, month, 1, 0, 0, 0, 0, time.UTC)
 	lastDay := firstDay.AddDate(0, 1, -1)
 	today := time.Now()
-	
+
 	// Start from Monday of the week containing the first day
 	startDate := firstDay
 	for startDate.Weekday() != time.Monday {
 		startDate = startDate.AddDate(0, 0, -1)
 	}
-	
+
 	// End on Sunday of the week containing the last day
 	endDate := lastDay
 	for endDate.Weekday() != time.Sunday {
 		endDate = endDate.AddDate(0, 0, 1)
 	}
-	
+
 	var days []CalendarDay
 	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
 		var dayClasses []models.Class
@@ -758,7 +761,7 @@ func (h *Handlers) buildCalendarData(year int, month time.Month, classes []model
 				dayClasses = append(dayClasses, class)
 			}
 		}
-		
+
 		days = append(days, CalendarDay{
 			Day:          d.Day(),
 			Date:         d,
@@ -767,7 +770,7 @@ func (h *Handlers) buildCalendarData(year int, month time.Month, classes []model
 			Classes:      dayClasses,
 		})
 	}
-	
+
 	return CalendarData{
 		Year:    year,
 		Month:   month,
@@ -790,8 +793,8 @@ func (h *Handlers) getClassesForDateRange(tenantID int, start, end time.Time) ([
 	var classes []models.Class
 	for rows.Next() {
 		var class models.Class
-		err := rows.Scan(&class.ID, &class.Name, &class.Description, 
-			&class.InstructorID, &class.StartTime, &class.EndTime, 
+		err := rows.Scan(&class.ID, &class.Name, &class.Description,
+			&class.InstructorID, &class.StartTime, &class.EndTime,
 			&class.MaxCapacity, &class.Price)
 		if err != nil {
 			return nil, err
@@ -811,7 +814,7 @@ func (h *Handlers) CalendarDayDetails(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	dateStr := vars["date"]
-	
+
 	date, err := time.Parse("2006-01-02", dateStr)
 	if err != nil {
 		http.Error(w, "Invalid date format", http.StatusBadRequest)
@@ -821,7 +824,7 @@ func (h *Handlers) CalendarDayDetails(w http.ResponseWriter, r *http.Request) {
 	// Get classes for the specific day
 	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
 	endOfDay := startOfDay.Add(24 * time.Hour)
-	
+
 	classes, err := h.getClassesForDateRange(user.TenantID, startOfDay, endOfDay)
 	if err != nil {
 		http.Error(w, "Failed to get classes", http.StatusInternalServerError)
@@ -957,7 +960,7 @@ func (h *Handlers) CreateClassPayment(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Failed to book class", http.StatusInternalServerError)
 			return
 		}
-		
+
 		w.Header().Set("Content-Type", "text/html")
 		w.Write([]byte(`<div class="booking-success">Class booked successfully!</div>`))
 		return
@@ -1129,24 +1132,24 @@ func (h *Handlers) MembershipPayment(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) getClassByID(classID int) (*models.Class, error) {
 	query := `SELECT id, name, description, instructor_id, start_time, end_time, max_capacity, price, tenant_id
 			  FROM classes WHERE id = ? AND active = true`
-	
+
 	var class models.Class
 	err := h.db.QueryRow(query, classID).Scan(
 		&class.ID, &class.Name, &class.Description, &class.InstructorID,
 		&class.StartTime, &class.EndTime, &class.MaxCapacity, &class.Price, &class.TenantID,
 	)
-	
+
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &class, nil
 }
 
 func (h *Handlers) bookClassDirectly(userID, classID int) error {
 	query := `INSERT INTO bookings (user_id, class_id, status, created_at, updated_at)
 			  VALUES (?, ?, 'confirmed', datetime('now'), datetime('now'))`
-	
+
 	_, err := h.db.Exec(query, userID, classID)
 	return err
 }
@@ -1262,9 +1265,9 @@ func (h *Handlers) getUserBookings(userID int) ([]models.Booking, error) {
 // DynamicCSS generates CSS based on community configuration
 func (h *Handlers) DynamicCSS(w http.ResponseWriter, r *http.Request) {
 	community := config.GetCurrent()
-	
+
 	w.Header().Set("Content-Type", "text/css")
-	
+
 	css := fmt.Sprintf(`/* Dynamic CSS for %s */
 
 /* CSS Variables from Community Config */
@@ -1609,7 +1612,7 @@ body {
 		community.Fonts.Secondary,
 		community.Fonts.SizeBase,
 	)
-	
+
 	fmt.Fprint(w, css)
 }
 
@@ -1652,7 +1655,7 @@ func (h *Handlers) KlippekortCategory(w http.ResponseWriter, r *http.Request) {
 	}
 
 	community := config.GetCurrent()
-	
+
 	// Find the specific category
 	var selectedCategory *config.KlippekortCategory
 	for _, category := range community.Pricing.Klippekort.Categories {
@@ -1702,11 +1705,11 @@ func (h *Handlers) KlippekortPurchaseInstant(w http.ResponseWriter, r *http.Requ
 	}
 
 	community := config.GetCurrent()
-	
+
 	// Find the category and package
 	var selectedCategory *config.KlippekortCategory
 	var selectedPackage *config.CardPackage
-	
+
 	for _, category := range community.Pricing.Klippekort.Categories {
 		if category.ID == categoryID {
 			selectedCategory = &category
@@ -1716,7 +1719,7 @@ func (h *Handlers) KlippekortPurchaseInstant(w http.ResponseWriter, r *http.Requ
 			break
 		}
 	}
-	
+
 	if selectedCategory == nil || selectedPackage == nil {
 		http.Error(w, "Invalid category or package", http.StatusBadRequest)
 		return
@@ -1724,8 +1727,8 @@ func (h *Handlers) KlippekortPurchaseInstant(w http.ResponseWriter, r *http.Requ
 
 	// Create payment intent
 	paymentIntent, err := h.paymentService.CreateKlippekortPaymentIntent(
-		user.ID, 
-		categoryID, 
+		user.ID,
+		categoryID,
 		selectedPackage.Klipp,
 		int64(selectedPackage.Price),
 	)
@@ -1754,7 +1757,7 @@ func (h *Handlers) getUserKlippBalances(userID int) (map[string]int, error) {
 		WHERE user_id = ? AND klipp_left > 0 
 		GROUP BY category_id
 	`
-	
+
 	rows, err := h.db.Query(query, userID)
 	if err != nil {
 		return nil, err
@@ -1780,7 +1783,7 @@ func (h *Handlers) getUserKlippBalance(userID int, categoryID string) (int, erro
 		FROM klippekort 
 		WHERE user_id = ? AND category_id = ? AND klipp_left > 0
 	`
-	
+
 	var totalKlipp sql.NullInt64
 	err := h.db.QueryRow(query, userID, categoryID).Scan(&totalKlipp)
 	if err != nil {

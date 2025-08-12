@@ -4,12 +4,12 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-	"strconv"
 	"samskipnad/internal/models"
+	"strconv"
 
 	"github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/paymentintent"
 	"github.com/stripe/stripe-go/v76/customer"
+	"github.com/stripe/stripe-go/v76/paymentintent"
 )
 
 type Service struct {
@@ -22,7 +22,7 @@ func NewService(db *sql.DB) *Service {
 	if stripe.Key == "" {
 		stripe.Key = "sk_test_..." // Use a test key for development
 	}
-	
+
 	return &Service{
 		db: db,
 	}
@@ -97,7 +97,7 @@ func (s *Service) CreateMembershipPaymentIntent(userID int, membershipType strin
 		Metadata: map[string]string{
 			"user_id":         fmt.Sprintf("%d", userID),
 			"membership_type": membershipType,
-			"type":           "membership",
+			"type":            "membership",
 		},
 	}
 
@@ -223,7 +223,7 @@ func (s *Service) getOrCreateStripeCustomer(user *models.User) (*stripe.Customer
 	params := &stripe.CustomerListParams{
 		Email: stripe.String(user.Email),
 	}
-	
+
 	customers := customer.List(params)
 	for customers.Next() {
 		return customers.Customer(), nil
@@ -245,47 +245,47 @@ func (s *Service) getOrCreateStripeCustomer(user *models.User) (*stripe.Customer
 func (s *Service) getUserByID(userID int) (*models.User, error) {
 	query := `SELECT id, email, first_name, last_name, phone, role, active, tenant_id, created_at, updated_at 
 			  FROM users WHERE id = ?`
-	
+
 	var user models.User
 	err := s.db.QueryRow(query, userID).Scan(
 		&user.ID, &user.Email, &user.FirstName, &user.LastName,
 		&user.Phone, &user.Role, &user.Active, &user.TenantID,
 		&user.CreatedAt, &user.UpdatedAt,
 	)
-	
+
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &user, nil
 }
 
 func (s *Service) storePayment(payment *models.Payment) error {
 	query := `INSERT INTO payments (id, user_id, tenant_id, amount, currency, status, payment_type, reference_id, stripe_data, created_at, updated_at)
 			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
-	
+
 	_, err := s.db.Exec(query, payment.ID, payment.UserID, payment.TenantID,
 		payment.Amount, payment.Currency, payment.Status, payment.PaymentType,
 		payment.ReferenceID, payment.StripeData)
-	
+
 	return err
 }
 
 func (s *Service) getPaymentByID(paymentID string) (*models.Payment, error) {
 	query := `SELECT id, user_id, tenant_id, amount, currency, status, payment_type, reference_id, stripe_data, created_at, updated_at
 			  FROM payments WHERE id = ?`
-	
+
 	var payment models.Payment
 	err := s.db.QueryRow(query, paymentID).Scan(
 		&payment.ID, &payment.UserID, &payment.TenantID, &payment.Amount,
 		&payment.Currency, &payment.Status, &payment.PaymentType,
 		&payment.ReferenceID, &payment.StripeData, &payment.CreatedAt, &payment.UpdatedAt,
 	)
-	
+
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &payment, nil
 }
 
@@ -299,7 +299,7 @@ func (s *Service) processClassBooking(userID, classID int) error {
 	// Create booking record
 	query := `INSERT INTO bookings (user_id, class_id, status, created_at, updated_at)
 			  VALUES (?, ?, 'confirmed', datetime('now'), datetime('now'))`
-	
+
 	_, err := s.db.Exec(query, userID, classID)
 	return err
 }
@@ -325,7 +325,7 @@ func (s *Service) processMembershipPayment(userID int, membershipType string) er
 
 	query := fmt.Sprintf(`INSERT INTO memberships (user_id, tenant_id, type, start_date, end_date, active, created_at, updated_at)
 						  VALUES (?, ?, ?, %s, %s, true, datetime('now'), datetime('now'))`, startDate, endDate)
-	
+
 	_, err = s.db.Exec(query, userID, user.TenantID, membershipType)
 	return err
 }
@@ -345,7 +345,7 @@ func (s *Service) processKlippekortPayment(userID int, categoryID, klippStr stri
 	// Create klippekort record
 	query := `INSERT INTO klippekort (user_id, tenant_id, category_id, klipp_left, original_klipp, created_at, updated_at)
 			  VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
-	
+
 	_, err = s.db.Exec(query, userID, user.TenantID, categoryID, klipp, klipp)
 	return err
 }

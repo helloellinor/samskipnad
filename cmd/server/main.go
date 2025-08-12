@@ -38,10 +38,10 @@ func main() {
 
 	// Set up routes
 	r := mux.NewRouter()
-	
+
 	// Static files
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./web/static/"))))
-	
+
 	// Dynamic CSS based on community config
 	r.HandleFunc("/css/community.css", handlers.DynamicCSS).Methods("GET")
 
@@ -54,7 +54,7 @@ func main() {
 	// Protected routes
 	protected := r.PathPrefix("/").Subrouter()
 	protected.Use(middleware.AuthRequired(authService))
-	
+
 	protected.HandleFunc("/dashboard", handlers.Dashboard).Methods("GET")
 	protected.HandleFunc("/classes", handlers.Classes).Methods("GET")
 	protected.HandleFunc("/calendar", handlers.Calendar).Methods("GET")
@@ -63,7 +63,7 @@ func main() {
 	protected.HandleFunc("/klippekort", handlers.Klippekort).Methods("GET")
 	protected.HandleFunc("/klippekort/purchase", handlers.KlippekortPurchase).Methods("POST")
 	protected.HandleFunc("/profile", handlers.Profile).Methods("GET", "POST")
-	
+
 	// Payment routes
 	protected.HandleFunc("/payment/membership", handlers.MembershipPayment).Methods("GET", "POST")
 	protected.HandleFunc("/payment/success", handlers.PaymentSuccess).Methods("GET")
@@ -71,7 +71,7 @@ func main() {
 	// Admin routes
 	admin := protected.PathPrefix("/admin").Subrouter()
 	admin.Use(middleware.AdminRequired())
-	
+
 	admin.HandleFunc("/", handlers.AdminDashboard).Methods("GET")
 	admin.HandleFunc("/classes", handlers.AdminClasses).Methods("GET", "POST")
 	admin.HandleFunc("/classes/{id}/edit", handlers.EditClass).Methods("GET", "POST")
@@ -86,7 +86,7 @@ func main() {
 	api.HandleFunc("/classes/search", handlers.SearchClasses).Methods("GET")
 	api.HandleFunc("/bookings/cancel/{id}", handlers.CancelBooking).Methods("DELETE")
 	api.HandleFunc("/calendar/day/{date}", handlers.CalendarDayDetails).Methods("GET")
-	
+
 	// Klippekort HTMX API routes
 	api.HandleFunc("/klippekort/balance", handlers.KlippekortBalance).Methods("GET")
 	api.HandleFunc("/klippekort/category", handlers.KlippekortCategory).Methods("GET")
