@@ -7,8 +7,36 @@
 </div>
 
 <div class="row mt-4">
+    <!-- Profile Card -->
+    <div class="col-md-4">
+        <div class="profile-card card p-4 fade-in-up">
+            <div class="profile-avatar">
+                {{substr .User.FirstName 0 1}}{{substr .User.LastName 0 1}}
+            </div>
+            <div class="profile-info text-center">
+                <h4>{{.User.FirstName}} {{.User.LastName}}</h4>
+                <span class="profile-role">{{.User.Role}}</span>
+                <p class="text-muted">Member since {{.User.CreatedAt.Format "Jan 2006"}}</p>
+            </div>
+            <div class="profile-stats">
+                <div class="profile-stat">
+                    <span class="profile-stat-value">{{len .UserBookings}}</span>
+                    <span class="profile-stat-label">Bookings</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="profile-stat-value">{{if .UserMembership}}1{{else}}0{{end}}</span>
+                    <span class="profile-stat-label">Membership</span>
+                </div>
+            </div>
+            <div class="mt-3 d-grid">
+                <a href="/profile" class="btn btn-outline-primary">Edit Profile</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Upcoming Classes -->
     <div class="col-md-8">
-        <div class="card">
+        <div class="card slide-in-left">
             <div class="card-header">
                 <h5 class="card-title mb-0">Upcoming Classes</h5>
             </div>
@@ -39,19 +67,26 @@
                     {{end}}
                 </div>
                 {{else}}
-                <p class="text-muted">No upcoming classes available.</p>
+                <div class="text-center py-5">
+                    <h6 class="text-muted">No upcoming classes available</h6>
+                    <p class="text-muted">Check back soon for new classes!</p>
+                </div>
                 {{end}}
                 
                 <div id="booking-result" class="mt-3"></div>
                 
-                <div class="mt-3">
+                <div class="mt-3 d-flex gap-2">
                     <a href="/classes" class="btn btn-primary">View All Classes</a>
+                    <a href="/calendar" class="btn btn-outline-secondary">Calendar View</a>
                 </div>
             </div>
         </div>
     </div>
-    
-    <div class="col-md-4">
+</div>
+
+<div class="row mt-4">
+    <!-- Your Bookings -->
+    <div class="col-md-6">
         <div class="card">
             <div class="card-header">
                 <h5 class="card-title mb-0">Your Bookings</h5>
@@ -72,20 +107,26 @@
                     {{end}}
                 </div>
                 {{else}}
-                <p class="text-muted">No bookings yet.</p>
+                <div class="text-center py-4">
+                    <h6 class="text-muted">No bookings yet</h6>
+                    <p class="text-muted">Book your first class to get started!</p>
+                </div>
                 {{end}}
             </div>
         </div>
-        
-        <div class="card mt-3">
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="col-md-6">
+        <div class="card">
             <div class="card-header">
                 <h5 class="card-title mb-0">Quick Actions</h5>
             </div>
             <div class="card-body">
                 <div class="d-grid gap-2">
                     <a href="/classes" class="btn btn-primary">Browse Classes</a>
+                    <a href="/calendar" class="btn btn-outline-primary">Calendar View</a>
                     <a href="/memberships" class="btn btn-outline-secondary">View Memberships</a>
-                    <a href="/profile" class="btn btn-outline-secondary">Edit Profile</a>
                     {{if eq .User.Role "admin"}}
                     <a href="/admin" class="btn btn-warning">Admin Panel</a>
                     {{end}}
@@ -99,6 +140,11 @@
 // Custom function to handle currency formatting
 function divf(value, divisor) {
     return value / divisor;
+}
+
+// Custom function to get substring
+function substr(str, start, length) {
+    return str.substring(start, start + length).toUpperCase();
 }
 </script>
 {{end}}

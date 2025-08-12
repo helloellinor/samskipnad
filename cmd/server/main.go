@@ -43,6 +43,7 @@ func main() {
 	
 	protected.HandleFunc("/dashboard", handlers.Dashboard).Methods("GET")
 	protected.HandleFunc("/classes", handlers.Classes).Methods("GET")
+	protected.HandleFunc("/calendar", handlers.Calendar).Methods("GET")
 	protected.HandleFunc("/classes/{id}/book", handlers.BookClass).Methods("POST")
 	protected.HandleFunc("/memberships", handlers.Memberships).Methods("GET")
 	protected.HandleFunc("/profile", handlers.Profile).Methods("GET", "POST")
@@ -64,6 +65,7 @@ func main() {
 	api.Use(middleware.AuthRequired(authService))
 	api.HandleFunc("/classes/search", handlers.SearchClasses).Methods("GET")
 	api.HandleFunc("/bookings/cancel/{id}", handlers.CancelBooking).Methods("DELETE")
+	api.HandleFunc("/calendar/day/{date}", handlers.CalendarDayDetails).Methods("GET")
 
 	port := os.Getenv("PORT")
 	if port == "" {

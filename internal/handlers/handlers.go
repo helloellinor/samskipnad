@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"samskipnad/internal/auth"
@@ -35,6 +36,16 @@ func New(db *sql.DB, authService *auth.Service) *Handlers {
 				return s
 			}
 			return string(s[0]-32) + s[1:]
+		},
+		"substr": func(s string, start, length int) string {
+			if start < 0 || start >= len(s) {
+				return ""
+			}
+			end := start + length
+			if end > len(s) {
+				end = len(s)
+			}
+			return strings.ToUpper(s[start:end])
 		},
 	}
 	
@@ -385,6 +396,273 @@ func (h *Handlers) AdminRoles(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) AdminPayments(w http.ResponseWriter, r *http.Request) {
 	// TODO: Implement payment management
 	http.Error(w, "Not implemented", http.StatusNotImplemented)
+}
+
+func (h *Handlers) Calendar(w http.ResponseWriter, r *http.Request) {
+	user, ok := r.Context().Value("user").(*models.User)
+	if !ok {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	// Get month and year from query params, default to current month
+	now := time.Now()
+	yearStr := r.URL.Query().Get("year")
+	monthStr := r.URL.Query().Get("month")
+	
+	year := now.Year()
+	month := now.Month()
+	
+	if yearStr != "" {
+		if y, err := strconv.Atoi(yearStr); err == nil {
+			year = y
+		}
+	}
+	
+	if monthStr != "" {
+		if m, err := strconv.Atoi(monthStr); err == nil && m >= 1 && m <= 12 {
+			month = time.Month(m)
+		}
+	}
+
+	// Get classes for the month
+	startOfMonth := time.Date(year, month, 1, 0, 0, 0, 0, time.UTC)
+	endOfMonth := startOfMonth.AddDate(0, 1, -1)
+	
+	classes, err := h.getClassesForDateRange(user.TenantID, startOfMonth, endOfMonth)
+	if err != nil {
+		http.Error(w, "Failed to get classes", http.StatusInternalServerError)
+		return
+	}
+
+	// Build calendar data
+	calendarData := h.buildCalendarData(year, month, classes)
+
+	data := struct {
+		Title        string
+		User         *models.User
+		CalendarData CalendarData
+		CurrentMonth time.Time
+		PrevMonth    time.Time
+		NextMonth    time.Time
+	}{
+		Title:        "Calendar",
+		User:         user,
+		CalendarData: calendarData,
+		CurrentMonth: time.Date(year, month, 1, 0, 0, 0, 0, time.UTC),
+		PrevMonth:    time.Date(year, month, 1, 0, 0, 0, 0, time.UTC).AddDate(0, -1, 0),
+		NextMonth:    time.Date(year, month, 1, 0, 0, 0, 0, time.UTC).AddDate(0, 1, 0),
+	}
+
+	h.renderTemplate(w, "calendar.html", data)
+}
+
+type CalendarData struct {
+	Year     int
+	Month    time.Month
+	Days     []CalendarDay
+	Classes  []models.Class
+}
+
+type CalendarDay struct {
+	Day        int
+	Date       time.Time
+	IsToday    bool
+	IsOtherMonth bool
+	Classes    []models.Class
+}
+
+func (h *Handlers) buildCalendarData(year int, month time.Month, classes []models.Class) CalendarData {
+	firstDay := time.Date(year, month, 1, 0, 0, 0, 0, time.UTC)
+	lastDay := firstDay.AddDate(0, 1, -1)
+	today := time.Now()
+	
+	// Start from Monday of the week containing the first day
+	startDate := firstDay
+	for startDate.Weekday() != time.Monday {
+		startDate = startDate.AddDate(0, 0, -1)
+	}
+	
+	// End on Sunday of the week containing the last day
+	endDate := lastDay
+	for endDate.Weekday() != time.Sunday {
+		endDate = endDate.AddDate(0, 0, 1)
+	}
+	
+	var days []CalendarDay
+	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
+		var dayClasses []models.Class
+		for _, class := range classes {
+			if class.StartTime.Day() == d.Day() && class.StartTime.Month() == d.Month() {
+				dayClasses = append(dayClasses, class)
+			}
+		}
+		
+		days = append(days, CalendarDay{
+			Day:          d.Day(),
+			Date:         d,
+			IsToday:      d.Year() == today.Year() && d.Month() == today.Month() && d.Day() == today.Day(),
+			IsOtherMonth: d.Month() != month,
+			Classes:      dayClasses,
+		})
+	}
+	
+	return CalendarData{
+		Year:    year,
+		Month:   month,
+		Days:    days,
+		Classes: classes,
+	}
+}
+
+func (h *Handlers) getClassesForDateRange(tenantID int, start, end time.Time) ([]models.Class, error) {
+	rows, err := h.db.Query(`
+		SELECT id, name, description, instructor_id, start_time, end_time, max_capacity, price
+		FROM classes
+		WHERE tenant_id = ? AND start_time >= ? AND start_time <= ? AND active = true
+		ORDER BY start_time ASC`, tenantID, start, end)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var classes []models.Class
+	for rows.Next() {
+		var class models.Class
+		err := rows.Scan(&class.ID, &class.Name, &class.Description, 
+			&class.InstructorID, &class.StartTime, &class.EndTime, 
+			&class.MaxCapacity, &class.Price)
+		if err != nil {
+			return nil, err
+		}
+		classes = append(classes, class)
+	}
+
+	return classes, nil
+}
+
+func (h *Handlers) CalendarDayDetails(w http.ResponseWriter, r *http.Request) {
+	user, ok := r.Context().Value("user").(*models.User)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	vars := mux.Vars(r)
+	dateStr := vars["date"]
+	
+	date, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		http.Error(w, "Invalid date format", http.StatusBadRequest)
+		return
+	}
+
+	// Get classes for the specific day
+	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
+	endOfDay := startOfDay.Add(24 * time.Hour)
+	
+	classes, err := h.getClassesForDateRange(user.TenantID, startOfDay, endOfDay)
+	if err != nil {
+		http.Error(w, "Failed to get classes", http.StatusInternalServerError)
+		return
+	}
+
+	// Get user's bookings for these classes
+	userBookings, err := h.getUserBookings(user.ID)
+	if err != nil {
+		userBookings = []models.Booking{} // Continue even if we can't get bookings
+	}
+
+	// Create a map for quick lookup of booked classes
+	bookedClasses := make(map[int]bool)
+	for _, booking := range userBookings {
+		bookedClasses[booking.ClassID] = true
+	}
+
+	data := struct {
+		Date          time.Time
+		Classes       []models.Class
+		BookedClasses map[int]bool
+	}{
+		Date:          date,
+		Classes:       classes,
+		BookedClasses: bookedClasses,
+	}
+
+	// Render the day details as HTML fragment
+	tmpl := `
+	<h6>{{.Date.Format "Monday, January 2, 2006"}}</h6>
+	{{if .Classes}}
+		{{range .Classes}}
+		<div class="card mb-3">
+			<div class="card-body">
+				<h6 class="card-title">{{.Name}}</h6>
+				<p class="card-text text-muted">{{.Description}}</p>
+				<div class="class-details">
+					<div class="detail-item">
+						<span class="detail-label">Time:</span>
+						<span class="detail-value">{{.StartTime.Format "15:04"}} - {{.EndTime.Format "15:04"}}</span>
+					</div>
+					<div class="detail-item">
+						<span class="detail-label">Duration:</span>
+						<span class="detail-value">{{printf "%.0f" .EndTime.Sub(.StartTime).Minutes}} minutes</span>
+					</div>
+					<div class="detail-item">
+						<span class="detail-label">Price:</span>
+						<span class="detail-value">
+							{{if gt .Price 0}}
+								${{printf "%.2f" (divf (float64 .Price) 100.0)}}
+							{{else}}
+								Free
+							{{end}}
+						</span>
+					</div>
+					<div class="detail-item">
+						<span class="detail-label">Capacity:</span>
+						<span class="detail-value">{{.MaxCapacity}} spots</span>
+					</div>
+				</div>
+				<div class="mt-3">
+					{{if index $.BookedClasses .ID}}
+					<span class="badge bg-success">Booked</span>
+					{{else}}
+					<button class="btn btn-primary btn-sm" 
+							hx-post="/classes/{{.ID}}/book" 
+							hx-target="#booking-result-{{.ID}}"
+							hx-swap="innerHTML">
+						Book Class
+					</button>
+					{{end}}
+					<div id="booking-result-{{.ID}}" class="mt-2"></div>
+				</div>
+			</div>
+		</div>
+		{{end}}
+	{{else}}
+		<p class="text-muted">No classes scheduled for this day.</p>
+	{{end}}`
+
+	t, err := template.New("day-details").Funcs(template.FuncMap{
+		"divf": func(a, b float64) float64 {
+			if b != 0 {
+				return a / b
+			}
+			return 0
+		},
+		"float64": func(i int) float64 {
+			return float64(i)
+		},
+	}).Parse(tmpl)
+	if err != nil {
+		http.Error(w, "Template error", http.StatusInternalServerError)
+		return
+	}
+
+	err = t.Execute(w, data)
+	if err != nil {
+		http.Error(w, "Template execution error", http.StatusInternalServerError)
+		return
+	}
 }
 
 // API handlers for HTMX
