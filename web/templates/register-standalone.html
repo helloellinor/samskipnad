@@ -4,71 +4,287 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Samskipnad</title>
-    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="description" content="Create a new Samskipnad account">
+    <!-- Self-hosted or fallback scripts instead of external CDNs -->
+    <script src="/static/js/htmx-lite.js"></script>
     <link rel="stylesheet" href="/static/css/styles.css">
+    <!-- Accessibility improvements -->
+    <style>
+        /* High contrast focus styles for accessibility */
+        *:focus {
+            outline: 3px solid #00ff41 !important;
+            outline-offset: 2px !important;
+        }
+        
+        /* Skip link for screen readers */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: #000;
+            color: #00ff41;
+            padding: 8px;
+            text-decoration: none;
+            border: 2px solid #00ff41;
+            border-radius: 4px;
+            font-weight: bold;
+            z-index: 9999;
+        }
+        
+        .skip-link:focus {
+            top: 6px;
+        }
+        
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">Samskipnad</a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/login">Login</a>
-                <a class="nav-link" href="/register">Register</a>
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <nav class="cyber-nav" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <a class="nav-brand" href="/" aria-label="Samskipnad homepage">
+                <span class="brand-symbol" aria-hidden="true">[</span>
+                SAMSKIPNAD
+                <span class="brand-symbol" aria-hidden="true">]</span>
+            </a>
+            <div class="nav-links" role="list">
+                <a class="nav-link" href="/login" role="listitem">
+                    <span class="nav-symbol" aria-hidden="true">&gt;</span> 
+                    <span>LOGIN</span>
+                    <span class="sr-only">Sign in to your account</span>
+                </a>
+                <a class="nav-link" href="/register" role="listitem" aria-current="page">
+                    <span class="nav-symbol" aria-hidden="true">+</span> 
+                    <span>REGISTER</span>
+                    <span class="sr-only">Create a new account</span>
+                </a>
             </div>
         </div>
     </nav>
 
-    <main class="container mt-4">
+    <main class="main-content" id="main-content" role="main" tabindex="-1">
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title mb-0">Register</h3>
+                <div class="cyber-card">
+                    <div class="text-center mb-4">
+                        <h1 style="color: var(--neon-green); text-transform: uppercase; letter-spacing: 2px; font-family: 'Space Mono', monospace;">
+                            [ USER REGISTRATION ]
+                        </h1>
+                        <p style="color: var(--secondary-color); font-family: 'Space Mono', monospace;">
+                            Create new account credentials
+                        </p>
                     </div>
-                    <div class="card-body">
-                        {{if .Error}}
-                        <div class="alert alert-danger">{{.Error}}</div>
-                        {{end}}
-                        
-                        <form method="POST" action="/register">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="first_name" class="form-label">First Name</label>
-                                    <input type="text" class="form-control" id="first_name" name="first_name" 
-                                           value="{{.FirstName}}" required>
+                    
+                    {{if .Error}}
+                    <div class="alert alert-danger mb-4" role="alert" aria-live="assertive">
+                        <strong>REGISTRATION FAILED:</strong> {{.Error}}
+                    </div>
+                    {{end}}
+                    
+                    <form method="POST" action="/register" aria-labelledby="register-heading" novalidate>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label" id="first-name-label">
+                                    <span style="color: var(--neon-orange);" aria-hidden="true">&gt;</span> FIRST NAME
+                                </label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" 
+                                       value="{{.FirstName}}" required autocomplete="given-name"
+                                       placeholder="Your first name"
+                                       aria-labelledby="first-name-label"
+                                       aria-describedby="first-name-error"
+                                       aria-invalid="{{if .Error}}true{{else}}false{{end}}">
+                                <div id="first-name-error" class="sr-only">
+                                    {{if .Error}}Please check your first name{{end}}
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="last_name" class="form-label">Last Name</label>
-                                    <input type="text" class="form-control" id="last_name" name="last_name" 
-                                           value="{{.LastName}}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label" id="last-name-label">
+                                    <span style="color: var(--neon-orange);" aria-hidden="true">&gt;</span> LAST NAME
+                                </label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" 
+                                       value="{{.LastName}}" required autocomplete="family-name"
+                                       placeholder="Your last name"
+                                       aria-labelledby="last-name-label"
+                                       aria-describedby="last-name-error"
+                                       aria-invalid="{{if .Error}}true{{else}}false{{end}}">
+                                <div id="last-name-error" class="sr-only">
+                                    {{if .Error}}Please check your last name{{end}}
                                 </div>
                             </div>
-                            
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" 
-                                       value="{{.Email}}" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password" name="password" 
-                                       minlength="6" required>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary w-100">Register</button>
-                        </form>
-                        
-                        <div class="text-center mt-3">
-                            <p>Already have an account? <a href="/login">Login here</a></p>
                         </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label" id="email-label">
+                                <span style="color: var(--neon-orange);" aria-hidden="true">&gt;</span> EMAIL ADDRESS
+                            </label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="{{.Email}}" required autocomplete="email"
+                                   placeholder="user@domain.com"
+                                   aria-labelledby="email-label"
+                                   aria-describedby="email-error email-help"
+                                   aria-invalid="{{if .Error}}true{{else}}false{{end}}">
+                            <div id="email-help" class="small text-muted mt-1">
+                                This will be your login username
+                            </div>
+                            <div id="email-error" class="sr-only">
+                                {{if .Error}}Please check your email address{{end}}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="password" class="form-label" id="password-label">
+                                <span style="color: var(--neon-orange);" aria-hidden="true">&gt;</span> PASSWORD
+                            </label>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                   minlength="6" required autocomplete="new-password"
+                                   placeholder="••••••••"
+                                   aria-labelledby="password-label"
+                                   aria-describedby="password-error password-help"
+                                   aria-invalid="{{if .Error}}true{{else}}false{{end}}">
+                            <div id="password-help" class="small text-muted mt-1">
+                                Minimum 6 characters required
+                            </div>
+                            <div id="password-error" class="sr-only">
+                                {{if .Error}}Please check your password{{end}}
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 mb-4" 
+                                aria-describedby="submit-help">
+                            <span style="margin-right: 0.5rem;" aria-hidden="true">&gt;</span> CREATE ACCOUNT
+                        </button>
+                        <div id="submit-help" class="sr-only">
+                            Press Enter or click to submit the registration form
+                        </div>
+                    </form>
+                    
+                    <div class="text-center">
+                        <p style="color: var(--secondary-color); font-family: 'Space Mono', monospace;">
+                            EXISTING USER? 
+                            <a href="/login" class="text-decoration-none" 
+                               style="color: var(--neon-green);"
+                               aria-label="Sign in to existing account">
+                                [ LOGIN HERE ]
+                            </a>
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <footer class="cyber-footer" role="contentinfo">
+        <div class="footer-container">
+            <div class="footer-section">
+                <p>&copy; 2024 Samskipnad. 
+                <span class="footer-accent" aria-label="System status">[ SYSTEM ACTIVE ]</span></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Enhanced accessibility features for standalone register
+        document.addEventListener('DOMContentLoaded', function() {
+            // Focus management for skip link
+            const skipLink = document.querySelector('.skip-link');
+            if (skipLink) {
+                skipLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector('#main-content');
+                    if (target) {
+                        target.focus();
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            }
+            
+            const firstNameInput = document.getElementById('first_name');
+            const lastNameInput = document.getElementById('last_name');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            
+            // Add real-time validation feedback for all fields
+            function setupFieldValidation(input, errorDivId, validationFn) {
+                if (input) {
+                    input.addEventListener('blur', function() {
+                        const isValid = validationFn(this.value);
+                        this.setAttribute('aria-invalid', !isValid);
+                        
+                        const errorDiv = document.getElementById(errorDivId);
+                        if (errorDiv) {
+                            if (!isValid) {
+                                errorDiv.className = 'text-danger small mt-1';
+                            } else {
+                                errorDiv.className = 'sr-only';
+                                errorDiv.textContent = '';
+                            }
+                        }
+                    });
+                }
+            }
+            
+            setupFieldValidation(firstNameInput, 'first-name-error', function(value) {
+                const isValid = value.trim().length > 0;
+                const errorDiv = document.getElementById('first-name-error');
+                if (!isValid && errorDiv) {
+                    errorDiv.textContent = 'First name is required';
+                }
+                return isValid;
+            });
+            
+            setupFieldValidation(lastNameInput, 'last-name-error', function(value) {
+                const isValid = value.trim().length > 0;
+                const errorDiv = document.getElementById('last-name-error');
+                if (!isValid && errorDiv) {
+                    errorDiv.textContent = 'Last name is required';
+                }
+                return isValid;
+            });
+            
+            setupFieldValidation(emailInput, 'email-error', function(value) {
+                const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+                const errorDiv = document.getElementById('email-error');
+                if (!isValid && errorDiv) {
+                    errorDiv.textContent = 'Please enter a valid email address';
+                }
+                return isValid;
+            });
+            
+            setupFieldValidation(passwordInput, 'password-error', function(value) {
+                const isValid = value.length >= 6;
+                const errorDiv = document.getElementById('password-error');
+                if (!isValid && errorDiv) {
+                    errorDiv.textContent = 'Password must be at least 6 characters long';
+                }
+                return isValid;
+            });
+
+            // Improve form accessibility
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function() {
+                    // Announce form submission to screen readers
+                    const announcement = document.createElement('div');
+                    announcement.setAttribute('aria-live', 'assertive');
+                    announcement.className = 'sr-only';
+                    announcement.textContent = 'Registration form submitted, please wait';
+                    document.body.appendChild(announcement);
+                    setTimeout(() => document.body.removeChild(announcement), 3000);
+                });
+            }
+        });
+    </script>
 </body>
 </html>

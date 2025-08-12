@@ -3,40 +3,59 @@
     <div class="col-md-6">
         <div class="cyber-card">
             <div class="text-center mb-4">
-                <h3 style="color: var(--neon-green); text-transform: uppercase; letter-spacing: 2px; font-family: 'Space Mono', monospace;">
+                <h1 style="color: var(--neon-green); text-transform: uppercase; letter-spacing: 2px; font-family: 'Space Mono', monospace;">
                     [ SYSTEM ACCESS ]
-                </h3>
+                </h1>
                 <p style="color: var(--secondary-color); font-family: 'Space Mono', monospace;">
                     Enter credentials to proceed
                 </p>
             </div>
             
             {{if .Error}}
-            <div class="alert alert-danger mb-4">
+            <div class="alert alert-danger mb-4" role="alert" aria-live="assertive">
                 <strong>ACCESS DENIED:</strong> {{.Error}}
             </div>
             {{end}}
             
-            <form method="POST" action="/login" hx-post="/login" hx-target="main" hx-push-url="true">
+            <form method="POST" action="/login" hx-post="/login" hx-target="main" hx-push-url="true" 
+                  aria-labelledby="login-heading" novalidate>
                 <div class="mb-3">
-                    <label for="email" class="form-label">
-                        <span style="color: var(--neon-orange);">&gt;</span> EMAIL ADDRESS
+                    <label for="email" class="form-label" id="email-label">
+                        <span style="color: var(--neon-orange);" aria-hidden="true">&gt;</span> EMAIL ADDRESS
                     </label>
                     <input type="email" class="form-control" id="email" name="email" 
-                           value="{{.Email}}" required placeholder="user@domain.com">
+                           value="{{.Email}}" required autocomplete="email"
+                           placeholder="user@domain.com"
+                           aria-labelledby="email-label"
+                           aria-describedby="email-error"
+                           aria-invalid="{{if .Error}}true{{else}}false{{end}}">
+                    <div id="email-error" class="sr-only">
+                        {{if .Error}}Please check your email address{{end}}
+                    </div>
                 </div>
                 
                 <div class="mb-4">
-                    <label for="password" class="form-label">
-                        <span style="color: var(--neon-orange);">&gt;</span> PASSWORD
+                    <label for="password" class="form-label" id="password-label">
+                        <span style="color: var(--neon-orange);" aria-hidden="true">&gt;</span> PASSWORD
                     </label>
                     <input type="password" class="form-control" id="password" name="password" 
-                           required placeholder="••••••••">
+                           required autocomplete="current-password"
+                           placeholder="••••••••"
+                           aria-labelledby="password-label"
+                           aria-describedby="password-error"
+                           aria-invalid="{{if .Error}}true{{else}}false{{end}}">
+                    <div id="password-error" class="sr-only">
+                        {{if .Error}}Please check your password{{end}}
+                    </div>
                 </div>
                 
-                <button type="submit" class="btn btn-primary w-100 mb-4">
-                    <span style="margin-right: 0.5rem;">&gt;</span> INITIALIZE SESSION
+                <button type="submit" class="btn btn-primary w-100 mb-4" 
+                        aria-describedby="submit-help">
+                    <span style="margin-right: 0.5rem;" aria-hidden="true">&gt;</span> INITIALIZE SESSION
                 </button>
+                <div id="submit-help" class="sr-only">
+                    Press Enter or click to submit the login form
+                </div>
             </form>
             
             <div class="text-center">
@@ -44,7 +63,8 @@
                     NO ACCOUNT? 
                     <a href="/register" class="text-decoration-none" 
                        style="color: var(--neon-green);"
-                       hx-get="/register" hx-target="main" hx-push-url="true">
+                       hx-get="/register" hx-target="main" hx-push-url="true"
+                       aria-label="Register for a new user account">
                         [ REGISTER NEW USER ]
                     </a>
                 </p>
@@ -52,4 +72,49 @@
         </div>
     </div>
 </div>
+
+<script>
+// Enhance form accessibility on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    
+    // Add real-time validation feedback
+    if (emailInput) {
+        emailInput.addEventListener('blur', function() {
+            const isValid = this.checkValidity();
+            this.setAttribute('aria-invalid', !isValid);
+            
+            const errorDiv = document.getElementById('email-error');
+            if (errorDiv) {
+                if (!isValid) {
+                    errorDiv.textContent = 'Please enter a valid email address';
+                    errorDiv.className = 'text-danger small mt-1';
+                } else {
+                    errorDiv.className = 'sr-only';
+                    errorDiv.textContent = '';
+                }
+            }
+        });
+    }
+    
+    if (passwordInput) {
+        passwordInput.addEventListener('blur', function() {
+            const isValid = this.value.length > 0;
+            this.setAttribute('aria-invalid', !isValid);
+            
+            const errorDiv = document.getElementById('password-error');
+            if (errorDiv) {
+                if (!isValid) {
+                    errorDiv.textContent = 'Password is required';
+                    errorDiv.className = 'text-danger small mt-1';
+                } else {
+                    errorDiv.className = 'sr-only';
+                    errorDiv.textContent = '';
+                }
+            }
+        });
+    }
+});
+</script>
 {{end}}
