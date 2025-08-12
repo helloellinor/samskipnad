@@ -1,47 +1,73 @@
 {{define "content"}}
 <div class="row justify-content-center">
     <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title mb-0">Register</h3>
+        <div class="cyber-card">
+            <div class="text-center mb-4">
+                <h3 style="color: var(--neon-green); text-transform: uppercase; letter-spacing: 2px; font-family: 'Space Mono', monospace;">
+                    [ NEW USER REGISTRATION ]
+                </h3>
+                <p style="color: var(--secondary-color); font-family: 'Space Mono', monospace;">
+                    Initialize new account credentials
+                </p>
             </div>
-            <div class="card-body">
-                {{if .Error}}
-                <div class="alert alert-danger">{{.Error}}</div>
-                {{end}}
-                
-                <form method="POST" action="/register">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="first_name" class="form-label">First Name</label>
-                            <input type="text" class="form-control" id="first_name" name="first_name" 
-                                   value="{{.FirstName}}" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="last_name" class="form-label">Last Name</label>
-                            <input type="text" class="form-control" id="last_name" name="last_name" 
-                                   value="{{.LastName}}" required>
-                        </div>
+            
+            {{if .Error}}
+            <div class="alert alert-danger mb-4">
+                <strong>REGISTRATION ERROR:</strong> {{.Error}}
+            </div>
+            {{end}}
+            
+            <form method="POST" action="/register" hx-post="/register" hx-target="main" hx-push-url="true">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="first_name" class="form-label">
+                            <span style="color: var(--neon-orange);">&gt;</span> FIRST NAME
+                        </label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" 
+                               value="{{.FirstName}}" required placeholder="Enter first name">
                     </div>
-                    
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" 
-                               value="{{.Email}}" required>
+                    <div class="col-md-6 mb-3">
+                        <label for="last_name" class="form-label">
+                            <span style="color: var(--neon-orange);">&gt;</span> LAST NAME
+                        </label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" 
+                               value="{{.LastName}}" required placeholder="Enter last name">
                     </div>
-                    
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" 
-                               minlength="6" required>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary w-100">Register</button>
-                </form>
-                
-                <div class="text-center mt-3">
-                    <p>Already have an account? <a href="/login">Login here</a></p>
                 </div>
+                
+                <div class="mb-3">
+                    <label for="email" class="form-label">
+                        <span style="color: var(--neon-orange);">&gt;</span> EMAIL ADDRESS
+                    </label>
+                    <input type="email" class="form-control" id="email" name="email" 
+                           value="{{.Email}}" required placeholder="user@domain.com">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="password" class="form-label">
+                        <span style="color: var(--neon-orange);">&gt;</span> PASSWORD
+                    </label>
+                    <input type="password" class="form-control" id="password" name="password" 
+                           minlength="6" required placeholder="Minimum 6 characters">
+                    <small class="form-text" style="color: var(--secondary-color); font-family: 'Space Mono', monospace;">
+                        Minimum 6 characters required for security protocol
+                    </small>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 mb-4">
+                    <span style="margin-right: 0.5rem;">&gt;</span> CREATE ACCOUNT
+                </button>
+            </form>
+            
+            <div class="text-center">
+                <p style="color: var(--secondary-color); font-family: 'Space Mono', monospace;">
+                    EXISTING USER? 
+                    <a href="/login" class="text-decoration-none" 
+                       style="color: var(--neon-green);"
+                       hx-get="/login" hx-target="main" hx-push-url="true">
+                        [ ACCESS SYSTEM ]
+                    </a>
+                </p>
             </div>
         </div>
     </div>
