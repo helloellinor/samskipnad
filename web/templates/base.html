@@ -33,28 +33,35 @@
                 <div class="nav-links">
                     {{if not .User}}
                     <a href="/login" class="nav-link"
-                       hx-get="/login" hx-target="main" hx-push-url="true">Login</a> |
+                       hx-get="/login" hx-target="main" hx-push-url="true">Login</a>
+                    <span>|</span>
                     <a href="/register" class="nav-link"
                        hx-get="/register" hx-target="main" hx-push-url="true">Register</a>
                     {{else}}
                     <a href="/dashboard" class="nav-link"
-                       hx-get="/dashboard" hx-target="main" hx-push-url="true">Dashboard</a> |
+                       hx-get="/dashboard" hx-target="main" hx-push-url="true">Dashboard</a>
+                    <span>|</span>
                     {{if .Community.Features.Classes}}
                     <a href="/classes" class="nav-link"
-                       hx-get="/classes" hx-target="main" hx-push-url="true">Classes</a> |
+                       hx-get="/classes" hx-target="main" hx-push-url="true">Classes</a>
+                    <span>|</span>
                     {{end}}
                     {{if .Community.Features.Memberships}}
                     <a href="/memberships" class="nav-link"
-                       hx-get="/memberships" hx-target="main" hx-push-url="true">Memberships</a> |
+                       hx-get="/memberships" hx-target="main" hx-push-url="true">Memberships</a>
+                    <span>|</span>
                     {{end}}
                     <a href="/klippekort" class="nav-link"
-                       hx-get="/klippekort" hx-target="main" hx-push-url="true">Klippekort</a> |
+                       hx-get="/klippekort" hx-target="main" hx-push-url="true">Klippekort</a>
+                    <span>|</span>
                     {{if eq .User.Role "admin"}}
                     <a href="/admin/" class="nav-link"
-                       hx-get="/admin/" hx-target="main" hx-push-url="true">Admin</a> |
+                       hx-get="/admin/" hx-target="main" hx-push-url="true">Admin</a>
+                    <span>|</span>
                     {{end}}
                     <a href="/profile" class="nav-link"
-                       hx-get="/profile" hx-target="main" hx-push-url="true">{{.User.FirstName}}</a> |
+                       hx-get="/profile" hx-target="main" hx-push-url="true">{{.User.FirstName}}</a>
+                    <span>|</span>
                     <a href="/logout" class="nav-link">Logout</a>
                     {{end}}
                 </div>

@@ -14,7 +14,7 @@
             {{end}}
             
             <form method="POST" action="/register">
-                <table align="center" cellpadding="4" cellspacing="2" border="0">
+                <table class="form-table">
                     <tr>
                         <td><label for="first_name" class="form-label"><b>First Name:</b></label></td>
                         <td><input type="text" class="form-control" id="first_name" name="first_name" 
@@ -36,13 +36,14 @@
                                    minlength="6" required size="25" maxlength="50"></td>
                     </tr>
                     <tr>
-                        <td colspan="2"><small>Password must be at least 6 characters long</small></td>
+                        <td colspan="2" class="text-center"><small>Password must be at least 6 characters long</small></td>
                     </tr>
                     <tr>
-                        <td colspan="2" align="center">
-                            <br>
-                            <input type="submit" value="CREATE ACCOUNT" class="btn btn-primary">
-                            <input type="reset" value="CLEAR FORM" class="btn">
+                        <td colspan="2" class="text-center">
+                            <div class="mt-2">
+                                <input type="submit" value="CREATE ACCOUNT" class="btn btn-primary">
+                                <input type="reset" value="CLEAR FORM" class="btn">
+                            </div>
                         </td>
                     </tr>
                 </table>

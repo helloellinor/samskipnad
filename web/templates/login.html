@@ -14,7 +14,7 @@
             {{end}}
             
             <form method="POST" action="/login">
-                <table align="center" cellpadding="4" cellspacing="2" border="0">
+                <table class="form-table">
                     <tr>
                         <td><label for="email" class="form-label"><b>E-mail:</b></label></td>
                         <td><input type="email" class="form-control" id="email" name="email" 
@@ -26,10 +26,11 @@
                                    required size="25" maxlength="50"></td>
                     </tr>
                     <tr>
-                        <td colspan="2" align="center">
-                            <br>
-                            <input type="submit" value="LOGIN" class="btn btn-primary">
-                            <input type="reset" value="CLEAR" class="btn">
+                        <td colspan="2" class="text-center">
+                            <div class="mt-2">
+                                <input type="submit" value="LOGIN" class="btn btn-primary">
+                                <input type="reset" value="CLEAR" class="btn">
+                            </div>
                         </td>
                     </tr>
                 </table>
