@@ -1,34 +1,10 @@
-# Samskipnad - Configurable Community Platform
+# Samskipnad
+## A playground for open source developers of community management software.
 
-A lightweight, modern platform for managing fitness communities and wellness studios. Built with Go and HTMX for fast, interactive experiences without JavaScript complexity.
+Samskipnad is a way for developers without experience to get their feet wet in the basics of configuration.
+Simple-text based file structures are transformed with GO and HTMX into functional community management platforms.
+Our motto: KISS!
 
-## ✨ Unique Features
-
-- **🎨 Fully Configurable Branding**: Each community gets its own colors, fonts, content, and identity
-- **📝 YAML-based Configuration**: Human-readable config files for easy customization
-- **🌍 Multi-Community Support**: One platform, infinite possibilities
-- **🎯 White-label Ready**: "Built with Samskipnad" attribution system
-
-## 🏋️ Example Communities
-
-### Kjernekraft (Default)
-A Scandinavian fitness community for busy parents with an edgy, sarcastic tone. Features Nordic color palette and modern typography.
-
-### Serenity Yoga Studio
-A traditional yoga studio with warm, earthy colors and peaceful, mindful messaging.
-
-**Configure your own**: See [COMMUNITY_CONFIG.md](COMMUNITY_CONFIG.md) for the complete guide.
-
-## Features
-
-- **🎨 Community Configuration**: YAML-based branding and content customization
-- **🏢 Multi-tenant Support**: Communities can create their own instances
-- **📅 Class Management**: Schedule and manage classes and events
-- **🎫 Flexible Booking**: Support for both memberships and class tickets
-- **👥 Role-based Permissions**: Admin, instructor, and member roles
-- **💳 Payment Processing**: Stripe integration with configurable pricing
-- **⚡ HTMX-powered UI**: Fast, interactive frontend without JavaScript
-- **📱 Mobile Responsive**: Works seamlessly on all devices
 
 ## Quick Start
 
@@ -193,9 +169,9 @@ Samskipnad is designed as a white-label platform supporting multiple communities
 Perfect for:
 - **Yoga Studios**: Traditional, hot yoga, prenatal, etc.
 - **Fitness Centers**: CrossFit, pilates, barre, etc.  
-- **Dance Studios**: Ballet, hip-hop, salsa, etc.
-- **Wellness Centers**: Meditation, mindfulness, therapy, etc.
-- **Corporate Programs**: Employee wellness initiatives
+- **Hackerspaces**: Community events, hackathons, workshops, and fix parties
+- **Unions and Societies**: Meetups, language societies, interest groups
+- **Language Cafes***
 
 ## Contributing
 
