@@ -153,10 +153,11 @@
     </footer>
     {{end}}
 
+    <!-- Non-blocking loading indicator -->
     <div class="loading-overlay" id="loading-overlay" role="status" aria-live="polite" aria-label="Loading content">
         <div class="loading-spinner">
             <div class="spinner-ring" aria-hidden="true"></div>
-            <div class="loading-text">LOADING...</div>
+            <div class="loading-text">LOADING</div>
         </div>
     </div>
 
@@ -176,31 +177,45 @@
                 });
             }
             
-            // Add loading states for HTMX requests with accessibility
+            // Improved loading states for HTMX requests with accessibility
             document.body.addEventListener('htmx:beforeRequest', function() {
                 const overlay = document.getElementById('loading-overlay');
                 if (overlay) {
-                    overlay.style.display = 'flex';
+                    overlay.style.display = 'block';
                     overlay.setAttribute('aria-busy', 'true');
                 }
             });
             
             document.body.addEventListener('htmx:afterRequest', function() {
+                // Small delay to show loading completed, then hide
                 setTimeout(() => {
                     const overlay = document.getElementById('loading-overlay');
                     if (overlay) {
                         overlay.style.display = 'none';
                         overlay.setAttribute('aria-busy', 'false');
-                        // Announce content load completion to screen readers
+                        // Brief accessibility announcement for content load completion
                         const announcement = document.createElement('div');
                         announcement.setAttribute('aria-live', 'polite');
                         announcement.setAttribute('aria-atomic', 'true');
                         announcement.className = 'sr-only';
-                        announcement.textContent = 'Content loaded';
+                        announcement.textContent = 'Content updated';
                         document.body.appendChild(announcement);
-                        setTimeout(() => document.body.removeChild(announcement), 1000);
+                        setTimeout(() => {
+                            if (document.body.contains(announcement)) {
+                                document.body.removeChild(announcement);
+                            }
+                        }, 1000);
                     }
-                }, 300);
+                }, 200);
+            });
+
+            // Hide loading overlay on any errors
+            document.body.addEventListener('htmx:responseError', function() {
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) {
+                    overlay.style.display = 'none';
+                    overlay.setAttribute('aria-busy', 'false');
+                }
             });
 
             // Accessible keyboard navigation for nav links
