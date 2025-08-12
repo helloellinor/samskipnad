@@ -12,17 +12,19 @@ import (
 	"samskipnad/internal/auth"
 	"samskipnad/internal/middleware"
 	"samskipnad/internal/models"
+	"samskipnad/internal/payments"
 
 	"github.com/gorilla/mux"
 )
 
 type Handlers struct {
-	db          *sql.DB
-	authService *auth.Service
-	templates   *template.Template
+	db             *sql.DB
+	authService    *auth.Service
+	paymentService *payments.Service
+	templates      *template.Template
 }
 
-func New(db *sql.DB, authService *auth.Service) *Handlers {
+func New(db *sql.DB, authService *auth.Service, paymentService *payments.Service) *Handlers {
 	// Load templates with custom functions
 	funcMap := template.FuncMap{
 		"divf": func(a, b float64) float64 {
@@ -52,9 +54,10 @@ func New(db *sql.DB, authService *auth.Service) *Handlers {
 	templates := template.Must(template.New("").Funcs(funcMap).ParseGlob("web/templates/*.html"))
 
 	return &Handlers{
-		db:          db,
-		authService: authService,
-		templates:   templates,
+		db:             db,
+		authService:    authService,
+		paymentService: paymentService,
+		templates:      templates,
 	}
 }
 
@@ -200,19 +203,14 @@ func (h *Handlers) BookClass(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if class exists and has capacity
-	var class models.Class
-	err = h.db.QueryRow(`
-		SELECT id, name, start_time, max_capacity, price, requires_ticket, requires_membership
-		FROM classes WHERE id = ? AND active = true`, classID).Scan(
-		&class.ID, &class.Name, &class.StartTime, &class.MaxCapacity,
-		&class.Price, &class.RequiresTicket, &class.RequiresMembership)
+	// Get class details
+	class, err := h.getClassByID(classID)
 	if err != nil {
 		http.Error(w, "Class not found", http.StatusNotFound)
 		return
 	}
 
-	// Check current bookings
+	// Check capacity
 	var currentBookings int
 	err = h.db.QueryRow("SELECT COUNT(*) FROM bookings WHERE class_id = ? AND status = 'confirmed'", classID).Scan(&currentBookings)
 	if err != nil {
@@ -221,7 +219,8 @@ func (h *Handlers) BookClass(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if currentBookings >= class.MaxCapacity {
-		http.Error(w, "Class is full", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<div class="booking-error">Class is full</div>`))
 		return
 	}
 
@@ -234,24 +233,135 @@ func (h *Handlers) BookClass(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if existingBooking > 0 {
-		http.Error(w, "Already booked", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<div class="booking-error">Already booked</div>`))
 		return
 	}
 
-	// Create booking
-	_, err = h.db.Exec(`
-		INSERT INTO bookings (user_id, class_id, status, created_at, updated_at)
-		VALUES (?, ?, 'confirmed', ?, ?)`,
-		user.ID, classID, time.Now(), time.Now())
+	// If class is free, book directly
+	if class.Price == 0 {
+		err = h.bookClassDirectly(user.ID, classID)
+		if err != nil {
+			http.Error(w, "Failed to book class", http.StatusInternalServerError)
+			return
+		}
+		
+		w.Header().Set("Content-Type", "text/html")
+		w.Header().Set("HX-Trigger", "booking-updated")
+		w.Write([]byte(`<div class="booking-success">Successfully booked ` + class.Name + `!</div>`))
+		return
+	}
+
+	// For paid classes, create payment intent
+	paymentIntent, err := h.paymentService.CreatePaymentIntent(user.ID, classID, int64(class.Price))
 	if err != nil {
-		http.Error(w, "Failed to book class", http.StatusInternalServerError)
+		http.Error(w, "Failed to create payment", http.StatusInternalServerError)
 		return
 	}
 
-	// Return success for HTMX
-	w.Header().Set("HX-Trigger", "booking-updated")
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, `<div class="alert alert-success">Successfully booked %s!</div>`, class.Name)
+	// Return payment form
+	data := struct {
+		PaymentIntent *struct {
+			ID           string
+			ClientSecret string
+		}
+		Class *models.Class
+		User  *models.User
+	}{
+		PaymentIntent: &struct {
+			ID           string
+			ClientSecret string
+		}{
+			ID:           paymentIntent.ID,
+			ClientSecret: paymentIntent.ClientSecret,
+		},
+		Class: class,
+		User:  user,
+	}
+
+	// Render payment form as HTML fragment
+	tmpl := `
+	<div class="payment-form p-3">
+		<h6 class="text-white">Payment Required</h6>
+		<div class="payment-summary mb-3">
+			<div class="d-flex justify-content-between">
+				<span>Class:</span>
+				<span class="text-white">{{.Class.Name}}</span>
+			</div>
+			<div class="d-flex justify-content-between">
+				<span>Price:</span>
+				<span class="payment-total">${{printf "%.2f" (divf (float64 .Class.Price) 100.0)}}</span>
+			</div>
+		</div>
+		<div id="payment-element-{{.Class.ID}}" class="mb-3"></div>
+		<button id="submit-payment-{{.Class.ID}}" class="btn btn-primary w-100">Pay Now</button>
+		<div id="payment-messages-{{.Class.ID}}" class="mt-2"></div>
+	</div>
+	<script src="https://js.stripe.com/v3/"></script>
+	<script>
+		(function() {
+			// Replace with your actual publishable key
+			const stripe = Stripe('pk_test_51234567890abcdef'); 
+			const elements = stripe.elements({
+				clientSecret: '{{.PaymentIntent.ClientSecret}}',
+				appearance: {
+					theme: 'night',
+					variables: {
+						colorPrimary: '#ff6b35',
+						colorBackground: '#2a2a2a',
+						colorText: '#f0f0f0',
+						borderRadius: '0px'
+					}
+				}
+			});
+			
+			const paymentElement = elements.create('payment');
+			paymentElement.mount('#payment-element-{{.Class.ID}}');
+			
+			document.getElementById('submit-payment-{{.Class.ID}}').addEventListener('click', async (e) => {
+				e.preventDefault();
+				e.target.disabled = true;
+				e.target.textContent = 'Processing...';
+				
+				const {error} = await stripe.confirmPayment({
+					elements,
+					confirmParams: {
+						return_url: window.location.origin + '/payment/success?class_id={{.Class.ID}}'
+					}
+				});
+				
+				if (error) {
+					document.getElementById('payment-messages-{{.Class.ID}}').innerHTML = 
+						'<div class="booking-error">' + error.message + '</div>';
+					e.target.disabled = false;
+					e.target.textContent = 'Pay Now';
+				}
+			});
+		})();
+	</script>`
+
+	t, err := template.New("payment-form").Funcs(template.FuncMap{
+		"divf": func(a, b float64) float64 {
+			if b != 0 {
+				return a / b
+			}
+			return 0
+		},
+		"float64": func(i int) float64 {
+			return float64(i)
+		},
+	}).Parse(tmpl)
+	if err != nil {
+		http.Error(w, "Template error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+	err = t.Execute(w, data)
+	if err != nil {
+		http.Error(w, "Template execution error", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *Handlers) Memberships(w http.ResponseWriter, r *http.Request) {
@@ -663,6 +773,230 @@ func (h *Handlers) CalendarDayDetails(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Template execution error", http.StatusInternalServerError)
 		return
 	}
+}
+
+// Payment handlers
+
+func (h *Handlers) CreateClassPayment(w http.ResponseWriter, r *http.Request) {
+	user, ok := r.Context().Value("user").(*models.User)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	vars := mux.Vars(r)
+	classIDStr := vars["id"]
+	classID, err := strconv.Atoi(classIDStr)
+	if err != nil {
+		http.Error(w, "Invalid class ID", http.StatusBadRequest)
+		return
+	}
+
+	// Get class details to determine price
+	class, err := h.getClassByID(classID)
+	if err != nil {
+		http.Error(w, "Class not found", http.StatusNotFound)
+		return
+	}
+
+	if class.Price == 0 {
+		// Free class, book directly
+		err = h.bookClassDirectly(user.ID, classID)
+		if err != nil {
+			http.Error(w, "Failed to book class", http.StatusInternalServerError)
+			return
+		}
+		
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(`<div class="booking-success">Class booked successfully!</div>`))
+		return
+	}
+
+	// Create payment intent for paid class
+	paymentIntent, err := h.paymentService.CreatePaymentIntent(user.ID, classID, int64(class.Price))
+	if err != nil {
+		http.Error(w, "Failed to create payment", http.StatusInternalServerError)
+		return
+	}
+
+	// Return payment form
+	data := struct {
+		PaymentIntent *struct {
+			ID           string
+			ClientSecret string
+		}
+		Class *models.Class
+		User  *models.User
+	}{
+		PaymentIntent: &struct {
+			ID           string
+			ClientSecret string
+		}{
+			ID:           paymentIntent.ID,
+			ClientSecret: paymentIntent.ClientSecret,
+		},
+		Class: class,
+		User:  user,
+	}
+
+	// Render payment form as HTML fragment
+	tmpl := `
+	<div class="payment-form">
+		<h6>Payment Required</h6>
+		<p>Class: {{.Class.Name}}</p>
+		<p>Price: ${{printf "%.2f" (divf (float64 .Class.Price) 100.0)}}</p>
+		<div id="payment-element"></div>
+		<button id="submit-payment" class="btn btn-primary mt-3">Pay Now</button>
+		<div id="payment-messages" class="mt-2"></div>
+	</div>
+	<script src="https://js.stripe.com/v3/"></script>
+	<script>
+		const stripe = Stripe('pk_test_...'); // Replace with your publishable key
+		const elements = stripe.elements({
+			clientSecret: '{{.PaymentIntent.ClientSecret}}'
+		});
+		
+		const paymentElement = elements.create('payment');
+		paymentElement.mount('#payment-element');
+		
+		document.getElementById('submit-payment').addEventListener('click', async () => {
+			const {error} = await stripe.confirmPayment({
+				elements,
+				confirmParams: {
+					return_url: window.location.origin + '/payment/success?class_id={{.Class.ID}}'
+				}
+			});
+			
+			if (error) {
+				document.getElementById('payment-messages').innerHTML = 
+					'<div class="booking-error">' + error.message + '</div>';
+			}
+		});
+	</script>`
+
+	t, err := template.New("payment-form").Funcs(template.FuncMap{
+		"divf": func(a, b float64) float64 {
+			if b != 0 {
+				return a / b
+			}
+			return 0
+		},
+		"float64": func(i int) float64 {
+			return float64(i)
+		},
+	}).Parse(tmpl)
+	if err != nil {
+		http.Error(w, "Template error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+	err = t.Execute(w, data)
+	if err != nil {
+		http.Error(w, "Template execution error", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *Handlers) PaymentSuccess(w http.ResponseWriter, r *http.Request) {
+	_, ok := r.Context().Value("user").(*models.User)
+	if !ok {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	paymentIntentID := r.URL.Query().Get("payment_intent")
+	if paymentIntentID == "" {
+		http.Error(w, "Missing payment intent", http.StatusBadRequest)
+		return
+	}
+
+	// Confirm the payment
+	err := h.paymentService.ConfirmPayment(paymentIntentID)
+	if err != nil {
+		http.Error(w, "Payment confirmation failed", http.StatusInternalServerError)
+		return
+	}
+
+	// Redirect to dashboard with success message
+	http.Redirect(w, r, "/dashboard?payment=success", http.StatusSeeOther)
+}
+
+func (h *Handlers) MembershipPayment(w http.ResponseWriter, r *http.Request) {
+	user, ok := r.Context().Value("user").(*models.User)
+	if !ok {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	if r.Method == "GET" {
+		// Show membership options
+		data := struct {
+			Title string
+			User  *models.User
+		}{
+			Title: "Purchase Membership",
+			User:  user,
+		}
+
+		h.renderTemplate(w, "membership-payment.html", data)
+		return
+	}
+
+	// POST - Process membership purchase
+	membershipType := r.FormValue("type")
+	if membershipType == "" {
+		http.Error(w, "Missing membership type", http.StatusBadRequest)
+		return
+	}
+
+	// Set prices based on type
+	var amount int64
+	switch membershipType {
+	case "monthly":
+		amount = 9900 // $99.00
+	case "yearly":
+		amount = 99900 // $999.00
+	default:
+		http.Error(w, "Invalid membership type", http.StatusBadRequest)
+		return
+	}
+
+	paymentIntent, err := h.paymentService.CreateMembershipPaymentIntent(user.ID, membershipType, amount)
+	if err != nil {
+		http.Error(w, "Failed to create payment", http.StatusInternalServerError)
+		return
+	}
+
+	// Redirect to payment page
+	http.Redirect(w, r, fmt.Sprintf("/payment/membership?payment_intent=%s", paymentIntent.ID), http.StatusSeeOther)
+}
+
+// Helper methods for payments
+
+func (h *Handlers) getClassByID(classID int) (*models.Class, error) {
+	query := `SELECT id, name, description, instructor_id, start_time, end_time, max_capacity, price, tenant_id
+			  FROM classes WHERE id = ? AND active = true`
+	
+	var class models.Class
+	err := h.db.QueryRow(query, classID).Scan(
+		&class.ID, &class.Name, &class.Description, &class.InstructorID,
+		&class.StartTime, &class.EndTime, &class.MaxCapacity, &class.Price, &class.TenantID,
+	)
+	
+	if err != nil {
+		return nil, err
+	}
+	
+	return &class, nil
+}
+
+func (h *Handlers) bookClassDirectly(userID, classID int) error {
+	query := `INSERT INTO bookings (user_id, class_id, status, created_at, updated_at)
+			  VALUES (?, ?, 'confirmed', datetime('now'), datetime('now'))`
+	
+	_, err := h.db.Exec(query, userID, classID)
+	return err
 }
 
 // API handlers for HTMX

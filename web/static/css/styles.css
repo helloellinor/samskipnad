@@ -835,6 +835,29 @@ body {
     background: var(--accent-color);
 }
 
+/* Membership Cards */
+.membership-card {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.membership-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(255, 107, 53, 0.3);
+}
+
+.membership-card .card-header {
+    position: relative;
+}
+
+.membership-card .badge {
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    font-size: 0.7rem;
+    padding: 0.5rem 1rem;
+}
+
 /* Text Selection */
 ::selection {
     background: var(--accent-color);

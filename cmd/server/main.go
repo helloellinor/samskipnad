@@ -9,6 +9,7 @@ import (
 	"samskipnad/internal/database"
 	"samskipnad/internal/handlers"
 	"samskipnad/internal/middleware"
+	"samskipnad/internal/payments"
 
 	"github.com/gorilla/mux"
 )
@@ -23,7 +24,8 @@ func main() {
 
 	// Initialize services
 	authService := auth.NewService(db)
-	handlers := handlers.New(db, authService)
+	paymentService := payments.NewService(db)
+	handlers := handlers.New(db, authService, paymentService)
 
 	// Set up routes
 	r := mux.NewRouter()
@@ -47,6 +49,10 @@ func main() {
 	protected.HandleFunc("/classes/{id}/book", handlers.BookClass).Methods("POST")
 	protected.HandleFunc("/memberships", handlers.Memberships).Methods("GET")
 	protected.HandleFunc("/profile", handlers.Profile).Methods("GET", "POST")
+	
+	// Payment routes
+	protected.HandleFunc("/payment/membership", handlers.MembershipPayment).Methods("GET", "POST")
+	protected.HandleFunc("/payment/success", handlers.PaymentSuccess).Methods("GET")
 
 	// Admin routes
 	admin := protected.PathPrefix("/admin").Subrouter()

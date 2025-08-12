@@ -9,4 +9,7 @@ require (
 	golang.org/x/crypto v0.15.0
 )
 
-require github.com/gorilla/securecookie v1.1.1 // indirect
+require (
+	github.com/gorilla/securecookie v1.1.1 // indirect
+	github.com/stripe/stripe-go/v76 v76.25.0 // indirect
+)
