@@ -26,13 +26,27 @@ type Handlers struct {
 }
 
 func New(db *sql.DB, authService *auth.Service, paymentService *payments.Service) *Handlers {
-	// Load templates with custom functions
-	funcMap := template.FuncMap{
+	// Only parse standalone templates initially
+	templates := template.Must(template.New("").Funcs(getFuncMap()).ParseGlob("web/templates/*-standalone.html"))
+
+	return &Handlers{
+		db:             db,
+		authService:    authService,
+		paymentService: paymentService,
+		templates:      templates,
+	}
+}
+
+func getFuncMap() template.FuncMap {
+	return template.FuncMap{
 		"divf": func(a, b float64) float64 {
 			if b != 0 {
 				return a / b
 			}
 			return 0
+		},
+		"float64": func(i int) float64 {
+			return float64(i)
 		},
 		"title": func(s string) string {
 			if len(s) == 0 {
@@ -59,15 +73,6 @@ func New(db *sql.DB, authService *auth.Service, paymentService *payments.Service
 		"subtract": func(a, b int) int {
 			return a - b
 		},
-	}
-	
-	templates := template.Must(template.New("").Funcs(funcMap).ParseGlob("web/templates/*.html"))
-
-	return &Handlers{
-		db:             db,
-		authService:    authService,
-		paymentService: paymentService,
-		templates:      templates,
 	}
 }
 
@@ -197,7 +202,7 @@ func (h *Handlers) Dashboard(w http.ResponseWriter, r *http.Request) {
 		"UserMembership":  nil, // TODO: Implement membership checking
 	}
 
-	h.renderTemplate(w, "dashboard-standalone.html", data)
+	h.renderTemplate(w, "dashboard.html", data)
 }
 
 func (h *Handlers) Classes(w http.ResponseWriter, r *http.Request) {
@@ -424,9 +429,11 @@ func (h *Handlers) Profile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "GET" {
+		community := config.GetCurrent()
 		data := map[string]interface{}{
-			"Title": "Profile",
-			"User":  user,
+			"Title":     "Profile",
+			"User":      user,
+			"Community": community,
 		}
 		h.renderTemplate(w, "profile.html", data)
 		return
@@ -456,12 +463,14 @@ func (h *Handlers) AdminDashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	community := config.GetCurrent()
 	data := map[string]interface{}{
-		"Title": "Admin Dashboard",
-		"User":  user,
+		"Title":     "Admin Dashboard",
+		"User":      user,
+		"Community": community,
 	}
 
-	h.renderTemplate(w, "admin-dashboard-standalone.html", data)
+	h.renderTemplate(w, "admin-dashboard.html", data)
 }
 
 func (h *Handlers) AdminClasses(w http.ResponseWriter, r *http.Request) {
@@ -478,10 +487,12 @@ func (h *Handlers) AdminClasses(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		community := config.GetCurrent()
 		data := map[string]interface{}{
-			"Title":   "Manage Classes",
-			"User":    user,
-			"Classes": classes,
+			"Title":     "Manage Classes",
+			"User":      user,
+			"Community": community,
+			"Classes":   classes,
 		}
 
 		h.renderTemplate(w, "admin-classes.html", data)
@@ -1050,10 +1061,24 @@ func (h *Handlers) CancelBooking(w http.ResponseWriter, r *http.Request) {
 
 // Helper methods
 func (h *Handlers) renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
-	err := h.templates.ExecuteTemplate(w, tmpl, data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	// For templates that extend base, we need to execute the base template
+	if tmpl != "home-standalone.html" && tmpl != "login-standalone.html" && tmpl != "register-standalone.html" && tmpl != "admin-dashboard-standalone.html" && tmpl != "dashboard-standalone.html" {
+		// Parse the specific template along with base
+		templates := template.Must(template.New("").Funcs(h.getFuncMap()).ParseFiles("web/templates/base.html", "web/templates/"+tmpl))
+		err := templates.ExecuteTemplate(w, "base", data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	} else {
+		err := h.templates.ExecuteTemplate(w, tmpl, data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	}
+}
+
+func (h *Handlers) getFuncMap() template.FuncMap {
+	return getFuncMap()
 }
 
 func (h *Handlers) getUpcomingClasses(tenantID int) ([]models.Class, error) {
