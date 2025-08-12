@@ -1,0 +1,39 @@
+{{template "base" .}}
+
+{{define "content"}}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="hero-section text-center py-5">
+            <h1 class="display-4 mb-4">Welcome to Samskipnad</h1>
+            <p class="lead mb-4">
+                The modern platform for yoga communities and fitness studios. 
+                Manage classes, memberships, and connect with your community.
+            </p>
+            <div class="row text-center mt-5">
+                <div class="col-md-4">
+                    <div class="feature-box p-4">
+                        <h3>Class Management</h3>
+                        <p>Easy booking and scheduling for all your yoga classes and events.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-box p-4">
+                        <h3>Memberships & Tickets</h3>
+                        <p>Flexible membership options and class packages for your members.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-box p-4">
+                        <h3>Community Platform</h3>
+                        <p>Build and manage your yoga community with role-based permissions.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="cta-section mt-5">
+                <a href="/register" class="btn btn-primary btn-lg me-3">Get Started</a>
+                <a href="/login" class="btn btn-outline-secondary btn-lg">Login</a>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

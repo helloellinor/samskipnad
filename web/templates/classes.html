@@ -1,0 +1,90 @@
+{{define "content"}}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Classes</h2>
+            <input type="search" class="form-control w-auto" placeholder="Search classes..." 
+                   hx-get="/api/classes/search" hx-trigger="keyup changed delay:300ms" 
+                   hx-target="#classes-list" hx-swap="innerHTML">
+        </div>
+    </div>
+</div>
+
+<div class="row" id="classes-list">
+    {{if .Classes}}
+    {{range .Classes}}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{.Name}}</h5>
+                <p class="card-text">{{.Description}}</p>
+                
+                <div class="class-details mb-3">
+                    <div class="d-flex justify-content-between text-muted small">
+                        <span>
+                            <i class="bi bi-calendar"></i>
+                            {{.StartTime.Format "Mon, Jan 2"}}
+                        </span>
+                        <span>
+                            <i class="bi bi-clock"></i>
+                            {{.StartTime.Format "3:04 PM"}} - {{.EndTime.Format "3:04 PM"}}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between text-muted small mt-1">
+                        <span>
+                            <i class="bi bi-people"></i>
+                            Max {{.MaxCapacity}} students
+                        </span>
+                        <span>
+                            {{if gt .Price 0}}
+                            <i class="bi bi-currency-dollar"></i>
+                            ${{printf "%.2f" (divf .Price 100)}}
+                            {{else}}
+                            <span class="text-success">Free</span>
+                            {{end}}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="requirements mb-3">
+                    {{if .RequiresMembership}}
+                    <span class="badge bg-info me-1">Membership Required</span>
+                    {{end}}
+                    {{if .RequiresTicket}}
+                    <span class="badge bg-warning me-1">Ticket Required</span>
+                    {{end}}
+                </div>
+            </div>
+            
+            <div class="card-footer">
+                <button class="btn btn-primary w-100" 
+                        hx-post="/classes/{{.ID}}/book" 
+                        hx-target="#booking-result-{{.ID}}"
+                        hx-swap="innerHTML">
+                    Book Class
+                </button>
+                <div id="booking-result-{{.ID}}" class="mt-2"></div>
+            </div>
+        </div>
+    </div>
+    {{end}}
+    {{else}}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <h4>No classes available</h4>
+            <p>There are currently no upcoming classes scheduled.</p>
+        </div>
+    </div>
+    {{end}}
+</div>
+
+<script>
+function divf(value, divisor) {
+    return value / divisor;
+}
+
+// Add Bootstrap Icons CSS
+document.head.insertAdjacentHTML('beforeend', 
+    '<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">');
+</script>
+{{end}}
