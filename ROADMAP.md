@@ -1,222 +1,328 @@
-# Samskipnad Feature Roadmap & Project Analysis
+# Samskipnad Platform Implementation Roadmap
 
-## 📋 Current Project Status
+This roadmap outlines the three-phase transformation of Samskipnad from a community management application into an extensible creator platform, as detailed in our [Re-Architecting Roadmap](Re-Architecting-Roadmap.md).
 
-**Repository**: helloellinor/samskipnad  
-**Technology Stack**: Go + HTMX + SQLite + Stripe  
-**Architecture**: Multi-tenant community platform  
-**Current State**: MVP with Neo 1999 design system implemented  
+## 🎯 Transformation Overview
 
----
+**Vision**: Transform Samskipnad from a closed application into an open, extensible platform that fosters a vibrant ecosystem of third-party creators and developers.
 
-## 🎯 Feature Roadmap
-
-### Phase 1: Core Platform Stability ⚠️ **IN PROGRESS**
-**Target**: Q1 2024 | **Priority**: Critical
-
-- [x] **Neo 1999 Design System** - Implemented with functional buttons and forms
-- [x] **Basic Authentication** - User registration, login, logout functionality  
-- [x] **Community Configuration** - YAML-based multi-tenant setup
-- [x] **Dynamic Theming** - CSS generation from community configs
-- [ ] **Comprehensive Testing** - Unit and integration test coverage ⚠️
-- [ ] **Error Handling** - Robust error handling and user feedback
-- [ ] **Database Migrations** - Proper migration system for schema changes
-- [ ] **Security Hardening** - CSRF protection, rate limiting, input validation
-- [ ] **Performance Optimization** - Database indexing, query optimization
-
-### Phase 2: Essential Business Features 📅 **PLANNED**
-**Target**: Q2 2024 | **Priority**: High
-
-- [ ] **Class Management System**
-  - [ ] Class scheduling with time slots
-  - [ ] Instructor assignment and management
-  - [ ] Class capacity and waitlist functionality
-  - [ ] Recurring class schedules
-  
-- [ ] **Booking System**
-  - [ ] Real-time booking with conflict prevention
-  - [ ] Cancellation policies and automated handling
-  - [ ] Class credits and membership tracking
-  - [ ] Email confirmations and reminders
-
-- [ ] **Payment Integration**
-  - [ ] Stripe payment processing completion
-  - [ ] Membership subscription management
-  - [ ] Klippekort (class credit) system
-  - [ ] Automated billing and invoice generation
-
-- [ ] **User Dashboard Enhancement**
-  - [ ] Personal class history
-  - [ ] Upcoming bookings overview
-  - [ ] Membership status and credits
-  - [ ] Profile management
-
-### Phase 3: Advanced Community Features 🚀 **FUTURE**
-**Target**: Q3 2024 | **Priority**: Medium
-
-- [ ] **Admin Management Portal**
-  - [ ] User role management (Admin, Instructor, Member)
-  - [ ] Revenue and analytics dashboard
-  - [ ] Class and instructor performance metrics
-  - [ ] Community settings management
-
-- [ ] **Communication System**
-  - [ ] Email notification system
-  - [ ] Community announcements
-  - [ ] Class update notifications
-  - [ ] Member messaging features
-
-- [ ] **Mobile Optimization**
-  - [ ] Progressive Web App (PWA) features
-  - [ ] Offline booking capability
-  - [ ] Mobile-first class browsing
-  - [ ] Touch-optimized interactions
-
-### Phase 4: Platform Scaling 📈 **LONG-TERM**
-**Target**: Q4 2024 | **Priority**: Low
-
-- [ ] **Multi-Language Support**
-  - [ ] Internationalization (i18n) framework
-  - [ ] Norwegian, English, Swedish support
-  - [ ] Community-specific language settings
-
-- [ ] **Advanced Analytics**
-  - [ ] Member retention analytics
-  - [ ] Revenue forecasting
-  - [ ] Class popularity insights
-  - [ ] Community growth metrics
-
-- [ ] **Third-Party Integrations**
-  - [ ] Calendar synchronization (Google Calendar, Outlook)
-  - [ ] Social media integration
-  - [ ] External payment providers
-  - [ ] Marketing automation tools
-
-- [ ] **API Development**
-  - [ ] RESTful API for mobile app development
-  - [ ] Webhook system for integrations
-  - [ ] Third-party developer documentation
+**Approach**: Abstraction Layered Architecture (ALA) with process-isolated plugins using HashiCorp's go-plugin system.
 
 ---
 
-## ⚠️ Project Weaknesses Analysis
+## 📋 Phase 1: Foundation & Core Services Layer
+**Duration**: 3-4 months | **Priority**: Critical | **Status**: 🔄 In Progress
 
-### 🔴 Critical Issues
+### 1.1 Core Objectives
+- Establish Abstraction Layered Architecture (ALA)
+- Refactor existing monolithic code into stable Core Services Layer
+- Implement Tier 1 declarative customization via YAML
+- Create foundation for future plugin system
 
-1. **Zero Test Coverage**
-   - **Impact**: High risk of regressions, difficult to refactor safely
-   - **Solution**: Implement comprehensive testing strategy (unit, integration, e2e)
-   - **Timeline**: Immediate priority
+### 1.2 Key Activities & Deliverables
 
-2. **No Database Migration System**
-   - **Impact**: Cannot safely update database schema in production
-   - **Solution**: Implement Go migrate or similar migration tool
-   - **Timeline**: Phase 1
+#### **Core Services Refactoring**
+- [ ] **UserProfileService Interface**
+  - [ ] Extract authentication logic into stable interface
+  - [ ] Implement user management, profiles, preferences
+  - [ ] Add role-based access control abstraction
+  - [ ] Estimate: 2 weeks
 
-3. **Security Vulnerabilities**
-   - **Impact**: Potential for CSRF, injection attacks, unauthorized access
-   - **Missing**: CSRF tokens, input validation, rate limiting, SQL injection prevention
-   - **Solution**: Security audit and hardening implementation
-   - **Timeline**: Phase 1
+- [ ] **CommunityManagementService Interface**
+  - [ ] Formalize multi-tenant community configuration
+  - [ ] Add group structures, memberships, permissions
+  - [ ] Implement community isolation boundaries
+  - [ ] Estimate: 2 weeks
 
-### 🟡 Significant Concerns
+- [ ] **ItemManagementService Interface**
+  - [ ] Create typed content objects (classes, events, articles)
+  - [ ] Implement CRUD operations with metadata
+  - [ ] Add content categorization and tagging
+  - [ ] Estimate: 3 weeks
 
-4. **Incomplete Payment System**
-   - **Impact**: Cannot process real transactions
-   - **Missing**: Stripe webhook handling, subscription management, failure handling
-   - **Solution**: Complete Stripe integration with proper error handling
-   - **Timeline**: Phase 2
+- [ ] **PaymentService Interface**
+  - [ ] Abstract Stripe integration behind stable interface
+  - [ ] Add subscription and billing management
+  - [ ] Implement credit/klippekort system
+  - [ ] Estimate: 2 weeks
 
-5. **No Production Configuration**
-   - **Impact**: Difficult to deploy and maintain in production
-   - **Missing**: Environment-based config, logging, monitoring, Docker setup
-   - **Solution**: Production deployment pipeline and configuration
-   - **Timeline**: Phase 1
+- [ ] **EventBusService Interface**
+  - [ ] Design asynchronous messaging system
+  - [ ] Implement decoupled communication between components
+  - [ ] Add event handling and notification system
+  - [ ] Estimate: 2 weeks
 
-6. **Limited Error Handling**
-   - **Impact**: Poor user experience when things go wrong
-   - **Missing**: Graceful error pages, user feedback, logging
-   - **Solution**: Comprehensive error handling strategy
-   - **Timeline**: Phase 1
+#### **Dynamic YAML Configuration System**
+- [ ] **Enhanced YAML Loader**
+  - [ ] Implement schema validation for configuration files
+  - [ ] Add hot-reloading with file watcher mechanism
+  - [ ] Create dynamic variable resolution
+  - [ ] Estimate: 1 week
 
-### 🟠 Technical Debt
+- [ ] **Declarative Theming**
+  - [ ] Expand theme.yaml with comprehensive styling options
+  - [ ] Implement CSS generation from community configs
+  - [ ] Add real-time theme preview capabilities
+  - [ ] Estimate: 1 week
 
-7. **Single-File Handler Package**
-   - **Impact**: Code organization becomes unwieldy as features grow
-   - **Solution**: Split handlers into logical modules
-   - **Timeline**: Phase 2
+- [ ] **Feature Flag System**
+  - [ ] Create feature_flags.yaml for module toggles
+  - [ ] Implement runtime feature enabling/disabling
+  - [ ] Add A/B testing capabilities
+  - [ ] Estimate: 1 week
 
-8. **No Admin Interface**
-   - **Impact**: Cannot manage communities without direct database access
-   - **Solution**: Build comprehensive admin dashboard
-   - **Timeline**: Phase 2
+#### **Architecture & Quality**
+- [ ] **Testing Framework**
+  - [ ] Implement comprehensive unit testing (target: 80% coverage)
+  - [ ] Add integration tests for core services
+  - [ ] Create mock implementations for interface testing
+  - [ ] Estimate: 2 weeks
 
-9. **Missing Documentation**
-   - **Impact**: Difficult for new developers to contribute
-   - **Missing**: API docs, deployment guides, development setup
-   - **Solution**: Comprehensive documentation effort
-   - **Timeline**: Ongoing
+- [ ] **Documentation**
+  - [ ] Document Core Services Layer interfaces
+  - [ ] Create YAML configuration schemas
+  - [ ] Write architectural decision records (ADRs)
+  - [ ] Estimate: 1 week
 
-10. **Performance Bottlenecks**
-    - **Impact**: Poor user experience under load
-    - **Missing**: Database indexing, query optimization, caching
-    - **Solution**: Performance audit and optimization
-    - **Timeline**: Phase 1
-
----
-
-## 📊 Progress Tracking
-
-### Overall Completion: **25%**
-
-| Component | Status | Completion |
-|-----------|--------|------------|
-| Authentication | ✅ Complete | 100% |
-| Community Config | ✅ Complete | 100% |
-| Neo 1999 Design | ✅ Complete | 100% |
-| Basic Templates | ✅ Complete | 90% |
-| Class Management | ⚠️ Partial | 30% |
-| Payment System | ⚠️ Partial | 40% |
-| Admin Interface | ❌ Missing | 10% |
-| Testing | ❌ Missing | 0% |
-| Security | ❌ Missing | 20% |
-| Documentation | ⚠️ Partial | 60% |
-
-### Immediate Action Items (Next 30 Days)
-
-1. **🔥 Priority 1**: Implement basic testing framework
-2. **🔥 Priority 2**: Add CSRF protection and input validation
-3. **🔥 Priority 3**: Create database migration system
-4. **📝 Priority 4**: Document deployment process
-5. **⚡ Priority 5**: Optimize database queries and add indexing
+### 1.3 Success Metrics
+- [ ] All core business logic runs behind stable interfaces
+- [ ] Mock service implementations pass all tests
+- [ ] Theme changes via YAML reflect instantly without restart
+- [ ] Zero functional regressions from existing MVP
+- [ ] Test coverage reaches 80%+ across all packages
 
 ---
 
-## 🎯 Success Metrics
+## 🔌 Phase 2: Plugin Architecture & Developer Tools
+**Duration**: 2-3 months | **Priority**: High | **Status**: ❌ Pending
 
-### Technical Metrics
-- **Test Coverage**: Target 80%+ across all packages
-- **Performance**: Page load times <200ms, API responses <100ms
-- **Security**: Zero critical vulnerabilities in security audit
-- **Uptime**: 99.9% availability target
+### 2.1 Core Objectives
+- Implement HashiCorp go-plugin based architecture
+- Create Plugin SDK and developer toolchain
+- Build proof-of-concept plugins to validate system
+- Expose Core Services via gRPC APIs
 
-### Business Metrics
-- **User Adoption**: Support for 5+ active communities
-- **Transaction Volume**: Process 1000+ bookings per month
-- **Developer Experience**: New contributor onboarding <1 hour
-- **Community Growth**: Enable 50+ classes per community
+### 2.2 Key Activities & Deliverables
+
+#### **Plugin Host Implementation**
+- [ ] **go-plugin Integration**
+  - [ ] Integrate HashiCorp go-plugin library
+  - [ ] Implement plugin discovery and lifecycle management
+  - [ ] Add plugin health monitoring and recovery
+  - [ ] Estimate: 2 weeks
+
+- [ ] **gRPC API Layer**
+  - [ ] Expose Core Services interfaces over gRPC
+  - [ ] Implement service authentication and authorization
+  - [ ] Add API versioning and compatibility layer
+  - [ ] Estimate: 2 weeks
+
+- [ ] **Plugin Isolation & Security**
+  - [ ] Implement process-level isolation
+  - [ ] Add plugin sandboxing and resource limits
+  - [ ] Create secure communication channels
+  - [ ] Estimate: 1 week
+
+#### **Plugin SDK Development**
+- [ ] **Developer SDK**
+  - [ ] Package Go interfaces and gRPC client code
+  - [ ] Create plugin template and scaffolding tools
+  - [ ] Add development server and testing utilities
+  - [ ] Estimate: 2 weeks
+
+- [ ] **CLI Toolchain**
+  - [ ] Build plugin development CLI
+  - [ ] Add commands for build, test, package, deploy
+  - [ ] Implement plugin validation and linting
+  - [ ] Estimate: 1 week
+
+#### **Proof-of-Concept Plugins**
+- [ ] **RSS Feed Importer Plugin**
+  - [ ] Build plugin using ItemManagementService
+  - [ ] Add configuration schema and UI generation
+  - [ ] Implement error handling and logging
+  - [ ] Estimate: 1 week
+
+- [ ] **Custom Payment Provider Plugin**
+  - [ ] Integrate alternative payment system
+  - [ ] Demonstrate PaymentService interface usage
+  - [ ] Add webhook handling and reconciliation
+  - [ ] Estimate: 1 week
+
+#### **Documentation & Developer Experience**
+- [ ] **Plugin Development Guide**
+  - [ ] Create comprehensive tutorial documentation
+  - [ ] Add API reference and examples
+  - [ ] Build sample plugin repository
+  - [ ] Estimate: 1 week
+
+### 2.3 Success Metrics
+- [ ] Proof-of-concept plugins load and function correctly
+- [ ] External developers can build plugins using SDK
+- [ ] Plugin crashes don't affect core system stability
+- [ ] Plugin API maintains backward compatibility
+
+---
+
+## 🎨 Phase 3: Creator Studio & Ecosystem
+**Duration**: 3-4 months | **Priority**: Medium | **Status**: ❌ Pending
+
+### 3.1 Core Objectives
+- Build Creator Studio management interface
+- Create plugin marketplace and discovery system
+- Establish plugin validation and security pipeline
+- Foster third-party developer community
+
+### 3.2 Key Activities & Deliverables
+
+#### **Creator Studio UI**
+- [ ] **Plugin Marketplace**
+  - [ ] Build plugin browsing and discovery interface
+  - [ ] Add search, filtering, and categorization
+  - [ ] Implement rating and review system
+  - [ ] Estimate: 3 weeks
+
+- [ ] **Plugin Management**
+  - [ ] Create install/uninstall workflows
+  - [ ] Add plugin configuration interfaces
+  - [ ] Implement rollback and version management
+  - [ ] Estimate: 2 weeks
+
+- [ ] **Community Dashboard**
+  - [ ] Build unified administration interface
+  - [ ] Add analytics and usage metrics
+  - [ ] Create community customization tools
+  - [ ] Estimate: 2 weeks
+
+#### **Plugin Validation Pipeline**
+- [ ] **Automated Testing**
+  - [ ] Build plugin submission validation
+  - [ ] Add security scanning and vulnerability checks
+  - [ ] Implement automated testing frameworks
+  - [ ] Estimate: 2 weeks
+
+- [ ] **Review Process**
+  - [ ] Create manual review workflow
+  - [ ] Add quality guidelines and standards
+  - [ ] Build reviewer dashboard and tools
+  - [ ] Estimate: 1 week
+
+#### **Ecosystem Growth**
+- [ ] **Developer Community**
+  - [ ] Launch developer portal and forums
+  - [ ] Create plugin development contests
+  - [ ] Add documentation and tutorial content
+  - [ ] Estimate: 2 weeks
+
+- [ ] **Plugin Templates**
+  - [ ] Build common plugin templates
+  - [ ] Add integration examples (Slack, Discord, etc.)
+  - [ ] Create best practices documentation
+  - [ ] Estimate: 1 week
+
+### 3.3 Success Metrics
+- [ ] First third-party plugin submitted and approved
+- [ ] Non-technical users can install plugins via UI
+- [ ] Plugin marketplace has 10+ quality plugins
+- [ ] Active developer community established
+
+---
+
+## 🚀 Implementation Timeline
+
+### Phase 1 Milestones
+| Week | Milestone | Deliverable |
+|------|-----------|-------------|
+| **Week 1-2** | Architecture Setup | Core Services interfaces defined |
+| **Week 3-4** | UserProfileService | Authentication refactored to interface |
+| **Week 5-6** | CommunityManagementService | Multi-tenant isolation implemented |
+| **Week 7-9** | ItemManagementService | Content management abstracted |
+| **Week 10-11** | PaymentService | Stripe integration behind interface |
+| **Week 12-13** | EventBusService | Messaging system implemented |
+| **Week 14-15** | YAML Enhancement | Hot-reload and validation working |
+| **Week 16** | Testing & Documentation | 80% test coverage achieved |
+
+### Phase 2 Milestones
+| Week | Milestone | Deliverable |
+|------|-----------|-------------|
+| **Week 1-2** | Plugin Host | go-plugin integration complete |
+| **Week 3-4** | gRPC APIs | Core Services exposed via gRPC |
+| **Week 5-6** | Plugin SDK | Developer tools packaged |
+| **Week 7** | RSS Plugin | Proof-of-concept plugin working |
+| **Week 8** | Payment Plugin | Alternative provider integrated |
+| **Week 9-10** | Documentation | Developer guides complete |
+
+### Phase 3 Milestones
+| Week | Milestone | Deliverable |
+|------|-----------|-------------|
+| **Week 1-3** | Marketplace UI | Plugin discovery interface |
+| **Week 4-5** | Management Tools | Install/configure workflows |
+| **Week 6-7** | Validation Pipeline | Automated security scanning |
+| **Week 8-9** | Community Dashboard | Administration interface |
+| **Week 10-12** | Ecosystem Launch | Developer community active |
+
+---
+
+## ⚠️ Critical Dependencies & Risks
+
+### Technical Dependencies
+- **go-plugin Library**: Ensure compatibility with latest versions
+- **gRPC Ecosystem**: Maintain protocol buffer compatibility
+- **YAML Processing**: Validate performance with hot-reload
+- **Security Framework**: Implement robust plugin sandboxing
+
+### Migration Risks
+- **Legacy Code**: Ensure smooth transition from monolithic structure
+- **Data Migration**: Maintain database compatibility across phases
+- **API Compatibility**: Preserve existing integrations during refactoring
+- **Performance**: Monitor system performance during architecture changes
+
+### Mitigation Strategies
+- **Incremental Rollout**: Deploy phase changes gradually
+- **Feature Flags**: Use feature toggles for new architecture components
+- **Rollback Plans**: Maintain ability to revert to previous versions
+- **Testing**: Comprehensive test coverage before each phase deployment
+
+---
+
+## 📊 Success Metrics & KPIs
+
+### Phase 1 Metrics
+- **Architecture Quality**: 100% of business logic behind interfaces
+- **Configuration**: Theme changes reflect within 1 second
+- **Testing**: 80%+ test coverage across all packages
+- **Performance**: No degradation from baseline MVP performance
+
+### Phase 2 Metrics
+- **Plugin System**: 100% uptime despite plugin failures
+- **Developer Experience**: Plugin development setup < 5 minutes
+- **API Stability**: Zero breaking changes to Core Service APIs
+- **Documentation**: Tutorial completion rate > 90%
+
+### Phase 3 Metrics
+- **Ecosystem Growth**: 10+ community-developed plugins
+- **User Adoption**: 50+ active communities using platform
+- **Marketplace**: 1000+ plugin downloads
+- **Community**: 100+ active developers in ecosystem
 
 ---
 
 ## 🤝 Contributing to the Roadmap
 
-To contribute to this roadmap:
+### How to Help
+1. **Pick Up Tasks**: Choose unassigned items from phase backlogs
+2. **Follow Architecture**: Adhere to ALA principles in all development
+3. **Add Tests**: Ensure all new code has comprehensive test coverage
+4. **Document Changes**: Update architecture docs and decision records
+5. **Community Feedback**: Gather input from potential plugin developers
 
-1. **Bug Reports**: File issues for any discovered problems
-2. **Feature Requests**: Propose new features with business justification
-3. **Implementation**: Pick up items from the roadmap and submit PRs
-4. **Testing**: Help improve test coverage
-5. **Documentation**: Improve guides and API documentation
+### Priority Areas (Help Needed)
+- **Testing Framework**: Critical for Phase 1 success
+- **Core Services Refactoring**: Large effort requiring multiple contributors
+- **gRPC API Design**: Needs distributed systems expertise
+- **Plugin Security**: Requires security-focused development
+- **Developer Experience**: Needs UX input for tooling design
 
 **Last Updated**: December 2024  
-**Next Review**: January 2024
+**Next Review**: Weekly during active development  
+**Source of Truth**: [Re-Architecting-Roadmap.md](Re-Architecting-Roadmap.md)
