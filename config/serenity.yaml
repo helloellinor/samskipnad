@@ -6,24 +6,24 @@ name: "Serenity Yoga Studio"
 description: "Find your inner peace through mindful movement"
 tagline: "Breathe, Flow, Be"
 
-# Branding - Warm, earthy tones
+# Branding - Neo 1999 theme (earthy variation)
 colors:
-  primary: "#8B4513"        # Saddle brown
-  secondary: "#D2691E"      # Chocolate
-  accent: "#CD853F"         # Peru
-  success: "#228B22"        # Forest green
-  warning: "#DAA520"        # Golden rod
-  danger: "#B22222"         # Fire brick
-  background: "#FFF8DC"     # Cornsilk
-  surface: "#FFFAF0"        # Floral white
-  text: "#2F4F4F"           # Dark slate gray
-  muted: "#696969"          # Dim gray
+  primary: "#0000FF"        # Classic blue
+  secondary: "#800080"      # Classic purple
+  accent: "#FF0000"         # Classic red
+  success: "#008000"        # Classic green
+  warning: "#FFA500"        # Classic orange
+  danger: "#FF0000"         # Classic red
+  background: "#FFFFFF"     # Classic white
+  surface: "#C0C0C0"        # Classic gray
+  text: "#000000"           # Classic black
+  muted: "#666666"          # Classic muted
 
-# Typography - Traditional, readable fonts
+# Typography - Neo 1999 fonts
 fonts:
-  primary: "Lora"           # Serif for warmth
-  secondary: "Source Sans Pro"  # Sans-serif for clarity
-  size_base: "16px"
+  primary: "Times New Roman"     # Classic serif
+  secondary: "Arial"             # Classic sans-serif
+  size_base: "12px"
 
 # Community Features
 features:

@@ -6,24 +6,24 @@ name: "Kjernekraft"
 description: "Nuclear-powered fitness for busy parents"
 tagline: "Where strength meets chaos"
 
-# Branding
+# Branding - Neo 1999 theme
 colors:
-  primary: "#2e3440"      # Nord dark
-  secondary: "#5e81ac"    # Nord blue
-  accent: "#d08770"       # Nord orange
-  success: "#a3be8c"      # Nord green
-  warning: "#ebcb8b"      # Nord yellow
-  danger: "#bf616a"       # Nord red
-  background: "#eceff4"   # Nord light gray
-  surface: "#f4f6fa"      # Even lighter
-  text: "#2e3440"         # Dark text
-  muted: "#4c566a"        # Muted text
+  primary: "#0000FF"      # Classic blue
+  secondary: "#800080"    # Classic purple
+  accent: "#FF0000"       # Classic red
+  success: "#008000"      # Classic green
+  warning: "#FFA500"      # Classic orange
+  danger: "#FF0000"       # Classic red
+  background: "#FFFFFF"   # Classic white
+  surface: "#C0C0C0"      # Classic gray
+  text: "#000000"         # Classic black
+  muted: "#666666"        # Classic muted
 
-# Typography
+# Typography - Neo 1999 fonts
 fonts:
-  primary: "Inter"        # Clean sans-serif
-  secondary: "JetBrains Mono"  # Code/accent font
-  size_base: "16px"
+  primary: "Times New Roman"     # Classic serif
+  secondary: "Arial"             # Classic sans-serif
+  size_base: "12px"
 
 # Community Features
 features:
