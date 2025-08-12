@@ -1,0 +1,76 @@
+# Kjernekraft - Default community configuration
+# This is a Scandinavian mom-friendly fitness community
+
+# Basic Information
+name: "Kjernekraft"
+description: "Nuclear-powered fitness for busy parents"
+tagline: "Where strength meets chaos"
+
+# Branding
+colors:
+  primary: "#2e3440"      # Nord dark
+  secondary: "#5e81ac"    # Nord blue
+  accent: "#d08770"       # Nord orange
+  success: "#a3be8c"      # Nord green
+  warning: "#ebcb8b"      # Nord yellow
+  danger: "#bf616a"       # Nord red
+  background: "#eceff4"   # Nord light gray
+  surface: "#f4f6fa"      # Even lighter
+  text: "#2e3440"         # Dark text
+  muted: "#4c566a"        # Muted text
+
+# Typography
+fonts:
+  primary: "Inter"        # Clean sans-serif
+  secondary: "JetBrains Mono"  # Code/accent font
+  size_base: "16px"
+
+# Community Features
+features:
+  classes: true
+  memberships: true
+  community: true
+  payments: true
+  calendar: true
+
+# Content Configuration
+content:
+  home:
+    title: "Welcome to Kjernekraft"
+    subtitle: "Nuclear-powered fitness for busy parents who need to decompress"
+    description: "Finally, a fitness community that gets it. Between school runs and existential dread, you deserve a space that's both supportive and slightly sarcastic."
+    
+  features:
+    - title: "Class Management"
+      description: "Book sessions when you can actually escape. We won't judge if you show up in yesterday's clothes."
+      
+    - title: "Flexible Memberships"
+      description: "Because life is unpredictable and so is your schedule. Pay for what works, skip what doesn't."
+      
+    - title: "Community Support"
+      description: "Connect with other parents who understand that 'self-care' sometimes means hiding in the bathroom for five minutes."
+
+# Pricing (in your local currency)
+pricing:
+  currency: "NOK"
+  monthly: 299
+  yearly: 2990
+  drop_in: 89
+
+# Locale
+locale:
+  language: "en"
+  country: "NO"
+  timezone: "Europe/Oslo"
+
+# Admin settings
+admin:
+  registration_open: true
+  require_approval: false
+  default_role: "member"
+
+# Attribution
+attribution:
+  show: true
+  text: "Built with Samskipnad"
+  link: "https://github.com/helloellinor/samskipnad"

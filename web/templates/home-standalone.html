@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="{{if .Community}}{{.Community.Locale.Language}}{{else}}en{{end}}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}{{if .Community}} - {{.Community.Name}}{{end}}</title>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    {{if .Community}}
+    <link href="https://fonts.googleapis.com/css2?family={{.Community.Fonts.Primary | replace " " "+"}}:wght@400;500;600;700&family={{.Community.Fonts.Secondary | replace " " "+"}}:wght@400;500;600;700&display=swap" rel="stylesheet">
+    {{else}}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    {{end}}
+    <link rel="stylesheet" href="/css/community.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">{{if .Community}}{{.Community.Name}}{{else}}Samskipnad{{end}}</a>
+            
+            {{if .User}}
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+                {{if .Community.Features.Classes}}<a class="nav-link" href="/classes">Classes</a>{{end}}
+                {{if .Community.Features.Memberships}}<a class="nav-link" href="/memberships">Memberships</a>{{end}}
+                {{if eq .User.Role "admin"}}
+                <a class="nav-link" href="/admin">Admin</a>
+                {{end}}
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        {{.User.FirstName}} {{.User.LastName}}
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form method="POST" action="/logout" style="display: inline;">
+                                <button type="submit" class="dropdown-item">Logout</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            {{else}}
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/login">Login</a>
+                <a class="nav-link" href="/register">Register</a>
+            </div>
+            {{end}}
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="hero-section text-center py-5">
+                    <h1 class="display-4 mb-4">{{if .Community}}{{.Community.Content.Home.Title}}{{else}}Welcome to Samskipnad{{end}}</h1>
+                    {{if and .Community .Community.Content.Home.Subtitle}}
+                    <h2 class="h4 mb-3 text-muted">{{.Community.Content.Home.Subtitle}}</h2>
+                    {{end}}
+                    <p class="lead mb-4">{{if .Community}}{{.Community.Content.Home.Description}}{{else}}The modern platform for fitness communities and studios.{{end}}</p>
+                    
+                    <div class="row text-center mt-5">
+                        {{if .Community}}
+                        {{range $index, $feature := .Community.Content.Features}}
+                        <div class="col-md-4">
+                            <div class="feature-box p-4">
+                                <h3>{{$feature.Title}}</h3>
+                                <p>{{$feature.Description}}</p>
+                            </div>
+                        </div>
+                        {{end}}
+                        {{else}}
+                        <div class="col-md-4">
+                            <div class="feature-box p-4">
+                                <h3>Class Management</h3>
+                                <p>Easy booking and scheduling for all your classes and events.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="feature-box p-4">
+                                <h3>Memberships & Tickets</h3>
+                                <p>Flexible membership options and class packages for your members.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="feature-box p-4">
+                                <h3>Community Platform</h3>
+                                <p>Build and manage your community with role-based permissions.</p>
+                            </div>
+                        </div>
+                        {{end}}
+                    </div>
+                    <div class="cta-section mt-5">
+                        <a href="/register" class="btn btn-primary btn-lg me-3">Get Started</a>
+                        <a href="/login" class="btn btn-outline-secondary btn-lg">Login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    {{if and .Community .Community.Attribution.Show}}
+    <footer class="attribution">
+        <div class="container">
+            <a href="{{.Community.Attribution.Link}}" target="_blank">{{.Community.Attribution.Text}}</a>
+        </div>
+    </footer>
+    {{end}}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

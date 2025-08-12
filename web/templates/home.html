@@ -1,0 +1,30 @@
+{{template "base" .}}
+
+{{define "content"}}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="hero-section text-center py-5">
+            <h1 class="display-4 mb-4">{{.Community.Content.Home.Title}}</h1>
+            {{if .Community.Content.Home.Subtitle}}
+            <h2 class="h4 mb-3 text-muted">{{.Community.Content.Home.Subtitle}}</h2>
+            {{end}}
+            <p class="lead mb-4">{{.Community.Content.Home.Description}}</p>
+            
+            <div class="row text-center mt-5">
+                {{range $index, $feature := .Community.Content.Features}}
+                <div class="col-md-4">
+                    <div class="feature-box p-4">
+                        <h3>{{$feature.Title}}</h3>
+                        <p>{{$feature.Description}}</p>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+            <div class="cta-section mt-5">
+                <a href="/register" class="btn btn-primary btn-lg me-3">Get Started</a>
+                <a href="/login" class="btn btn-outline-secondary btn-lg">Login</a>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

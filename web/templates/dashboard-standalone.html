@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Samskipnad</title>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Samskipnad</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+                <a class="nav-link" href="/classes">Classes</a>
+                <a class="nav-link" href="/memberships">Memberships</a>
+                {{if eq .User.Role "admin"}}
+                <a class="nav-link" href="/admin">Admin</a>
+                {{end}}
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        {{.User.FirstName}} {{.User.LastName}}
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form method="POST" action="/logout" style="display: inline;">
+                                <button type="submit" class="dropdown-item">Logout</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h2>Welcome back, {{.User.FirstName}}!</h2>
+                <p class="text-muted">Here's your dashboard overview</p>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <!-- Profile Card -->
+            <div class="col-md-4">
+                <div class="profile-card card p-4 fade-in-up">
+                    <div class="profile-avatar">
+                        {{substr .User.FirstName 0 1}}{{substr .User.LastName 0 1}}
+                    </div>
+                    <div class="profile-info text-center">
+                        <h4>{{.User.FirstName}} {{.User.LastName}}</h4>
+                        <span class="profile-role">{{.User.Role}}</span>
+                        <p class="text-muted">Member since {{.User.CreatedAt.Format "Jan 2006"}}</p>
+                    </div>
+                    <div class="profile-stats">
+                        <div class="profile-stat">
+                            <span class="profile-stat-value">0</span>
+                            <span class="profile-stat-label">Bookings</span>
+                        </div>
+                        <div class="profile-stat">
+                            <span class="profile-stat-value">0</span>
+                            <span class="profile-stat-label">Membership</span>
+                        </div>
+                    </div>
+                    <div class="mt-3 d-grid">
+                        <a href="/profile" class="btn btn-outline-primary">Edit Profile</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Upcoming Classes -->
+            <div class="col-md-8">
+                <div class="card slide-in-left">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Upcoming Classes</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center py-5">
+                            <h6 class="text-muted">No upcoming classes available</h6>
+                            <p class="text-muted">Check back soon for new classes!</p>
+                        </div>
+                        
+                        <div class="mt-3 d-flex gap-2">
+                            <a href="/classes" class="btn btn-primary">View All Classes</a>
+                            <a href="/calendar" class="btn btn-outline-secondary">Calendar View</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <!-- Your Bookings -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Your Bookings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center py-4">
+                            <h6 class="text-muted">No bookings yet</h6>
+                            <p class="text-muted">Book your first class to get started!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="/classes" class="btn btn-primary">Browse Classes</a>
+                            <a href="/calendar" class="btn btn-outline-primary">Calendar View</a>
+                            <a href="/payment/membership" class="btn btn-outline-secondary">Purchase Membership</a>
+                            {{if eq .User.Role "admin"}}
+                            <a href="/admin" class="btn btn-warning">Admin Panel</a>
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Custom function to get substring
+    function substr(str, start, length) {
+        return str.substring(start, start + length).toUpperCase();
+    }
+    </script>
+</body>
+</html>

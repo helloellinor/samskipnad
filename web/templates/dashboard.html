@@ -1,0 +1,150 @@
+{{define "content"}}
+<div class="row">
+    <div class="col-12">
+        <h2>Welcome back, {{.User.FirstName}}!</h2>
+        <p class="text-muted">Here's your dashboard overview</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Profile Card -->
+    <div class="col-md-4">
+        <div class="profile-card card p-4 fade-in-up">
+            <div class="profile-avatar">
+                {{substr .User.FirstName 0 1}}{{substr .User.LastName 0 1}}
+            </div>
+            <div class="profile-info text-center">
+                <h4>{{.User.FirstName}} {{.User.LastName}}</h4>
+                <span class="profile-role">{{.User.Role}}</span>
+                <p class="text-muted">Member since {{.User.CreatedAt.Format "Jan 2006"}}</p>
+            </div>
+            <div class="profile-stats">
+                <div class="profile-stat">
+                    <span class="profile-stat-value">{{len .UserBookings}}</span>
+                    <span class="profile-stat-label">Bookings</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="profile-stat-value">{{if .UserMembership}}1{{else}}0{{end}}</span>
+                    <span class="profile-stat-label">Membership</span>
+                </div>
+            </div>
+            <div class="mt-3 d-grid">
+                <a href="/profile" class="btn btn-outline-primary">Edit Profile</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Upcoming Classes -->
+    <div class="col-md-8">
+        <div class="card slide-in-left">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Upcoming Classes</h5>
+            </div>
+            <div class="card-body">
+                {{if .UpcomingClasses}}
+                <div class="list-group list-group-flush">
+                    {{range .UpcomingClasses}}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">{{.Name}}</h6>
+                            <p class="mb-1 text-muted">{{.StartTime.Format "Mon, Jan 2 at 3:04 PM"}}</p>
+                            <small class="text-muted">{{.Description}}</small>
+                        </div>
+                        <div>
+                            {{if gt .Price 0}}
+                            <span class="badge bg-primary">${{printf "%.2f" (divf .Price 100)}}</span>
+                            {{else}}
+                            <span class="badge bg-success">Free</span>
+                            {{end}}
+                            <button class="btn btn-sm btn-outline-primary ms-2" 
+                                    hx-post="/classes/{{.ID}}/book" 
+                                    hx-target="#booking-result"
+                                    hx-swap="innerHTML">
+                                Book
+                            </button>
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+                {{else}}
+                <div class="text-center py-5">
+                    <h6 class="text-muted">No upcoming classes available</h6>
+                    <p class="text-muted">Check back soon for new classes!</p>
+                </div>
+                {{end}}
+                
+                <div id="booking-result" class="mt-3"></div>
+                
+                <div class="mt-3 d-flex gap-2">
+                    <a href="/classes" class="btn btn-primary">View All Classes</a>
+                    <a href="/calendar" class="btn btn-outline-secondary">Calendar View</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Your Bookings -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Your Bookings</h5>
+            </div>
+            <div class="card-body">
+                {{if .UserBookings}}
+                <div class="list-group list-group-flush">
+                    {{range .UserBookings}}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Class #{{.ClassID}}</h6>
+                                <small class="text-muted">Booked: {{.CreatedAt.Format "Jan 2"}}</small>
+                            </div>
+                            <span class="badge bg-success">{{.Status}}</span>
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+                {{else}}
+                <div class="text-center py-4">
+                    <h6 class="text-muted">No bookings yet</h6>
+                    <p class="text-muted">Book your first class to get started!</p>
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="/classes" class="btn btn-primary">Browse Classes</a>
+                    <a href="/calendar" class="btn btn-outline-primary">Calendar View</a>
+                    <a href="/memberships" class="btn btn-outline-secondary">View Memberships</a>
+                    {{if eq .User.Role "admin"}}
+                    <a href="/admin" class="btn btn-warning">Admin Panel</a>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Custom function to handle currency formatting
+function divf(value, divisor) {
+    return value / divisor;
+}
+
+// Custom function to get substring
+function substr(str, start, length) {
+    return str.substring(start, start + length).toUpperCase();
+}
+</script>
+{{end}}
