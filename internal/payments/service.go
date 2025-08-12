@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"strconv"
 	"samskipnad/internal/models"
 
 	"github.com/stripe/stripe-go/v76"
@@ -124,6 +125,54 @@ func (s *Service) CreateMembershipPaymentIntent(userID int, membershipType strin
 	return pi, nil
 }
 
+// CreateKlippekortPaymentIntent creates a payment intent for klippekort purchase
+func (s *Service) CreateKlippekortPaymentIntent(userID int, categoryID string, klipp int, amount int64) (*stripe.PaymentIntent, error) {
+	user, err := s.getUserByID(userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	stripeCustomer, err := s.getOrCreateStripeCustomer(user)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create customer: %w", err)
+	}
+
+	params := &stripe.PaymentIntentParams{
+		Amount:   stripe.Int64(amount),
+		Currency: stripe.String(string(stripe.CurrencyUSD)),
+		Customer: stripe.String(stripeCustomer.ID),
+		Metadata: map[string]string{
+			"user_id":     fmt.Sprintf("%d", userID),
+			"category_id": categoryID,
+			"klipp":       fmt.Sprintf("%d", klipp),
+			"type":        "klippekort",
+		},
+	}
+
+	pi, err := paymentintent.New(params)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create payment intent: %w", err)
+	}
+
+	// Store payment record
+	err = s.storePayment(&models.Payment{
+		ID:          pi.ID,
+		UserID:      userID,
+		TenantID:    user.TenantID,
+		Amount:      int(amount),
+		Currency:    "usd",
+		Status:      string(pi.Status),
+		PaymentType: "klippekort",
+		ReferenceID: 0, // Will be set when klippekort is created
+		StripeData:  "",
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to store payment: %w", err)
+	}
+
+	return pi, nil
+}
+
 // ConfirmPayment processes a successful payment
 func (s *Service) ConfirmPayment(paymentIntentID string) error {
 	// Get payment from database
@@ -154,6 +203,8 @@ func (s *Service) ConfirmPayment(paymentIntentID string) error {
 		err = s.processClassBooking(payment.UserID, payment.ReferenceID)
 	case "membership":
 		err = s.processMembershipPayment(payment.UserID, pi.Metadata["membership_type"])
+	case "klippekort":
+		err = s.processKlippekortPayment(payment.UserID, pi.Metadata["category_id"], pi.Metadata["klipp"])
 	default:
 		return fmt.Errorf("unknown payment type: %s", payment.PaymentType)
 	}
@@ -276,5 +327,25 @@ func (s *Service) processMembershipPayment(userID int, membershipType string) er
 						  VALUES (?, ?, ?, %s, %s, true, datetime('now'), datetime('now'))`, startDate, endDate)
 	
 	_, err = s.db.Exec(query, userID, user.TenantID, membershipType)
+	return err
+}
+
+// processKlippekortPayment creates klippekort record after successful payment
+func (s *Service) processKlippekortPayment(userID int, categoryID, klippStr string) error {
+	user, err := s.getUserByID(userID)
+	if err != nil {
+		return err
+	}
+
+	klipp, err := strconv.Atoi(klippStr)
+	if err != nil {
+		return fmt.Errorf("invalid klipp count: %w", err)
+	}
+
+	// Create klippekort record
+	query := `INSERT INTO klippekort (user_id, tenant_id, category_id, klipp_left, original_klipp, created_at, updated_at)
+			  VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
+	
+	_, err = s.db.Exec(query, userID, user.TenantID, categoryID, klipp, klipp)
 	return err
 }

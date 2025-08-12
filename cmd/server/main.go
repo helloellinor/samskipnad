@@ -60,6 +60,8 @@ func main() {
 	protected.HandleFunc("/calendar", handlers.Calendar).Methods("GET")
 	protected.HandleFunc("/classes/{id}/book", handlers.BookClass).Methods("POST")
 	protected.HandleFunc("/memberships", handlers.Memberships).Methods("GET")
+	protected.HandleFunc("/klippekort", handlers.Klippekort).Methods("GET")
+	protected.HandleFunc("/klippekort/purchase", handlers.KlippekortPurchase).Methods("POST")
 	protected.HandleFunc("/profile", handlers.Profile).Methods("GET", "POST")
 	
 	// Payment routes

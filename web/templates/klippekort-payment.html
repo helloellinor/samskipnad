@@ -1,0 +1,68 @@
+<div class="card">
+    <div class="card-header">
+        <h5>{{.Category.Name}} - {{.Package.Name}}</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h3>{{.Community.FormatPrice .Package.Price}}</h3>
+                <p class="text-muted">{{.Package.Klipp}} klipp - {{.Community.FormatPrice .Package.PricePerKlipp}} per klipp</p>
+                
+                {{if gt .Package.SavePercent 0}}
+                <div class="alert alert-success">
+                    <i class="bi bi-piggy-bank"></i> Du sparer {{.Package.SavePercent}}%!
+                </div>
+                {{end}}
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h6>Betaling</h6>
+                        <p class="small text-muted">Sikker betaling via Stripe</p>
+                        
+                        <!-- Stripe Elements will be mounted here -->
+                        <div id="payment-element"></div>
+                        
+                        <button id="pay-button" class="btn btn-primary w-100 mt-3">
+                            Betal {{.Community.FormatPrice .Package.Price}}
+                        </button>
+                        
+                        <div id="payment-messages" class="mt-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+const stripe = Stripe('{{.Community.Stripe.PublishableKey}}');
+const elements = stripe.elements({
+    clientSecret: '{{.PaymentIntent.ClientSecret}}'
+});
+
+const paymentElement = elements.create('payment');
+paymentElement.mount('#payment-element');
+
+const payButton = document.getElementById('pay-button');
+const messagesDiv = document.getElementById('payment-messages');
+
+payButton.addEventListener('click', async () => {
+    payButton.disabled = true;
+    payButton.textContent = 'Behandler...';
+    
+    const {error} = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+            return_url: window.location.origin + '/payment/success?type=klippekort'
+        }
+    });
+
+    if (error) {
+        messagesDiv.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+        payButton.disabled = false;
+        payButton.textContent = 'Betal {{.Community.FormatPrice .Package.Price}}';
+    }
+});
+</script>

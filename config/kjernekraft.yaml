@@ -56,6 +56,104 @@ pricing:
   monthly: 299
   yearly: 2990
   drop_in: 89
+  
+  # Klippekort system configuration
+  klippekort:
+    categories:
+      - id: "personal_training"
+        name: "Personlig Trening"
+        description: "En-til-en personlig trening med sertifisert instruktør"
+        icon: "person-check"
+        color: "#5e81ac"
+        info_text: "Ingen utløpsdato på klippekort. Kan brukes til alle PT-økter."
+        packages:
+          - name: "1 klipp"
+            klipp: 1
+            price: 1300
+            price_per_klipp: 1300
+            save_percent: 0
+          - name: "5 klipp"
+            klipp: 5
+            price: 6175
+            price_per_klipp: 1235
+            save_percent: 5
+          - name: "10 klipp"
+            klipp: 10
+            price: 11050
+            price_per_klipp: 1105
+            save_percent: 15
+            badge: "Best Deal"
+            
+      - id: "pt_30min"
+        name: "PT 30 min"
+        description: "Kort og intensiv 30-minutters personlig trening"
+        icon: "clock"
+        color: "#d08770"
+        info_text: "Perfekt for travel dager eller lunchtid."
+        packages:
+          - name: "1 klipp"
+            klipp: 1
+            price: 800
+            price_per_klipp: 800
+            save_percent: 0
+          - name: "5 klipp"
+            klipp: 5
+            price: 3800
+            price_per_klipp: 760
+            save_percent: 5
+          - name: "10 klipp"
+            klipp: 10
+            price: 7200
+            price_per_klipp: 720
+            save_percent: 10
+            badge: "Populær"
+            
+      - id: "reformer"
+        name: "Reformer / Apparater"
+        description: "Pilates-inspirerte øvelser på reformer og andre apparater"
+        icon: "gear"
+        color: "#a3be8c"
+        info_text: "Alle nivåer velkommen. Introduksjon tilgjengelig."
+        packages:
+          - name: "1 klipp"
+            klipp: 1
+            price: 450
+            price_per_klipp: 450
+            save_percent: 0
+          - name: "5 klipp"
+            klipp: 5
+            price: 2138
+            price_per_klipp: 428
+            save_percent: 5
+          - name: "10 klipp"
+            klipp: 10
+            price: 4050
+            price_per_klipp: 405
+            save_percent: 10
+            badge: "Best Deal"
+            
+      - id: "special"
+        name: "Spesialtimer"
+        description: "Workshops, introduksjonstimer og spesielle arrangementer"
+        icon: "star"
+        color: "#ebcb8b"
+        info_text: "Inkluderer workshops og særlige arrangementer."
+        packages:
+          - name: "1 klipp"
+            klipp: 1
+            price: 250
+            price_per_klipp: 250
+            save_percent: 0
+          - name: "3 klipp"
+            klipp: 3
+            price: 713
+            price_per_klipp: 238
+            save_percent: 5
+          - name: "5 klipp"
+            klipp: 5
+            price: 1125
+            price_per_klipp: 225
+            save_percent: 10
 
 # Locale
 locale:

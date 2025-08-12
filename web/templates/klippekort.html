@@ -1,0 +1,270 @@
+{{define "content"}}
+<style>
+    .klipp-concept {
+        background: linear-gradient(135deg, {{.Community.Colors.Primary}}15, {{.Community.Colors.Secondary}}15);
+        border-left: 4px solid {{.Community.Colors.Primary}};
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 20px;
+        z-index: 100;
+    }
+    
+    .category-section {
+        margin-bottom: 3rem;
+    }
+    
+    .category-header {
+        border-bottom: 3px solid;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .pricing-card {
+        border: 2px solid transparent;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .pricing-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .pricing-card.best-deal {
+        border-color: {{.Community.Colors.Success}};
+        position: relative;
+        transform: scale(1.05);
+    }
+    
+    .best-deal-badge {
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: {{.Community.Colors.Success}};
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: bold;
+    }
+    
+    .savings-chart {
+        background: {{.Community.Colors.Background}};
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .savings-bar {
+        background: linear-gradient(90deg, {{.Community.Colors.Danger}}, {{.Community.Colors.Warning}}, {{.Community.Colors.Success}});
+        height: 40px;
+        border-radius: 20px;
+        position: relative;
+        margin: 1rem 0;
+    }
+    
+    .price-marker {
+        position: absolute;
+        top: -30px;
+        transform: translateX(-50%);
+        background: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .special-sessions {
+        background: {{.Community.Colors.Surface}};
+        border-radius: 12px;
+        padding: 2rem;
+        margin-top: 3rem;
+    }
+    
+    .trust-text {
+        background: {{.Community.Colors.Primary}}10;
+        border-radius: 6px;
+        padding: 0.75rem;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        color: {{.Community.Colors.Muted}};
+    }
+    
+    @media (max-width: 768px) {
+        .klipp-concept {
+            position: relative;
+            top: 0;
+        }
+        
+        .pricing-card.best-deal {
+            transform: none;
+        }
+        
+        .category-section {
+            margin-bottom: 2rem;
+        }
+    }
+</style>
+
+<!-- Bootstrap Icons CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+<!-- Klipp Concept Explanation -->
+<div class="klipp-concept">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h4 class="mb-2">
+                <i class="bi bi-ticket-perforated" style="color: {{.Community.Colors.Primary}};"></i>
+                Hva er klipp?
+            </h4>
+            <p class="mb-0">
+                <strong>1 klipp = 1 treningsøkt (60 min).</strong> 
+                Kjøp flere klipp om gangen for lavere pris per økt.
+            </p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <div class="d-inline-flex align-items-center bg-white rounded px-3 py-2">
+                <i class="bi bi-infinity text-primary me-2"></i>
+                <small class="text-muted">Ingen utløpsdato</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{range .Community.Pricing.Klippekort.Categories}}
+<div class="category-section">
+    <!-- Category Header -->
+    <div class="category-header" style="border-color: {{.Color}};">
+        <div class="row align-items-center">
+            <div class="col">
+                <h2 class="mb-1" style="color: {{.Color}};">
+                    <i class="bi bi-{{.Icon}} me-2"></i>
+                    {{.Name}}
+                </h2>
+                <p class="text-muted mb-0">{{.Description}}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing Cards -->
+    <div class="row g-4 mb-4">
+        {{range $index, $package := .Packages}}
+        <div class="col-md-4">
+            <div class="card pricing-card {{if $package.Badge}}best-deal{{end}}">
+                {{if $package.Badge}}
+                <div class="best-deal-badge">{{$package.Badge}}</div>
+                {{end}}
+                
+                <div class="card-header text-center" style="background-color: {{$.Color}}20; border-color: {{$.Color}};">
+                    <h5 class="mb-0" style="color: {{$.Color}};">{{$package.Name}}</h5>
+                </div>
+                
+                <div class="card-body text-center">
+                    <div class="display-6 fw-bold mb-2" style="color: {{$.Color}};">
+                        {{$.Community.FormatPrice $package.Price}}
+                    </div>
+                    
+                    <div class="text-muted mb-3">
+                        {{$.Community.FormatPrice $package.PricePerKlipp}} per klipp
+                    </div>
+                    
+                    {{if gt $package.SavePercent 0}}
+                    <div class="alert alert-success py-2 mb-3">
+                        <i class="bi bi-piggy-bank me-1"></i>
+                        Spar {{$package.SavePercent}}%
+                    </div>
+                    {{end}}
+                    
+                    <div class="d-grid">
+                        <button class="btn btn-outline-primary" 
+                                style="border-color: {{$.Color}}; color: {{$.Color}};"
+                                hx-post="/klippekort/purchase"
+                                hx-vals='{"category_id": "{{$.ID}}", "package_index": {{$index}}}'
+                                hx-target="#purchase-result"
+                                hx-swap="innerHTML">
+                            Kjøp nå
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+    <!-- Visual Savings Chart -->
+    {{if gt (len .Packages) 1}}
+    <div class="savings-chart">
+        <h6 class="mb-3">
+            <i class="bi bi-graph-down text-success me-2"></i>
+            Pris per klipp synker med større pakker
+        </h6>
+        <div class="savings-bar">
+            {{range $index, $package := .Packages}}
+            <div class="price-marker" style="left: {{if eq (len $.Packages) 1}}50{{else}}{{mul (div $index (sub1 (len $.Packages))) 100}}{{end}}%;">
+                {{$.Community.FormatPrice $package.PricePerKlipp}}
+            </div>
+            {{end}}
+        </div>
+        <div class="d-flex justify-content-between text-muted small">
+            <span>Høyere pris</span>
+            <span>Lavere pris</span>
+        </div>
+    </div>
+    {{end}}
+
+    <!-- Trust Text -->
+    {{if .InfoText}}
+    <div class="trust-text">
+        <i class="bi bi-shield-check text-success me-2"></i>
+        {{.InfoText}}
+    </div>
+    {{end}}
+</div>
+{{end}}
+
+<!-- Special Sessions Section -->
+<div class="special-sessions">
+    <h3 class="mb-3" style="color: {{.Community.Colors.Muted}};">
+        <i class="bi bi-star me-2"></i>
+        Spesielle tjenester
+    </h3>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="d-flex align-items-center mb-3">
+                <div class="flex-shrink-0">
+                    <i class="bi bi-mortarboard fs-4" style="color: {{.Community.Colors.Secondary}};"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <h6 class="mb-1">Introduksjonstimer</h6>
+                    <p class="text-muted mb-0 small">Gratis for nye medlemmer</p>
+                </div>
+                <div class="flex-shrink-0">
+                    <span class="badge bg-success">Gratis</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="d-flex align-items-center mb-3">
+                <div class="flex-shrink-0">
+                    <i class="bi bi-people fs-4" style="color: {{.Community.Colors.Secondary}};"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <h6 class="mb-1">Gruppetimer</h6>
+                    <p class="text-muted mb-0 small">Inkludert i medlemskap</p>
+                </div>
+                <div class="flex-shrink-0">
+                    <a href="/memberships" class="btn btn-sm btn-outline-secondary">Se medlemskap</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Purchase Result -->
+<div id="purchase-result" class="mt-4"></div>
+{{end}}

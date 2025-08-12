@@ -26,8 +26,8 @@ type Handlers struct {
 }
 
 func New(db *sql.DB, authService *auth.Service, paymentService *payments.Service) *Handlers {
-	// Only parse standalone templates initially
-	templates := template.Must(template.New("").Funcs(getFuncMap()).ParseGlob("web/templates/*-standalone.html"))
+	// Parse all templates
+	templates := template.Must(template.New("").Funcs(getFuncMap()).ParseGlob("web/templates/*.html"))
 
 	return &Handlers{
 		db:             db,
@@ -72,6 +72,29 @@ func getFuncMap() template.FuncMap {
 		},
 		"subtract": func(a, b int) int {
 			return a - b
+		},
+		"div": func(a, b int) int {
+			if b != 0 {
+				return a / b
+			}
+			return 0
+		},
+		"mul": func(a, b int) int {
+			return a * b
+		},
+		"sub": func(a, b int) int {
+			return a - b
+		},
+		"len": func(slice interface{}) int {
+			switch v := slice.(type) {
+			case []interface{}:
+				return len(v)
+			default:
+				return 0
+			}
+		},
+		"sub1": func(i int) int {
+			return i - 1
 		},
 	}
 }
@@ -419,6 +442,86 @@ func (h *Handlers) Memberships(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.renderTemplate(w, "memberships.html", data)
+}
+
+func (h *Handlers) Klippekort(w http.ResponseWriter, r *http.Request) {
+	user := middleware.GetUserFromContext(r.Context())
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	community := config.GetCurrent()
+	data := map[string]interface{}{
+		"Title":     "Klippekort",
+		"User":      user,
+		"Community": community,
+	}
+
+	h.renderTemplate(w, "klippekort.html", data)
+}
+
+func (h *Handlers) KlippekortPurchase(w http.ResponseWriter, r *http.Request) {
+	user := middleware.GetUserFromContext(r.Context())
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	categoryID := r.FormValue("category_id")
+	packageIndex, err := strconv.Atoi(r.FormValue("package_index"))
+	if err != nil {
+		http.Error(w, "Invalid package index", http.StatusBadRequest)
+		return
+	}
+
+	community := config.GetCurrent()
+	
+	// Find the category and package
+	var selectedCategory *config.KlippekortCategory
+	var selectedPackage *config.CardPackage
+	
+	for _, category := range community.Pricing.Klippekort.Categories {
+		if category.ID == categoryID {
+			selectedCategory = &category
+			if packageIndex >= 0 && packageIndex < len(category.Packages) {
+				selectedPackage = &category.Packages[packageIndex]
+			}
+			break
+		}
+	}
+	
+	if selectedCategory == nil || selectedPackage == nil {
+		http.Error(w, "Invalid category or package", http.StatusBadRequest)
+		return
+	}
+
+	// Create payment intent for klippekort purchase
+	paymentIntent, err := h.paymentService.CreateKlippekortPaymentIntent(
+		user.ID, 
+		categoryID, 
+		selectedPackage.Klipp,
+		int64(selectedPackage.Price),
+	)
+	if err != nil {
+		http.Error(w, "Failed to create payment", http.StatusInternalServerError)
+		return
+	}
+
+	// Return payment form
+	data := map[string]interface{}{
+		"PaymentIntent": paymentIntent,
+		"Package":       selectedPackage,
+		"Category":      selectedCategory,
+		"Community":     community,
+	}
+
+	h.renderTemplate(w, "klippekort-payment.html", data)
 }
 
 func (h *Handlers) Profile(w http.ResponseWriter, r *http.Request) {

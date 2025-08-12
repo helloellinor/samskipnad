@@ -74,6 +74,20 @@ type Membership struct {
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }
 
+// Klippekort represents a user's klippekort credits
+type Klippekort struct {
+	ID          int       `json:"id" db:"id"`
+	UserID      int       `json:"user_id" db:"user_id"`
+	TenantID    int       `json:"tenant_id" db:"tenant_id"`
+	CategoryID  string    `json:"category_id" db:"category_id"` // Category from config
+	KlippLeft   int       `json:"klipp_left" db:"klipp_left"`
+	OriginalKlipp int     `json:"original_klipp" db:"original_klipp"`
+	ExpiryDate  *time.Time `json:"expiry_date" db:"expiry_date"`
+	PaymentID   string    `json:"payment_id" db:"payment_id"`
+	CreatedAt   time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
+}
+
 // Ticket represents a class ticket/pass
 type Ticket struct {
 	ID          int       `json:"id" db:"id"`
