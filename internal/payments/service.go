@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"os"
 	"samskipnad/internal/models"
+	"strconv"
 
 	"github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/paymentintent"
 	"github.com/stripe/stripe-go/v76/customer"
+	"github.com/stripe/stripe-go/v76/paymentintent"
 )
 
 type Service struct {
@@ -21,7 +22,7 @@ func NewService(db *sql.DB) *Service {
 	if stripe.Key == "" {
 		stripe.Key = "sk_test_..." // Use a test key for development
 	}
-	
+
 	return &Service{
 		db: db,
 	}
@@ -96,7 +97,7 @@ func (s *Service) CreateMembershipPaymentIntent(userID int, membershipType strin
 		Metadata: map[string]string{
 			"user_id":         fmt.Sprintf("%d", userID),
 			"membership_type": membershipType,
-			"type":           "membership",
+			"type":            "membership",
 		},
 	}
 
@@ -115,6 +116,54 @@ func (s *Service) CreateMembershipPaymentIntent(userID int, membershipType strin
 		Status:      string(pi.Status),
 		PaymentType: "membership",
 		ReferenceID: 0, // Will be set when membership is created
+		StripeData:  "",
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to store payment: %w", err)
+	}
+
+	return pi, nil
+}
+
+// CreateKlippekortPaymentIntent creates a payment intent for klippekort purchase
+func (s *Service) CreateKlippekortPaymentIntent(userID int, categoryID string, klipp int, amount int64) (*stripe.PaymentIntent, error) {
+	user, err := s.getUserByID(userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	stripeCustomer, err := s.getOrCreateStripeCustomer(user)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create customer: %w", err)
+	}
+
+	params := &stripe.PaymentIntentParams{
+		Amount:   stripe.Int64(amount),
+		Currency: stripe.String(string(stripe.CurrencyUSD)),
+		Customer: stripe.String(stripeCustomer.ID),
+		Metadata: map[string]string{
+			"user_id":     fmt.Sprintf("%d", userID),
+			"category_id": categoryID,
+			"klipp":       fmt.Sprintf("%d", klipp),
+			"type":        "klippekort",
+		},
+	}
+
+	pi, err := paymentintent.New(params)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create payment intent: %w", err)
+	}
+
+	// Store payment record
+	err = s.storePayment(&models.Payment{
+		ID:          pi.ID,
+		UserID:      userID,
+		TenantID:    user.TenantID,
+		Amount:      int(amount),
+		Currency:    "usd",
+		Status:      string(pi.Status),
+		PaymentType: "klippekort",
+		ReferenceID: 0, // Will be set when klippekort is created
 		StripeData:  "",
 	})
 	if err != nil {
@@ -154,6 +203,8 @@ func (s *Service) ConfirmPayment(paymentIntentID string) error {
 		err = s.processClassBooking(payment.UserID, payment.ReferenceID)
 	case "membership":
 		err = s.processMembershipPayment(payment.UserID, pi.Metadata["membership_type"])
+	case "klippekort":
+		err = s.processKlippekortPayment(payment.UserID, pi.Metadata["category_id"], pi.Metadata["klipp"])
 	default:
 		return fmt.Errorf("unknown payment type: %s", payment.PaymentType)
 	}
@@ -172,7 +223,7 @@ func (s *Service) getOrCreateStripeCustomer(user *models.User) (*stripe.Customer
 	params := &stripe.CustomerListParams{
 		Email: stripe.String(user.Email),
 	}
-	
+
 	customers := customer.List(params)
 	for customers.Next() {
 		return customers.Customer(), nil
@@ -194,47 +245,47 @@ func (s *Service) getOrCreateStripeCustomer(user *models.User) (*stripe.Customer
 func (s *Service) getUserByID(userID int) (*models.User, error) {
 	query := `SELECT id, email, first_name, last_name, phone, role, active, tenant_id, created_at, updated_at 
 			  FROM users WHERE id = ?`
-	
+
 	var user models.User
 	err := s.db.QueryRow(query, userID).Scan(
 		&user.ID, &user.Email, &user.FirstName, &user.LastName,
 		&user.Phone, &user.Role, &user.Active, &user.TenantID,
 		&user.CreatedAt, &user.UpdatedAt,
 	)
-	
+
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &user, nil
 }
 
 func (s *Service) storePayment(payment *models.Payment) error {
 	query := `INSERT INTO payments (id, user_id, tenant_id, amount, currency, status, payment_type, reference_id, stripe_data, created_at, updated_at)
 			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
-	
+
 	_, err := s.db.Exec(query, payment.ID, payment.UserID, payment.TenantID,
 		payment.Amount, payment.Currency, payment.Status, payment.PaymentType,
 		payment.ReferenceID, payment.StripeData)
-	
+
 	return err
 }
 
 func (s *Service) getPaymentByID(paymentID string) (*models.Payment, error) {
 	query := `SELECT id, user_id, tenant_id, amount, currency, status, payment_type, reference_id, stripe_data, created_at, updated_at
 			  FROM payments WHERE id = ?`
-	
+
 	var payment models.Payment
 	err := s.db.QueryRow(query, paymentID).Scan(
 		&payment.ID, &payment.UserID, &payment.TenantID, &payment.Amount,
 		&payment.Currency, &payment.Status, &payment.PaymentType,
 		&payment.ReferenceID, &payment.StripeData, &payment.CreatedAt, &payment.UpdatedAt,
 	)
-	
+
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &payment, nil
 }
 
@@ -248,7 +299,7 @@ func (s *Service) processClassBooking(userID, classID int) error {
 	// Create booking record
 	query := `INSERT INTO bookings (user_id, class_id, status, created_at, updated_at)
 			  VALUES (?, ?, 'confirmed', datetime('now'), datetime('now'))`
-	
+
 	_, err := s.db.Exec(query, userID, classID)
 	return err
 }
@@ -274,7 +325,27 @@ func (s *Service) processMembershipPayment(userID int, membershipType string) er
 
 	query := fmt.Sprintf(`INSERT INTO memberships (user_id, tenant_id, type, start_date, end_date, active, created_at, updated_at)
 						  VALUES (?, ?, ?, %s, %s, true, datetime('now'), datetime('now'))`, startDate, endDate)
-	
+
 	_, err = s.db.Exec(query, userID, user.TenantID, membershipType)
+	return err
+}
+
+// processKlippekortPayment creates klippekort record after successful payment
+func (s *Service) processKlippekortPayment(userID int, categoryID, klippStr string) error {
+	user, err := s.getUserByID(userID)
+	if err != nil {
+		return err
+	}
+
+	klipp, err := strconv.Atoi(klippStr)
+	if err != nil {
+		return fmt.Errorf("invalid klipp count: %w", err)
+	}
+
+	// Create klippekort record
+	query := `INSERT INTO klippekort (user_id, tenant_id, category_id, klipp_left, original_klipp, created_at, updated_at)
+			  VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
+
+	_, err = s.db.Exec(query, userID, user.TenantID, categoryID, klipp, klipp)
 	return err
 }

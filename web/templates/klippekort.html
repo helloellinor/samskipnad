@@ -1,0 +1,532 @@
+{{define "content"}}
+<style>
+    /* Edgy minimalist klippekort design */
+    .klipp-header {
+        background: linear-gradient(45deg, #000, #1a1a1a);
+        border: 1px solid #333;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .klipp-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        animation: shine 3s infinite;
+    }
+    
+    @keyframes shine {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+    
+    .balance-display {
+        background: #0a0a0a;
+        border: 1px solid #333;
+        border-radius: 4px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .balance-item {
+        padding: 0.5rem;
+        border-bottom: 1px solid #222;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .balance-item:last-child {
+        border-bottom: none;
+    }
+    
+    .category-tabs {
+        display: flex;
+        border-bottom: 1px solid #333;
+        margin-bottom: 2rem;
+        overflow-x: auto;
+    }
+    
+    .category-tab {
+        background: transparent;
+        border: none;
+        color: #666;
+        padding: 1rem 2rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: 'Space Mono', monospace;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+        border-bottom: 2px solid transparent;
+        white-space: nowrap;
+    }
+    
+    .category-tab:hover {
+        color: #fff;
+        background: #111;
+    }
+    
+    .category-tab.active {
+        color: #ff6b35;
+        border-bottom-color: #ff6b35;
+        background: #0a0a0a;
+    }
+    
+    .category-content {
+        min-height: 400px;
+        background: #0a0a0a;
+        border: 1px solid #333;
+        border-radius: 4px;
+    }
+    
+    .package-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .package-card {
+        background: #111;
+        border: 1px solid #333;
+        border-radius: 4px;
+        padding: 1.5rem;
+        transition: all 0.3s;
+        position: relative;
+        cursor: pointer;
+    }
+    
+    .package-card:hover {
+        border-color: #ff6b35;
+        box-shadow: 0 0 20px rgba(255,107,53,0.2);
+        transform: translateY(-2px);
+    }
+    
+    .package-card.best-deal {
+        border-color: #00ff41;
+        background: #001a06;
+    }
+    
+    .package-card.best-deal::before {
+        content: 'BEST';
+        position: absolute;
+        top: -1px;
+        right: -1px;
+        background: #00ff41;
+        color: #000;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.7rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+    
+    .package-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #333;
+    }
+    
+    .package-klipp {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #fff;
+    }
+    
+    .package-price {
+        text-align: right;
+    }
+    
+    .total-price {
+        font-size: 1.5rem;
+        color: #ff6b35;
+        font-weight: bold;
+    }
+    
+    .per-klipp {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .savings {
+        background: #001a06;
+        color: #00ff41;
+        padding: 0.25rem 0.5rem;
+        border-radius: 2px;
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+        display: inline-block;
+    }
+    
+    .purchase-btn {
+        width: 100%;
+        background: transparent;
+        border: 1px solid #ff6b35;
+        color: #ff6b35;
+        padding: 0.75rem;
+        font-family: 'Space Mono', monospace;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-top: 1rem;
+    }
+    
+    .purchase-btn:hover {
+        background: #ff6b35;
+        color: #000;
+    }
+    
+    .purchase-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+    
+    .error-message {
+        background: #1a0606;
+        border: 1px solid #ff073a;
+        color: #ff073a;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 4px;
+    }
+    
+    .success-message {
+        background: #061a06;
+        border: 1px solid #00ff41;
+        color: #00ff41;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 4px;
+    }
+    
+    @media (max-width: 768px) {
+        .category-tabs {
+            flex-wrap: wrap;
+        }
+        
+        .category-tab {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .package-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<!-- HTMX Klippekort Interface -->
+<div class="klipp-header p-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-1 text-white">KLIPPEKORT</h1>
+            <p class="mb-0 text-muted">1 KLIPP = 1 SESSION · NO EXPIRY</p>
+        </div>
+        <div class="text-end">
+            <button class="btn btn-outline-light btn-sm" 
+                    hx-get="/api/klippekort/balance"
+                    hx-target="#balance-display"
+                    hx-indicator="#balance-loading">
+                <span id="balance-loading" class="htmx-indicator">⟳</span>
+                REFRESH BALANCE
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Balance Display -->
+<div id="balance-display" class="balance-display">
+    <div class="text-start">
+        <h6 class="text-muted mb-3">YOUR KLIPP BALANCE</h6>
+        <div class="text-center p-4">
+            <div class="text-muted">
+                <i class="bi bi-ticket-perforated fs-1 d-block mb-2"></i>
+                <p>No klipp purchased yet</p>
+                <small>Purchase your first klipp package below</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Navigation -->
+<div class="category-tabs">
+    {{range $index, $category := .Community.Pricing.Klippekort.Categories}}
+    <button class="category-tab {{if eq $index 0}}active{{end}}"
+            onclick="showCategory('{{$category.ID}}', this)">
+        {{$category.Name}}
+    </button>
+    {{end}}
+</div>
+
+<!-- Category Content -->
+<div id="category-content" class="category-content">
+    {{$firstCategory := index .Community.Pricing.Klippekort.Categories 0}}
+    <div class="p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h5 class="text-white mb-1">{{$firstCategory.Name}}</h5>
+                <small class="text-muted">{{$firstCategory.Description}}</small>
+            </div>
+            <div class="text-end">
+                <span class="text-muted small">Current balance:</span>
+                <div class="h6 text-primary mb-0">0 klipp</div>
+            </div>
+        </div>
+        
+        <div class="package-grid">
+            {{range $index, $package := $firstCategory.Packages}}
+            <div class="package-card {{if $package.Badge}}best-deal{{end}}"
+                 onclick="selectPackage(this, '{{$firstCategory.ID}}', {{$index}})">
+                
+                <div class="package-header">
+                    <div class="package-klipp">{{$package.Klipp}}</div>
+                    <div class="package-price">
+                        <div class="total-price">{{$.Community.FormatPrice $package.Price}}</div>
+                        <div class="per-klipp">{{$.Community.FormatPrice $package.PricePerKlipp}}/klipp</div>
+                    </div>
+                </div>
+                
+                {{if gt $package.SavePercent 0}}
+                <div class="savings">SAVE {{$package.SavePercent}}%</div>
+                {{end}}
+                
+                <button class="purchase-btn"
+                        onclick="showPurchaseForm('{{$firstCategory.ID}}', {{$index}})">
+                    BUY NOW
+                </button>
+            </div>
+            {{end}}
+        </div>
+        
+        {{if $firstCategory.InfoText}}
+        <div class="mt-3 p-3" style="background: #111; border: 1px solid #333; border-radius: 4px;">
+            <small class="text-muted">
+                <i class="bi bi-info-circle me-1"></i>
+                {{$firstCategory.InfoText}}
+            </small>
+        </div>
+        {{end}}
+    </div>
+    
+    <!-- Hidden category content for other categories -->
+    {{range $catIndex, $category := .Community.Pricing.Klippekort.Categories}}
+    {{if gt $catIndex 0}}
+    <div id="category-{{$category.ID}}" class="category-data" style="display: none;">
+        <div class="p-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="text-white mb-1">{{$category.Name}}</h5>
+                    <small class="text-muted">{{$category.Description}}</small>
+                </div>
+                <div class="text-end">
+                    <span class="text-muted small">Current balance:</span>
+                    <div class="h6 text-primary mb-0">0 klipp</div>
+                </div>
+            </div>
+            
+            <div class="package-grid">
+                {{range $index, $package := $category.Packages}}
+                <div class="package-card {{if $package.Badge}}best-deal{{end}}"
+                     onclick="selectPackage(this, '{{$category.ID}}', {{$index}})">
+                    
+                    <div class="package-header">
+                        <div class="package-klipp">{{$package.Klipp}}</div>
+                        <div class="package-price">
+                            <div class="total-price">{{$.Community.FormatPrice $package.Price}}</div>
+                            <div class="per-klipp">{{$.Community.FormatPrice $package.PricePerKlipp}}/klipp</div>
+                        </div>
+                    </div>
+                    
+                    {{if gt $package.SavePercent 0}}
+                    <div class="savings">SAVE {{$package.SavePercent}}%</div>
+                    {{end}}
+                    
+                    <button class="purchase-btn"
+                            onclick="showPurchaseForm('{{$category.ID}}', {{$index}})">
+                        BUY NOW
+                    </button>
+                </div>
+                {{end}}
+            </div>
+            
+            {{if $category.InfoText}}
+            <div class="mt-3 p-3" style="background: #111; border: 1px solid #333; border-radius: 4px;">
+                <small class="text-muted">
+                    <i class="bi bi-info-circle me-1"></i>
+                    {{$category.InfoText}}
+                </small>
+            </div>
+            {{end}}
+        </div>
+    </div>
+    {{end}}
+    {{end}}
+</div>
+
+<!-- Purchase Result -->
+<div id="purchase-result"></div>
+
+<script>
+function setActiveTab(button) {
+    // Remove active class from all tabs
+    document.querySelectorAll('.category-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Add active class to clicked tab
+    button.classList.add('active');
+}
+
+function showCategory(categoryId, button) {
+    // Update active tab
+    setActiveTab(button);
+    
+    // Hide all category data
+    document.querySelectorAll('.category-data').forEach(cat => {
+        cat.style.display = 'none';
+    });
+    
+    // Show selected category or use embedded content for first category
+    if (categoryId === 'personal_training') {
+        // First category is already shown, just return
+        return;
+    }
+    
+    const categoryData = document.getElementById('category-' + categoryId);
+    if (categoryData) {
+        // Hide the default content and show the selected category
+        const defaultContent = document.querySelector('#category-content > .p-3');
+        if (defaultContent) defaultContent.style.display = 'none';
+        
+        categoryData.style.display = 'block';
+        categoryData.style.position = 'relative';
+    }
+    
+    // If returning to first category, show default content
+    if (categoryId === 'personal_training') {
+        const defaultContent = document.querySelector('#category-content > .p-3');
+        if (defaultContent) defaultContent.style.display = 'block';
+        
+        document.querySelectorAll('.category-data').forEach(cat => {
+            cat.style.display = 'none';
+        });
+    }
+}
+
+function selectPackage(card, categoryId, packageIndex) {
+    // Visual feedback
+    document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+}
+
+function showPurchaseForm(categoryId, packageIndex) {
+    const purchaseResult = document.getElementById('purchase-result');
+    if (!purchaseResult) return;
+    
+    // Create a mock purchase form for demonstration
+    purchaseResult.innerHTML = `
+        <div class="mt-4 p-4" style="background: #0a0a0a; border: 1px solid #333; border-radius: 4px;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-white mb-0">PURCHASE CONFIRMATION</h6>
+                <button type="button" class="btn-close btn-close-white" 
+                        onclick="closePurchaseForm()"
+                        aria-label="Close"></button>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="p-3" style="background: #111; border-radius: 4px;">
+                        <h6 class="text-primary mb-2">Selected Package</h6>
+                        <div class="text-white">Package ${packageIndex + 1} from ${categoryId}</div>
+                        <div class="text-muted small mt-2">This is a demonstration of the purchase flow</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3" style="background: #111; border-radius: 4px;">
+                        <h6 class="text-muted mb-2">PAYMENT</h6>
+                        <div class="text-muted text-center">
+                            <i class="bi bi-credit-card fs-4 d-block mb-2"></i>
+                            <small>Secure payment with Stripe</small>
+                            <div class="mt-2 p-2" style="background: #222; border: 1px solid #333; border-radius: 4px;">
+                                Payment form would appear here
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="button" class="btn btn-outline-secondary" onclick="closePurchaseForm()">
+                    CANCEL
+                </button>
+                <button class="btn btn-primary" onclick="simulatePurchase()">
+                    COMPLETE PURCHASE
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Scroll to purchase form
+    purchaseResult.scrollIntoView({ behavior: 'smooth' });
+}
+
+function closePurchaseForm() {
+    const purchaseResult = document.getElementById('purchase-result');
+    if (purchaseResult) {
+        purchaseResult.innerHTML = '';
+    }
+}
+
+function simulatePurchase() {
+    const purchaseResult = document.getElementById('purchase-result');
+    if (purchaseResult) {
+        purchaseResult.innerHTML = `
+            <div class="success-message">
+                <i class="bi bi-check-circle me-2"></i>
+                Purchase successful! Your klipp has been added to your account.
+            </div>
+        `;
+        
+        // Clear after 3 seconds
+        setTimeout(() => {
+            closePurchaseForm();
+        }, 3000);
+    }
+}
+
+// Initialize category switching
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up category switching for embedded content
+    const categoryMap = {
+        'Personlig Trening': 'personal_training',
+        'PT 30 min': 'pt_30min',
+        'Reformer / Apparater': 'reformer',
+        'Spesialtimer': 'special'
+    };
+    
+    document.querySelectorAll('.category-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            const categoryName = this.textContent.trim();
+            const categoryId = categoryMap[categoryName];
+            if (categoryId) {
+                showCategory(categoryId, this);
+            }
+        });
+    });
+});
+</script>
+{{end}}

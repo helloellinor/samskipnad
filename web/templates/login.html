@@ -1,33 +1,53 @@
 {{define "content"}}
 <div class="row justify-content-center">
     <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title mb-0">Login</h3>
+        <div class="cyber-card">
+            <div class="text-center mb-4">
+                <h3 style="color: var(--neon-green); text-transform: uppercase; letter-spacing: 2px; font-family: 'Space Mono', monospace;">
+                    [ SYSTEM ACCESS ]
+                </h3>
+                <p style="color: var(--secondary-color); font-family: 'Space Mono', monospace;">
+                    Enter credentials to proceed
+                </p>
             </div>
-            <div class="card-body">
-                {{if .Error}}
-                <div class="alert alert-danger">{{.Error}}</div>
-                {{end}}
-                
-                <form method="POST" action="/login">
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" 
-                               value="{{.Email}}" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary w-100">Login</button>
-                </form>
-                
-                <div class="text-center mt-3">
-                    <p>Don't have an account? <a href="/register">Register here</a></p>
+            
+            {{if .Error}}
+            <div class="alert alert-danger mb-4">
+                <strong>ACCESS DENIED:</strong> {{.Error}}
+            </div>
+            {{end}}
+            
+            <form method="POST" action="/login" hx-post="/login" hx-target="main" hx-push-url="true">
+                <div class="mb-3">
+                    <label for="email" class="form-label">
+                        <span style="color: var(--neon-orange);">&gt;</span> EMAIL ADDRESS
+                    </label>
+                    <input type="email" class="form-control" id="email" name="email" 
+                           value="{{.Email}}" required placeholder="user@domain.com">
                 </div>
+                
+                <div class="mb-4">
+                    <label for="password" class="form-label">
+                        <span style="color: var(--neon-orange);">&gt;</span> PASSWORD
+                    </label>
+                    <input type="password" class="form-control" id="password" name="password" 
+                           required placeholder="••••••••">
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 mb-4">
+                    <span style="margin-right: 0.5rem;">&gt;</span> INITIALIZE SESSION
+                </button>
+            </form>
+            
+            <div class="text-center">
+                <p style="color: var(--secondary-color); font-family: 'Space Mono', monospace;">
+                    NO ACCOUNT? 
+                    <a href="/register" class="text-decoration-none" 
+                       style="color: var(--neon-green);"
+                       hx-get="/register" hx-target="main" hx-push-url="true">
+                        [ REGISTER NEW USER ]
+                    </a>
+                </p>
             </div>
         </div>
     </div>

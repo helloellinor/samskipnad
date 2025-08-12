@@ -1,29 +1,52 @@
 {{template "base" .}}
 
 {{define "content"}}
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <div class="hero-section text-center py-5">
-            <h1 class="display-4 mb-4">{{.Community.Content.Home.Title}}</h1>
-            {{if .Community.Content.Home.Subtitle}}
-            <h2 class="h4 mb-3 text-muted">{{.Community.Content.Home.Subtitle}}</h2>
-            {{end}}
-            <p class="lead mb-4">{{.Community.Content.Home.Description}}</p>
-            
-            <div class="row text-center mt-5">
-                {{range $index, $feature := .Community.Content.Features}}
-                <div class="col-md-4">
-                    <div class="feature-box p-4">
-                        <h3>{{$feature.Title}}</h3>
-                        <p>{{$feature.Description}}</p>
-                    </div>
-                </div>
-                {{end}}
+<div class="cyber-hero">
+    <div class="hero-content">
+        <h1>{{.Community.Content.Home.Title}}</h1>
+        {{if .Community.Content.Home.Subtitle}}
+        <h2 class="h4 mb-3" style="color: var(--neon-orange); text-transform: uppercase; letter-spacing: 2px;">{{.Community.Content.Home.Subtitle}}</h2>
+        {{end}}
+        <p class="lead mb-4">{{.Community.Content.Home.Description}}</p>
+        
+        <div class="cta-section">
+            <a href="/register" class="btn btn-primary btn-lg me-3" 
+               hx-get="/register" hx-target="main" hx-push-url="true">
+                <span style="margin-right: 0.5rem;">&gt;</span> INITIALIZE ACCOUNT
+            </a>
+            <a href="/login" class="btn btn-outline-secondary btn-lg"
+               hx-get="/login" hx-target="main" hx-push-url="true">
+                <span style="margin-right: 0.5rem;">&gt;</span> ACCESS SYSTEM
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row text-center">
+    {{range $index, $feature := .Community.Content.Features}}
+    <div class="col-md-4 mb-4">
+        <div class="cyber-feature">
+            <h3>{{$feature.Title}}</h3>
+            <p>{{$feature.Description}}</p>
+            <div class="feature-indicator">
+                <span style="color: var(--neon-green); font-weight: bold;">[ ACTIVE ]</span>
             </div>
-            <div class="cta-section mt-5">
-                <a href="/register" class="btn btn-primary btn-lg me-3">Get Started</a>
-                <a href="/login" class="btn btn-outline-secondary btn-lg">Login</a>
-            </div>
+        </div>
+    </div>
+    {{end}}
+</div>
+
+<div class="cyber-card mt-5">
+    <div class="text-center">
+        <h3 style="color: var(--neon-green); text-transform: uppercase; letter-spacing: 2px;">
+            SYSTEM STATUS
+        </h3>
+        <p style="font-family: 'Space Mono', monospace; color: var(--light-color);">
+            All systems operational. Ready for user registration and engagement.
+        </p>
+        <div class="status-indicators mt-3">
+            <span class="status-dot" style="background: var(--neon-green); width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin: 0 5px;"></span>
+            <span style="color: var(--neon-green); font-family: 'Space Mono', monospace;">ONLINE</span>
         </div>
     </div>
 </div>

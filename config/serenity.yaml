@@ -56,6 +56,103 @@ pricing:
   monthly: 89
   yearly: 890
   drop_in: 22
+  
+  # Klippekort system configuration
+  klippekort:
+    categories:
+      - id: "hatha_vinyasa"
+        name: "Hatha & Vinyasa"
+        description: "Traditional yoga classes focusing on breath and movement"
+        icon: "heart"
+        color: "#8B4513"
+        info_text: "No expiration date on class credits. Can be used for all classes in this category."
+        packages:
+          - name: "1 class"
+            klipp: 1
+            price: 22
+            price_per_klipp: 22
+            save_percent: 0
+          - name: "5 classes"
+            klipp: 5
+            price: 105
+            price_per_klipp: 21
+            save_percent: 5
+          - name: "10 classes"
+            klipp: 10
+            price: 198
+            price_per_klipp: 20
+            save_percent: 9
+            badge: "Best Value"
+            
+      - id: "yin_restorative"
+        name: "Yin & Restorative"
+        description: "Gentle, slow-paced yoga for deep relaxation"
+        icon: "moon"
+        color: "#CD853F"
+        info_text: "Perfect for stress relief and flexibility."
+        packages:
+          - name: "1 class"
+            klipp: 1
+            price: 25
+            price_per_klipp: 25
+            save_percent: 0
+          - name: "5 classes"
+            klipp: 5
+            price: 119
+            price_per_klipp: 24
+            save_percent: 4
+          - name: "10 classes"
+            klipp: 10
+            price: 225
+            price_per_klipp: 23
+            save_percent: 8
+            
+      - id: "hot_yoga"
+        name: "Hot Yoga"
+        description: "Heated yoga classes for deeper stretches and detox"
+        icon: "thermometer-sun"
+        color: "#DAA520"
+        info_text: "Heated to 95°F. Bring water and a towel."
+        packages:
+          - name: "1 class"
+            klipp: 1
+            price: 28
+            price_per_klipp: 28
+            save_percent: 0
+          - name: "5 classes"
+            klipp: 5
+            price: 133
+            price_per_klipp: 27
+            save_percent: 4
+          - name: "10 classes"
+            klipp: 10
+            price: 252
+            price_per_klipp: 25
+            save_percent: 11
+            badge: "Popular"
+            
+      - id: "workshops"
+        name: "Workshops & Special Events"
+        description: "Extended sessions, workshops, and special offerings"
+        icon: "calendar-event"
+        color: "#228B22"
+        info_text: "Includes all workshops and special events."
+        packages:
+          - name: "1 session"
+            klipp: 1
+            price: 45
+            price_per_klipp: 45
+            save_percent: 0
+          - name: "3 sessions"
+            klipp: 3
+            price: 128
+            price_per_klipp: 43
+            save_percent: 4
+          - name: "5 sessions"
+            klipp: 5
+            price: 203
+            price_per_klipp: 41
+            save_percent: 9
 
 # Locale
 locale:

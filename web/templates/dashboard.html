@@ -1,81 +1,166 @@
 {{define "content"}}
-<div class="row">
-    <div class="col-12">
-        <h2>Welcome back, {{.User.FirstName}}!</h2>
-        <p class="text-muted">Here's your dashboard overview</p>
+<div class="cyber-hero" style="padding: 2rem;">
+    <div class="hero-content">
+        <h1 style="font-size: 2rem;">WELCOME BACK, {{.User.FirstName | upper}}!</h1>
+        <p style="color: var(--secondary-color); margin-bottom: 0;">System dashboard initialized</p>
     </div>
 </div>
 
 <div class="row mt-4">
-    <!-- Profile Card -->
+    <!-- User Profile Card -->
     <div class="col-md-4">
-        <div class="profile-card card p-4 fade-in-up">
-            <div class="profile-avatar">
-                {{substr .User.FirstName 0 1}}{{substr .User.LastName 0 1}}
-            </div>
-            <div class="profile-info text-center">
-                <h4>{{.User.FirstName}} {{.User.LastName}}</h4>
-                <span class="profile-role">{{.User.Role}}</span>
-                <p class="text-muted">Member since {{.User.CreatedAt.Format "Jan 2006"}}</p>
-            </div>
-            <div class="profile-stats">
-                <div class="profile-stat">
-                    <span class="profile-stat-value">{{len .UserBookings}}</span>
-                    <span class="profile-stat-label">Bookings</span>
+        <div class="cyber-card">
+            <div class="text-center mb-3">
+                <div style="
+                    width: 80px; 
+                    height: 80px; 
+                    border-radius: 50%; 
+                    background: linear-gradient(45deg, var(--neon-green), var(--neon-orange)); 
+                    color: var(--dark-color); 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    font-size: 1.5rem; 
+                    font-weight: bold; 
+                    margin: 0 auto 1rem;
+                    font-family: 'Space Mono', monospace;
+                ">
+                    {{substr .User.FirstName 0 1}}{{substr .User.LastName 0 1}}
                 </div>
-                <div class="profile-stat">
-                    <span class="profile-stat-value">{{if .UserMembership}}1{{else}}0{{end}}</span>
-                    <span class="profile-stat-label">Membership</span>
+                <h4 style="color: var(--white); font-family: 'Space Mono', monospace; text-transform: uppercase;">
+                    {{.User.FirstName}} {{.User.LastName}}
+                </h4>
+                <span style="
+                    background: var(--neon-orange); 
+                    color: var(--dark-color); 
+                    padding: 0.25rem 0.5rem; 
+                    font-family: 'Space Mono', monospace; 
+                    font-size: 0.75rem; 
+                    font-weight: bold; 
+                    text-transform: uppercase;
+                ">
+                    {{.User.Role}}
+                </span>
+                <p style="color: var(--secondary-color); font-family: 'Space Mono', monospace; margin-top: 1rem;">
+                    Member since {{.User.CreatedAt.Format "Jan 2006"}}
+                </p>
+            </div>
+            
+            <div class="user-stats" style="border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div style="color: var(--neon-green); font-family: 'Space Mono', monospace; font-size: 1.5rem; font-weight: bold;">
+                            {{len .UserBookings}}
+                        </div>
+                        <div style="color: var(--secondary-color); font-size: 0.8rem; text-transform: uppercase;">
+                            BOOKINGS
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div style="color: var(--neon-orange); font-family: 'Space Mono', monospace; font-size: 1.5rem; font-weight: bold;">
+                            {{if .UserMembership}}1{{else}}0{{end}}
+                        </div>
+                        <div style="color: var(--secondary-color); font-size: 0.8rem; text-transform: uppercase;">
+                            MEMBERSHIP
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="mt-3 d-grid">
-                <a href="/profile" class="btn btn-outline-primary">Edit Profile</a>
+            
+            <div class="mt-3">
+                <a href="/profile" class="btn btn-outline-primary w-100"
+                   hx-get="/profile" hx-target="main" hx-push-url="true">
+                    <span style="margin-right: 0.5rem;">&gt;</span> EDIT PROFILE
+                </a>
             </div>
         </div>
     </div>
     
     <!-- Upcoming Classes -->
     <div class="col-md-8">
-        <div class="card slide-in-left">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Upcoming Classes</h5>
+        <div class="cyber-card">
+            <div class="mb-3">
+                <h5 style="color: var(--neon-green); font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 1px;">
+                    [ UPCOMING CLASSES ]
+                </h5>
             </div>
-            <div class="card-body">
-                {{if .UpcomingClasses}}
-                <div class="list-group list-group-flush">
-                    {{range .UpcomingClasses}}
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
+            
+            {{if .UpcomingClasses}}
+            <div class="classes-list">
+                {{range .UpcomingClasses}}
+                <div style="
+                    background: var(--light-dark); 
+                    border-left: 3px solid var(--neon-orange); 
+                    padding: 1rem; 
+                    margin-bottom: 1rem; 
+                    transition: all 0.3s ease;
+                " 
+                onmouseover="this.style.borderLeftColor='var(--neon-green)'; this.style.transform='translateX(5px)'"
+                onmouseout="this.style.borderLeftColor='var(--neon-orange)'; this.style.transform='translateX(0)'">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="mb-1">{{.Name}}</h6>
-                            <p class="mb-1 text-muted">{{.StartTime.Format "Mon, Jan 2 at 3:04 PM"}}</p>
-                            <small class="text-muted">{{.Description}}</small>
+                            <h6 style="color: var(--white); font-family: 'Space Mono', monospace; margin-bottom: 0.5rem;">
+                                {{.Name}}
+                            </h6>
+                            <p style="color: var(--secondary-color); font-family: 'Space Mono', monospace; margin: 0; font-size: 0.9rem;">
+                                {{.StartTime.Format "Mon, Jan 2 at 3:04 PM"}}
+                            </p>
                         </div>
-                        <div>
-                            {{if gt .Price 0}}
-                            {{if and $.Community $.Community.Pricing.Currency}}
-                            <span class="badge bg-primary">{{printf "%.0f %s" (divf (float64 .Price) 100.0) $.Community.Pricing.Currency}}</span>
-                            {{else}}
-                            <span class="badge bg-primary">${{printf "%.2f" (divf (float64 .Price) 100.0)}}</span>
-                            {{end}}
-                            {{else}}
-                            <span class="badge bg-success">Free</span>
-                            {{end}}
-                            <button class="btn btn-sm btn-outline-primary ms-2" 
-                                    hx-post="/classes/{{.ID}}/book" 
-                                    hx-target="#booking-result"
-                                    hx-swap="innerHTML">
-                                Book
-                            </button>
+                        <div style="color: var(--neon-green); font-family: 'Space Mono', monospace; font-weight: bold;">
+                            [ BOOKED ]
                         </div>
                     </div>
-                    {{end}}
-                </div>
-                {{else}}
-                <div class="text-center py-5">
-                    <h6 class="text-muted">No upcoming classes available</h6>
-                    <p class="text-muted">Check back soon for new classes!</p>
                 </div>
                 {{end}}
+            </div>
+            {{else}}
+            <div class="text-center" style="padding: 2rem;">
+                <p style="color: var(--secondary-color); font-family: 'Space Mono', monospace;">
+                    NO UPCOMING CLASSES SCHEDULED
+                </p>
+                <a href="/classes" class="btn btn-primary"
+                   hx-get="/classes" hx-target="main" hx-push-url="true">
+                    <span style="margin-right: 0.5rem;">&gt;</span> BROWSE CLASSES
+                </a>
+            </div>
+            {{end}}
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions Row -->
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="cyber-feature">
+            <h3 style="color: var(--neon-green);">KLIPPEKORT</h3>
+            <p>Purchase and manage class packages</p>
+            <a href="/klippekort" class="btn btn-outline-primary"
+               hx-get="/klippekort" hx-target="main" hx-push-url="true">
+                ACCESS SYSTEM
+            </a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="cyber-feature">
+            <h3 style="color: var(--neon-orange);">CLASSES</h3>
+            <p>View and book available classes</p>
+            <a href="/classes" class="btn btn-outline-primary"
+               hx-get="/classes" hx-target="main" hx-push-url="true">
+                VIEW SCHEDULE
+            </a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="cyber-feature">
+            <h3 style="color: var(--neon-red);">MEMBERSHIPS</h3>
+            <p>Manage membership subscriptions</p>
+            <a href="/memberships" class="btn btn-outline-primary"
+               hx-get="/memberships" hx-target="main" hx-push-url="true">
+                MANAGE ACCESS
+            </a>
+        </div>
+    </div>
+</div>
                 
                 <div id="booking-result" class="mt-3"></div>
                 

@@ -26,8 +26,8 @@ type Handlers struct {
 }
 
 func New(db *sql.DB, authService *auth.Service, paymentService *payments.Service) *Handlers {
-	// Only parse standalone templates initially
-	templates := template.Must(template.New("").Funcs(getFuncMap()).ParseGlob("web/templates/*-standalone.html"))
+	// Parse all templates
+	templates := template.Must(template.New("").Funcs(getFuncMap()).ParseGlob("web/templates/*.html"))
 
 	return &Handlers{
 		db:             db,
@@ -73,6 +73,32 @@ func getFuncMap() template.FuncMap {
 		"subtract": func(a, b int) int {
 			return a - b
 		},
+		"div": func(a, b int) int {
+			if b != 0 {
+				return a / b
+			}
+			return 0
+		},
+		"mul": func(a, b int) int {
+			return a * b
+		},
+		"sub": func(a, b int) int {
+			return a - b
+		},
+		"len": func(slice interface{}) int {
+			switch v := slice.(type) {
+			case []interface{}:
+				return len(v)
+			default:
+				return 0
+			}
+		},
+		"sub1": func(i int) int {
+			return i - 1
+		},
+		"upper": func(s string) string {
+			return strings.ToUpper(s)
+		},
 	}
 }
 
@@ -93,7 +119,7 @@ func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) Login(w http.ResponseWriter, r *http.Request) {
 	community := config.GetCurrent()
-	
+
 	if r.Method == "GET" {
 		data := map[string]interface{}{
 			"Title":     "Login",
@@ -285,7 +311,7 @@ func (h *Handlers) BookClass(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Failed to book class", http.StatusInternalServerError)
 			return
 		}
-		
+
 		w.Header().Set("Content-Type", "text/html")
 		w.Header().Set("HX-Trigger", "booking-updated")
 		w.Write([]byte(`<div class="booking-success">Successfully booked ` + class.Name + `!</div>`))
@@ -419,6 +445,86 @@ func (h *Handlers) Memberships(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.renderTemplate(w, "memberships.html", data)
+}
+
+func (h *Handlers) Klippekort(w http.ResponseWriter, r *http.Request) {
+	user := middleware.GetUserFromContext(r.Context())
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	community := config.GetCurrent()
+	data := map[string]interface{}{
+		"Title":     "Klippekort",
+		"User":      user,
+		"Community": community,
+	}
+
+	h.renderTemplate(w, "klippekort.html", data)
+}
+
+func (h *Handlers) KlippekortPurchase(w http.ResponseWriter, r *http.Request) {
+	user := middleware.GetUserFromContext(r.Context())
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	categoryID := r.FormValue("category_id")
+	packageIndex, err := strconv.Atoi(r.FormValue("package_index"))
+	if err != nil {
+		http.Error(w, "Invalid package index", http.StatusBadRequest)
+		return
+	}
+
+	community := config.GetCurrent()
+
+	// Find the category and package
+	var selectedCategory *config.KlippekortCategory
+	var selectedPackage *config.CardPackage
+
+	for _, category := range community.Pricing.Klippekort.Categories {
+		if category.ID == categoryID {
+			selectedCategory = &category
+			if packageIndex >= 0 && packageIndex < len(category.Packages) {
+				selectedPackage = &category.Packages[packageIndex]
+			}
+			break
+		}
+	}
+
+	if selectedCategory == nil || selectedPackage == nil {
+		http.Error(w, "Invalid category or package", http.StatusBadRequest)
+		return
+	}
+
+	// Create payment intent for klippekort purchase
+	paymentIntent, err := h.paymentService.CreateKlippekortPaymentIntent(
+		user.ID,
+		categoryID,
+		selectedPackage.Klipp,
+		int64(selectedPackage.Price),
+	)
+	if err != nil {
+		http.Error(w, "Failed to create payment", http.StatusInternalServerError)
+		return
+	}
+
+	// Return payment form
+	data := map[string]interface{}{
+		"PaymentIntent": paymentIntent,
+		"Package":       selectedPackage,
+		"Category":      selectedCategory,
+		"Community":     community,
+	}
+
+	h.renderTemplate(w, "klippekort-payment.html", data)
 }
 
 func (h *Handlers) Profile(w http.ResponseWriter, r *http.Request) {
@@ -567,16 +673,16 @@ func (h *Handlers) Calendar(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	yearStr := r.URL.Query().Get("year")
 	monthStr := r.URL.Query().Get("month")
-	
+
 	year := now.Year()
 	month := now.Month()
-	
+
 	if yearStr != "" {
 		if y, err := strconv.Atoi(yearStr); err == nil {
 			year = y
 		}
 	}
-	
+
 	if monthStr != "" {
 		if m, err := strconv.Atoi(monthStr); err == nil && m >= 1 && m <= 12 {
 			month = time.Month(m)
@@ -586,7 +692,7 @@ func (h *Handlers) Calendar(w http.ResponseWriter, r *http.Request) {
 	// Get classes for the month
 	startOfMonth := time.Date(year, month, 1, 0, 0, 0, 0, time.UTC)
 	endOfMonth := startOfMonth.AddDate(0, 1, -1)
-	
+
 	classes, err := h.getClassesForDateRange(user.TenantID, startOfMonth, endOfMonth)
 	if err != nil {
 		http.Error(w, "Failed to get classes", http.StatusInternalServerError)
@@ -616,37 +722,37 @@ func (h *Handlers) Calendar(w http.ResponseWriter, r *http.Request) {
 }
 
 type CalendarData struct {
-	Year     int
-	Month    time.Month
-	Days     []CalendarDay
-	Classes  []models.Class
+	Year    int
+	Month   time.Month
+	Days    []CalendarDay
+	Classes []models.Class
 }
 
 type CalendarDay struct {
-	Day        int
-	Date       time.Time
-	IsToday    bool
+	Day          int
+	Date         time.Time
+	IsToday      bool
 	IsOtherMonth bool
-	Classes    []models.Class
+	Classes      []models.Class
 }
 
 func (h *Handlers) buildCalendarData(year int, month time.Month, classes []models.Class) CalendarData {
 	firstDay := time.Date(year, month, 1, 0, 0, 0, 0, time.UTC)
 	lastDay := firstDay.AddDate(0, 1, -1)
 	today := time.Now()
-	
+
 	// Start from Monday of the week containing the first day
 	startDate := firstDay
 	for startDate.Weekday() != time.Monday {
 		startDate = startDate.AddDate(0, 0, -1)
 	}
-	
+
 	// End on Sunday of the week containing the last day
 	endDate := lastDay
 	for endDate.Weekday() != time.Sunday {
 		endDate = endDate.AddDate(0, 0, 1)
 	}
-	
+
 	var days []CalendarDay
 	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
 		var dayClasses []models.Class
@@ -655,7 +761,7 @@ func (h *Handlers) buildCalendarData(year int, month time.Month, classes []model
 				dayClasses = append(dayClasses, class)
 			}
 		}
-		
+
 		days = append(days, CalendarDay{
 			Day:          d.Day(),
 			Date:         d,
@@ -664,7 +770,7 @@ func (h *Handlers) buildCalendarData(year int, month time.Month, classes []model
 			Classes:      dayClasses,
 		})
 	}
-	
+
 	return CalendarData{
 		Year:    year,
 		Month:   month,
@@ -687,8 +793,8 @@ func (h *Handlers) getClassesForDateRange(tenantID int, start, end time.Time) ([
 	var classes []models.Class
 	for rows.Next() {
 		var class models.Class
-		err := rows.Scan(&class.ID, &class.Name, &class.Description, 
-			&class.InstructorID, &class.StartTime, &class.EndTime, 
+		err := rows.Scan(&class.ID, &class.Name, &class.Description,
+			&class.InstructorID, &class.StartTime, &class.EndTime,
 			&class.MaxCapacity, &class.Price)
 		if err != nil {
 			return nil, err
@@ -708,7 +814,7 @@ func (h *Handlers) CalendarDayDetails(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	dateStr := vars["date"]
-	
+
 	date, err := time.Parse("2006-01-02", dateStr)
 	if err != nil {
 		http.Error(w, "Invalid date format", http.StatusBadRequest)
@@ -718,7 +824,7 @@ func (h *Handlers) CalendarDayDetails(w http.ResponseWriter, r *http.Request) {
 	// Get classes for the specific day
 	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
 	endOfDay := startOfDay.Add(24 * time.Hour)
-	
+
 	classes, err := h.getClassesForDateRange(user.TenantID, startOfDay, endOfDay)
 	if err != nil {
 		http.Error(w, "Failed to get classes", http.StatusInternalServerError)
@@ -854,7 +960,7 @@ func (h *Handlers) CreateClassPayment(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Failed to book class", http.StatusInternalServerError)
 			return
 		}
-		
+
 		w.Header().Set("Content-Type", "text/html")
 		w.Write([]byte(`<div class="booking-success">Class booked successfully!</div>`))
 		return
@@ -1026,24 +1132,24 @@ func (h *Handlers) MembershipPayment(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) getClassByID(classID int) (*models.Class, error) {
 	query := `SELECT id, name, description, instructor_id, start_time, end_time, max_capacity, price, tenant_id
 			  FROM classes WHERE id = ? AND active = true`
-	
+
 	var class models.Class
 	err := h.db.QueryRow(query, classID).Scan(
 		&class.ID, &class.Name, &class.Description, &class.InstructorID,
 		&class.StartTime, &class.EndTime, &class.MaxCapacity, &class.Price, &class.TenantID,
 	)
-	
+
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &class, nil
 }
 
 func (h *Handlers) bookClassDirectly(userID, classID int) error {
 	query := `INSERT INTO bookings (user_id, class_id, status, created_at, updated_at)
 			  VALUES (?, ?, 'confirmed', datetime('now'), datetime('now'))`
-	
+
 	_, err := h.db.Exec(query, userID, classID)
 	return err
 }
@@ -1159,9 +1265,9 @@ func (h *Handlers) getUserBookings(userID int) ([]models.Booking, error) {
 // DynamicCSS generates CSS based on community configuration
 func (h *Handlers) DynamicCSS(w http.ResponseWriter, r *http.Request) {
 	community := config.GetCurrent()
-	
+
 	w.Header().Set("Content-Type", "text/css")
-	
+
 	css := fmt.Sprintf(`/* Dynamic CSS for %s */
 
 /* CSS Variables from Community Config */
@@ -1506,6 +1612,186 @@ body {
 		community.Fonts.Secondary,
 		community.Fonts.SizeBase,
 	)
-	
+
 	fmt.Fprint(w, css)
+}
+
+// HTMX endpoints for klippekort system
+
+func (h *Handlers) KlippekortBalance(w http.ResponseWriter, r *http.Request) {
+	user := middleware.GetUserFromContext(r.Context())
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Get user's klipp balances by category
+	balances, err := h.getUserKlippBalances(user.ID)
+	if err != nil {
+		http.Error(w, "Failed to get balances", http.StatusInternalServerError)
+		return
+	}
+
+	community := config.GetCurrent()
+	data := map[string]interface{}{
+		"Balances":  balances,
+		"Community": community,
+	}
+
+	h.renderTemplate(w, "klippekort-balance", data)
+}
+
+func (h *Handlers) KlippekortCategory(w http.ResponseWriter, r *http.Request) {
+	categoryID := r.URL.Query().Get("category")
+	if categoryID == "" {
+		http.Error(w, "Category required", http.StatusBadRequest)
+		return
+	}
+
+	user := middleware.GetUserFromContext(r.Context())
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	community := config.GetCurrent()
+
+	// Find the specific category
+	var selectedCategory *config.KlippekortCategory
+	for _, category := range community.Pricing.Klippekort.Categories {
+		if category.ID == categoryID {
+			selectedCategory = &category
+			break
+		}
+	}
+
+	if selectedCategory == nil {
+		http.Error(w, "Category not found", http.StatusNotFound)
+		return
+	}
+
+	// Get user's balance for this category
+	balance, err := h.getUserKlippBalance(user.ID, categoryID)
+	if err != nil {
+		balance = 0 // Default to 0 if error
+	}
+
+	data := map[string]interface{}{
+		"Category":  selectedCategory,
+		"Balance":   balance,
+		"Community": community,
+	}
+
+	h.renderTemplate(w, "klippekort-category", data)
+}
+
+func (h *Handlers) KlippekortPurchaseInstant(w http.ResponseWriter, r *http.Request) {
+	user := middleware.GetUserFromContext(r.Context())
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	categoryID := r.FormValue("category_id")
+	packageIndex, err := strconv.Atoi(r.FormValue("package_index"))
+	if err != nil {
+		http.Error(w, "Invalid package index", http.StatusBadRequest)
+		return
+	}
+
+	community := config.GetCurrent()
+
+	// Find the category and package
+	var selectedCategory *config.KlippekortCategory
+	var selectedPackage *config.CardPackage
+
+	for _, category := range community.Pricing.Klippekort.Categories {
+		if category.ID == categoryID {
+			selectedCategory = &category
+			if packageIndex >= 0 && packageIndex < len(category.Packages) {
+				selectedPackage = &category.Packages[packageIndex]
+			}
+			break
+		}
+	}
+
+	if selectedCategory == nil || selectedPackage == nil {
+		http.Error(w, "Invalid category or package", http.StatusBadRequest)
+		return
+	}
+
+	// Create payment intent
+	paymentIntent, err := h.paymentService.CreateKlippekortPaymentIntent(
+		user.ID,
+		categoryID,
+		selectedPackage.Klipp,
+		int64(selectedPackage.Price),
+	)
+	if err != nil {
+		http.Error(w, "Failed to create payment", http.StatusInternalServerError)
+		return
+	}
+
+	// Return inline payment form
+	data := map[string]interface{}{
+		"PaymentIntent": paymentIntent,
+		"Package":       selectedPackage,
+		"Category":      selectedCategory,
+		"Community":     community,
+	}
+
+	h.renderTemplate(w, "klippekort-purchase-form", data)
+}
+
+// Helper functions
+
+func (h *Handlers) getUserKlippBalances(userID int) (map[string]int, error) {
+	query := `
+		SELECT category_id, SUM(klipp_left) as total_klipp 
+		FROM klippekort 
+		WHERE user_id = ? AND klipp_left > 0 
+		GROUP BY category_id
+	`
+
+	rows, err := h.db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	balances := make(map[string]int)
+	for rows.Next() {
+		var categoryID string
+		var totalKlipp int
+		if err := rows.Scan(&categoryID, &totalKlipp); err != nil {
+			return nil, err
+		}
+		balances[categoryID] = totalKlipp
+	}
+
+	return balances, nil
+}
+
+func (h *Handlers) getUserKlippBalance(userID int, categoryID string) (int, error) {
+	query := `
+		SELECT SUM(klipp_left) as total_klipp 
+		FROM klippekort 
+		WHERE user_id = ? AND category_id = ? AND klipp_left > 0
+	`
+
+	var totalKlipp sql.NullInt64
+	err := h.db.QueryRow(query, userID, categoryID).Scan(&totalKlipp)
+	if err != nil {
+		return 0, err
+	}
+
+	if totalKlipp.Valid {
+		return int(totalKlipp.Int64), nil
+	}
+	return 0, nil
 }

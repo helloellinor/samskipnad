@@ -41,6 +41,7 @@ func runMigrations(db *sql.DB) error {
 		createBookingsTable,
 		createMembershipsTable,
 		createTicketsTable,
+		createKlippekortTable,
 		createPaymentsTable,
 		createRolesTable,
 		insertDefaultData,
@@ -149,6 +150,22 @@ CREATE TABLE IF NOT EXISTS tickets (
 	FOREIGN KEY (tenant_id) REFERENCES tenants(id)
 );`
 
+const createKlippekortTable = `
+CREATE TABLE IF NOT EXISTS klippekort (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	user_id INTEGER NOT NULL,
+	tenant_id INTEGER NOT NULL,
+	category_id TEXT NOT NULL,
+	klipp_left INTEGER NOT NULL,
+	original_klipp INTEGER NOT NULL,
+	expiry_date DATETIME,
+	payment_id TEXT,
+	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (user_id) REFERENCES users(id),
+	FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+);`
+
 const createPaymentsTable = `
 CREATE TABLE IF NOT EXISTS payments (
 	id TEXT PRIMARY KEY,
@@ -157,7 +174,7 @@ CREATE TABLE IF NOT EXISTS payments (
 	amount INTEGER NOT NULL,
 	currency TEXT DEFAULT 'usd',
 	status TEXT NOT NULL,
-	payment_type TEXT NOT NULL CHECK (payment_type IN ('class', 'membership', 'ticket')),
+	payment_type TEXT NOT NULL CHECK (payment_type IN ('class', 'membership', 'ticket', 'klippekort')),
 	reference_id INTEGER NOT NULL,
 	stripe_data TEXT,
 	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
