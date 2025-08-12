@@ -145,28 +145,12 @@ func (h *Handlers) Dashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get upcoming classes
-	upcomingClasses, err := h.getUpcomingClasses(user.TenantID)
-	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	// Get user's bookings
-	userBookings, err := h.getUserBookings(user.ID)
-	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
 	data := map[string]interface{}{
-		"Title":           "Dashboard",
-		"User":            user,
-		"UpcomingClasses": upcomingClasses,
-		"UserBookings":    userBookings,
+		"Title": "Dashboard",
+		"User":  user,
 	}
 
-	h.renderTemplate(w, "dashboard.html", data)
+	h.renderTemplate(w, "dashboard-standalone.html", data)
 }
 
 func (h *Handlers) Classes(w http.ResponseWriter, r *http.Request) {
@@ -319,7 +303,7 @@ func (h *Handlers) AdminDashboard(w http.ResponseWriter, r *http.Request) {
 		"User":  user,
 	}
 
-	h.renderTemplate(w, "admin-dashboard.html", data)
+	h.renderTemplate(w, "admin-dashboard-standalone.html", data)
 }
 
 func (h *Handlers) AdminClasses(w http.ResponseWriter, r *http.Request) {
