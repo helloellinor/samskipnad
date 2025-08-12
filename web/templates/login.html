@@ -1,19 +1,16 @@
 {{define "content"}}
 <div class="row justify-content-center">
     <div class="col-md-6">
-        <div class="cyber-card">
-            <div class="text-center mb-4">
-                <h1 style="color: var(--neon-green); text-transform: uppercase; letter-spacing: 2px; font-family: 'Space Mono', monospace;">
-                    [ SYSTEM ACCESS ]
-                </h1>
-                <p style="color: var(--secondary-color); font-family: 'Space Mono', monospace;">
-                    Enter credentials to proceed
-                </p>
+        <div class="card">
+            <div class="card-header text-center">
+                <h1>Login</h1>
+                <p>Enter credentials to proceed</p>
             </div>
+            <div class="card-body">
             
             {{if .Error}}
             <div class="alert alert-danger mb-4" role="alert" aria-live="assertive">
-                <strong>ACCESS DENIED:</strong> {{.Error}}
+                <strong>Error:</strong> {{.Error}}
             </div>
             {{end}}
             
@@ -21,7 +18,7 @@
                   aria-labelledby="login-heading" novalidate>
                 <div class="mb-3">
                     <label for="email" class="form-label" id="email-label">
-                        <span style="color: var(--neon-orange);" aria-hidden="true">&gt;</span> EMAIL ADDRESS
+                        Email Address
                     </label>
                     <input type="email" class="form-control" id="email" name="email" 
                            value="{{.Email}}" required autocomplete="email"
@@ -36,7 +33,7 @@
                 
                 <div class="mb-4">
                     <label for="password" class="form-label" id="password-label">
-                        <span style="color: var(--neon-orange);" aria-hidden="true">&gt;</span> PASSWORD
+                        Password
                     </label>
                     <input type="password" class="form-control" id="password" name="password" 
                            required autocomplete="current-password"
@@ -51,7 +48,7 @@
                 
                 <button type="submit" class="btn btn-primary w-100 mb-4" 
                         aria-describedby="submit-help">
-                    <span style="margin-right: 0.5rem;" aria-hidden="true">&gt;</span> INITIALIZE SESSION
+                    Login
                 </button>
                 <div id="submit-help" class="sr-only">
                     Press Enter or click to submit the login form
@@ -59,22 +56,22 @@
             </form>
             
             <div class="text-center">
-                <p style="color: var(--secondary-color); font-family: 'Space Mono', monospace;">
-                    NO ACCOUNT? 
+                <p>
+                    No account? 
                     <a href="/register" class="text-decoration-none" 
-                       style="color: var(--neon-green);"
                        hx-get="/register" hx-target="main" hx-push-url="true"
                        aria-label="Register for a new user account">
-                        [ REGISTER NEW USER ]
+                        Register
                     </a>
                 </p>
+            </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-// Enhance form accessibility on page load
+// Basic form accessibility on page load
 document.addEventListener('DOMContentLoaded', function() {
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');

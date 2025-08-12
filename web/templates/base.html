@@ -5,19 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.Title}}{{if .Community}} - {{.Community.Name}}{{end}}</title>
-    <!-- Fallback fonts for when external fonts fail -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Use system fonts for minimal design -->
     <link rel="stylesheet" href="/static/css/styles.css">
     <script src="/static/js/htmx-lite.js"></script>
     <!-- Accessibility improvements -->
     <meta name="description" content="{{if .Community}}{{.Community.Description}}{{else}}Samskipnad - Community platform for fitness and wellness{{end}}">
     <style>
-        /* High contrast focus styles for accessibility */
+        /* Basic focus styles for accessibility */
         *:focus {
-            outline: 3px solid #00ff41 !important;
-            outline-offset: 2px !important;
+            outline: 2px solid #0066cc;
+            outline-offset: 2px;
         }
         
         /* Skip link for screen readers */
@@ -25,11 +22,10 @@
             position: absolute;
             top: -40px;
             left: 6px;
-            background: #000;
-            color: #00ff41;
+            background: #0066cc;
+            color: white;
             padding: 8px;
             text-decoration: none;
-            border: 2px solid #00ff41;
             border-radius: 4px;
             font-weight: bold;
             z-index: 9999;
@@ -39,7 +35,6 @@
             top: 6px;
         }
         
-        /* Ensure sufficient color contrast for accessibility */
         .sr-only {
             position: absolute;
             width: 1px;
@@ -57,55 +52,46 @@
     <!-- Skip to main content link for accessibility -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
     
-    <nav class="cyber-nav" role="navigation" aria-label="Main navigation">
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
         <div class="nav-container">
             <a class="nav-brand" href="/" aria-label="{{if .Community}}{{.Community.Name}}{{else}}SAMSKIPNAD{{end}} homepage">
-                <span class="brand-symbol" aria-hidden="true">[</span>
                 {{if .Community}}{{.Community.Name}}{{else}}SAMSKIPNAD{{end}}
-                <span class="brand-symbol" aria-hidden="true">]</span>
             </a>
             
             {{if .User}}
             <div class="nav-links" role="list">
                 <a class="nav-link" href="/dashboard" hx-get="/dashboard" hx-target="main" hx-push-url="true" role="listitem">
-                    <span class="nav-symbol" aria-hidden="true">&gt;</span> 
                     <span>DASHBOARD</span>
                     <span class="sr-only">Go to dashboard</span>
                 </a>
                 {{if .Community.Features.Classes}}
                 <a class="nav-link" href="/classes" hx-get="/classes" hx-target="main" hx-push-url="true" role="listitem">
-                    <span class="nav-symbol" aria-hidden="true">&gt;</span> 
                     <span>CLASSES</span>
                     <span class="sr-only">Browse and book classes</span>
                 </a>
                 {{end}}
                 {{if .Community.Features.Memberships}}
                 <a class="nav-link" href="/memberships" hx-get="/memberships" hx-target="main" hx-push-url="true" role="listitem">
-                    <span class="nav-symbol" aria-hidden="true">&gt;</span> 
                     <span>MEMBERSHIPS</span>
                     <span class="sr-only">View membership options</span>
                 </a>
                 {{end}}
                 <a class="nav-link" href="/klippekort" hx-get="/klippekort" hx-target="main" hx-push-url="true" role="listitem">
-                    <span class="nav-symbol" aria-hidden="true">&gt;</span> 
                     <span>KLIPPEKORT</span>
                     <span class="sr-only">Manage your punch cards</span>
                 </a>
                 {{if eq .User.Role "admin"}}
                 <a class="nav-link admin-link" href="/admin/" hx-get="/admin/" hx-target="main" hx-push-url="true" role="listitem">
-                    <span class="nav-symbol" aria-hidden="true">#</span> 
                     <span>ADMIN</span>
                     <span class="sr-only">Access admin panel</span>
                 </a>
                 {{end}}
                 <a class="nav-link" href="/profile" hx-get="/profile" hx-target="main" hx-push-url="true" role="listitem">
-                    <span class="nav-symbol" aria-hidden="true">@</span> 
                     <span>{{.User.FirstName}}</span>
                     <span class="sr-only">View your profile</span>
                 </a>
                 <form method="POST" action="/logout" style="display: inline;" role="listitem">
                     <button type="submit" class="nav-link logout-link" aria-label="Logout of your account">
-                        <span class="nav-symbol" aria-hidden="true">X</span> 
                         <span>LOGOUT</span>
                     </button>
                 </form>
@@ -113,12 +99,10 @@
             {{else}}
             <div class="nav-links" role="list">
                 <a class="nav-link" href="/login" hx-get="/login" hx-target="main" hx-push-url="true" role="listitem">
-                    <span class="nav-symbol" aria-hidden="true">&gt;</span> 
                     <span>LOGIN</span>
                     <span class="sr-only">Sign in to your account</span>
                 </a>
                 <a class="nav-link" href="/register" hx-get="/register" hx-target="main" hx-push-url="true" role="listitem">
-                    <span class="nav-symbol" aria-hidden="true">+</span> 
                     <span>REGISTER</span>
                     <span class="sr-only">Create a new account</span>
                 </a>
@@ -132,22 +116,22 @@
     </main>
 
     {{if and .Community .Community.Attribution.Show}}
-    <footer class="cyber-footer" role="contentinfo">
+    <footer class="footer" role="contentinfo">
         <div class="footer-container">
             <div class="footer-section">
                 <p>&copy; 2024 {{if .Community}}{{.Community.Name}}{{else}}Samskipnad{{end}}. 
-                <span class="footer-accent" aria-label="System status">[ SYSTEM ACTIVE ]</span></p>
+                <span class="footer-accent" aria-label="System status">System Active</span></p>
                 <a href="{{.Community.Attribution.Link}}" target="_blank" rel="noopener noreferrer" 
                    aria-label="{{.Community.Attribution.Text}}, opens in new window">{{.Community.Attribution.Text}}</a>
             </div>
         </div>
     </footer>
     {{else}}
-    <footer class="cyber-footer" role="contentinfo">
+    <footer class="footer" role="contentinfo">
         <div class="footer-container">
             <div class="footer-section">
                 <p>&copy; 2024 {{if .Community}}{{.Community.Name}}{{else}}Samskipnad{{end}}. 
-                <span class="footer-accent" aria-label="System status">[ SYSTEM ACTIVE ]</span></p>
+                <span class="footer-accent" aria-label="System status">System Active</span></p>
             </div>
         </div>
     </footer>
@@ -157,7 +141,7 @@
     <div class="loading-overlay" id="loading-overlay" role="status" aria-live="polite" aria-label="Loading content">
         <div class="loading-spinner">
             <div class="spinner-ring" aria-hidden="true"></div>
-            <div class="loading-text">LOADING</div>
+            <div class="loading-text">Loading</div>
         </div>
     </div>
 
