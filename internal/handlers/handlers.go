@@ -1635,7 +1635,7 @@ func (h *Handlers) KlippekortBalance(w http.ResponseWriter, r *http.Request) {
 		"Community": community,
 	}
 
-	h.renderTemplate(w, "klippekort-balance.html", data)
+	h.renderTemplate(w, "klippekort-balance", data)
 }
 
 func (h *Handlers) KlippekortCategory(w http.ResponseWriter, r *http.Request) {
@@ -1679,7 +1679,7 @@ func (h *Handlers) KlippekortCategory(w http.ResponseWriter, r *http.Request) {
 		"Community": community,
 	}
 
-	h.renderTemplate(w, "klippekort-category.html", data)
+	h.renderTemplate(w, "klippekort-category", data)
 }
 
 func (h *Handlers) KlippekortPurchaseInstant(w http.ResponseWriter, r *http.Request) {
@@ -1742,7 +1742,7 @@ func (h *Handlers) KlippekortPurchaseInstant(w http.ResponseWriter, r *http.Requ
 		"Community":     community,
 	}
 
-	h.renderTemplate(w, "klippekort-purchase-form.html", data)
+	h.renderTemplate(w, "klippekort-purchase-form", data)
 }
 
 // Helper functions
