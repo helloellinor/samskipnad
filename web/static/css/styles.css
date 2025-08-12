@@ -1,33 +1,14 @@
-/* Modern Samskipnad Design System */
+/* NEO 1999 WEB DESIGN FOR SAMSKIPNAD - FUNCTIONAL RETRO */
+@import url('neo-1999.css');
 
-/* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
-/* Import modular CSS files */
-@import 'reset.css';
-@import 'variables.css';
-@import 'typography.css';
-@import 'layout.css';
-@import 'navigation.css';
-@import 'components.css';
-@import 'sections.css';
-
-/* Community theme integration */
-/* These styles will be dynamically overridden by community configuration */
-
-/* Kjernekraft theme (default) */
+/* Community theming integration - maintain dynamic theming capability */
 :root {
-  --primary-color: #2e3440;
-  --secondary-color: #5e81ac;
-  --accent-color: #d08770;
-  --success-color: #a3be8c;
-  --warning-color: #ebcb8b;
-  --danger-color: #bf616a;
-  --background-color: #eceff4;
-  --surface-color: #f4f6fa;
-  --text-color: #2e3440;
-  --text-muted: #4c566a;
-  
-  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-secondary: 'JetBrains Mono', 'SF Mono', Monaco, Consolas, monospace;
+    /* Override default Neo 1999 colors with community colors if available */
+    --primary-color: var(--community-primary, #0000FF);
+    --secondary-color: var(--community-secondary, #800080);
+    --background-color: var(--community-background, #FFFFFF);
+    --surface-color: var(--community-surface, #C0C0C0);
+    --text-color: var(--community-text, #000000);
+    --hover-color: var(--community-hover, #FF0000);
+    --focus-color: var(--community-focus, #FFFFCC);
 }
