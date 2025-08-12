@@ -175,9 +175,26 @@ func (h *Handlers) Dashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get upcoming classes
+	upcomingClasses, err := h.getUpcomingClasses(user.TenantID)
+	if err != nil {
+		upcomingClasses = []models.Class{} // Empty slice on error
+	}
+
+	// Get user bookings
+	userBookings, err := h.getUserBookings(user.ID)
+	if err != nil {
+		userBookings = []models.Booking{} // Empty slice on error
+	}
+
+	community := config.GetCurrent()
 	data := map[string]interface{}{
-		"Title": "Dashboard",
-		"User":  user,
+		"Title":           "Dashboard",
+		"User":            user,
+		"Community":       community,
+		"UpcomingClasses": upcomingClasses,
+		"UserBookings":    userBookings,
+		"UserMembership":  nil, // TODO: Implement membership checking
 	}
 
 	h.renderTemplate(w, "dashboard-standalone.html", data)
@@ -196,10 +213,12 @@ func (h *Handlers) Classes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	community := config.GetCurrent()
 	data := map[string]interface{}{
-		"Title":   "Classes",
-		"User":    user,
-		"Classes": classes,
+		"Title":     "Classes",
+		"User":      user,
+		"Community": community,
+		"Classes":   classes,
 	}
 
 	h.renderTemplate(w, "classes.html", data)

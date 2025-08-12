@@ -1,0 +1,76 @@
+# Serenity - A traditional yoga studio configuration
+# Calm, peaceful, traditional yoga community
+
+# Basic Information
+name: "Serenity Yoga Studio"
+description: "Find your inner peace through mindful movement"
+tagline: "Breathe, Flow, Be"
+
+# Branding - Warm, earthy tones
+colors:
+  primary: "#8B4513"        # Saddle brown
+  secondary: "#D2691E"      # Chocolate
+  accent: "#CD853F"         # Peru
+  success: "#228B22"        # Forest green
+  warning: "#DAA520"        # Golden rod
+  danger: "#B22222"         # Fire brick
+  background: "#FFF8DC"     # Cornsilk
+  surface: "#FFFAF0"        # Floral white
+  text: "#2F4F4F"           # Dark slate gray
+  muted: "#696969"          # Dim gray
+
+# Typography - Traditional, readable fonts
+fonts:
+  primary: "Lora"           # Serif for warmth
+  secondary: "Source Sans Pro"  # Sans-serif for clarity
+  size_base: "16px"
+
+# Community Features
+features:
+  classes: true
+  memberships: true
+  community: true
+  payments: true
+  calendar: true
+
+# Content Configuration
+content:
+  home:
+    title: "Welcome to Serenity Yoga Studio"
+    subtitle: "Your sanctuary for mind, body, and spirit"
+    description: "Join our peaceful community dedicated to traditional yoga practice. Whether you're a beginner or experienced practitioner, find your perfect flow with us."
+    
+  features:
+    - title: "Traditional Yoga Classes"
+      description: "Authentic Hatha, Vinyasa, and Yin yoga classes taught by certified instructors with years of experience."
+      
+    - title: "Mindful Community"
+      description: "Connect with like-minded practitioners in a supportive, non-judgmental environment focused on growth and wellness."
+      
+    - title: "Flexible Memberships"
+      description: "Choose from our range of membership options designed to fit your lifestyle and practice goals."
+
+# Pricing (in USD)
+pricing:
+  currency: "USD"
+  monthly: 89
+  yearly: 890
+  drop_in: 22
+
+# Locale
+locale:
+  language: "en"
+  country: "US"
+  timezone: "America/New_York"
+
+# Admin settings
+admin:
+  registration_open: true
+  require_approval: false
+  default_role: "member"
+
+# Attribution
+attribution:
+  show: true
+  text: "Built with Samskipnad"
+  link: "https://github.com/helloellinor/samskipnad"
