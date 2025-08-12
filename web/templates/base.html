@@ -5,267 +5,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.Title}}{{if .Community}} - {{.Community.Name}}{{end}}</title>
-    <!-- Fallback fonts for when external fonts fail -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Classic 1999 styling -->
     <link rel="stylesheet" href="/static/css/styles.css">
     <script src="/static/js/htmx-lite.js"></script>
-    <!-- Accessibility improvements -->
+    <!-- Basic meta for compatibility -->
     <meta name="description" content="{{if .Community}}{{.Community.Description}}{{else}}Samskipnad - Community platform for fitness and wellness{{end}}">
     <style>
-        /* High contrast focus styles for accessibility */
-        *:focus {
-            outline: 3px solid #00ff41 !important;
-            outline-offset: 2px !important;
-        }
-        
-        /* Skip link for screen readers */
-        .skip-link {
-            position: absolute;
-            top: -40px;
-            left: 6px;
-            background: #000;
-            color: #00ff41;
-            padding: 8px;
-            text-decoration: none;
-            border: 2px solid #00ff41;
-            border-radius: 4px;
-            font-weight: bold;
-            z-index: 9999;
-        }
-        
-        .skip-link:focus {
-            top: 6px;
-        }
-        
-        /* Ensure sufficient color contrast for accessibility */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
+        /* Additional 1999-style overrides */
+        body {
+            background-image: url('data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==');
+            background-repeat: repeat;
         }
     </style>
 </head>
 <body>
-    <!-- Skip to main content link for accessibility -->
+    <!-- Classic skip link -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
     
-    <nav class="cyber-nav" role="navigation" aria-label="Main navigation">
+    <!-- Classic 1999 navigation -->
+    <nav class="navbar">
         <div class="nav-container">
-            <a class="nav-brand" href="/" aria-label="{{if .Community}}{{.Community.Name}}{{else}}SAMSKIPNAD{{end}} homepage">
-                <span class="brand-symbol" aria-hidden="true">[</span>
+            <a href="/" class="nav-brand" 
+               hx-get="/" hx-target="main" hx-push-url="true">
                 {{if .Community}}{{.Community.Name}}{{else}}SAMSKIPNAD{{end}}
-                <span class="brand-symbol" aria-hidden="true">]</span>
             </a>
-            
-            {{if .User}}
-            <div class="nav-links" role="list">
-                <a class="nav-link" href="/dashboard" hx-get="/dashboard" hx-target="main" hx-push-url="true" role="listitem">
-                    <span class="nav-symbol" aria-hidden="true">&gt;</span> 
-                    <span>DASHBOARD</span>
-                    <span class="sr-only">Go to dashboard</span>
-                </a>
-                {{if .Community.Features.Classes}}
-                <a class="nav-link" href="/classes" hx-get="/classes" hx-target="main" hx-push-url="true" role="listitem">
-                    <span class="nav-symbol" aria-hidden="true">&gt;</span> 
-                    <span>CLASSES</span>
-                    <span class="sr-only">Browse and book classes</span>
-                </a>
-                {{end}}
-                {{if .Community.Features.Memberships}}
-                <a class="nav-link" href="/memberships" hx-get="/memberships" hx-target="main" hx-push-url="true" role="listitem">
-                    <span class="nav-symbol" aria-hidden="true">&gt;</span> 
-                    <span>MEMBERSHIPS</span>
-                    <span class="sr-only">View membership options</span>
-                </a>
-                {{end}}
-                <a class="nav-link" href="/klippekort" hx-get="/klippekort" hx-target="main" hx-push-url="true" role="listitem">
-                    <span class="nav-symbol" aria-hidden="true">&gt;</span> 
-                    <span>KLIPPEKORT</span>
-                    <span class="sr-only">Manage your punch cards</span>
-                </a>
-                {{if eq .User.Role "admin"}}
-                <a class="nav-link admin-link" href="/admin/" hx-get="/admin/" hx-target="main" hx-push-url="true" role="listitem">
-                    <span class="nav-symbol" aria-hidden="true">#</span> 
-                    <span>ADMIN</span>
-                    <span class="sr-only">Access admin panel</span>
-                </a>
-                {{end}}
-                <a class="nav-link" href="/profile" hx-get="/profile" hx-target="main" hx-push-url="true" role="listitem">
-                    <span class="nav-symbol" aria-hidden="true">@</span> 
-                    <span>{{.User.FirstName}}</span>
-                    <span class="sr-only">View your profile</span>
-                </a>
-                <form method="POST" action="/logout" style="display: inline;" role="listitem">
-                    <button type="submit" class="nav-link logout-link" aria-label="Logout of your account">
-                        <span class="nav-symbol" aria-hidden="true">X</span> 
-                        <span>LOGOUT</span>
-                    </button>
-                </form>
+            <div class="nav-menu">
+                <div class="nav-links">
+                    {{if not .User}}
+                    <a href="/login" class="nav-link"
+                       hx-get="/login" hx-target="main" hx-push-url="true">Login</a>
+                    <span>|</span>
+                    <a href="/register" class="nav-link"
+                       hx-get="/register" hx-target="main" hx-push-url="true">Register</a>
+                    {{else}}
+                    <a href="/dashboard" class="nav-link"
+                       hx-get="/dashboard" hx-target="main" hx-push-url="true">Dashboard</a>
+                    <span>|</span>
+                    {{if .Community.Features.Classes}}
+                    <a href="/classes" class="nav-link"
+                       hx-get="/classes" hx-target="main" hx-push-url="true">Classes</a>
+                    <span>|</span>
+                    {{end}}
+                    {{if .Community.Features.Memberships}}
+                    <a href="/memberships" class="nav-link"
+                       hx-get="/memberships" hx-target="main" hx-push-url="true">Memberships</a>
+                    <span>|</span>
+                    {{end}}
+                    <a href="/klippekort" class="nav-link"
+                       hx-get="/klippekort" hx-target="main" hx-push-url="true">Klippekort</a>
+                    <span>|</span>
+                    {{if eq .User.Role "admin"}}
+                    <a href="/admin/" class="nav-link"
+                       hx-get="/admin/" hx-target="main" hx-push-url="true">Admin</a>
+                    <span>|</span>
+                    {{end}}
+                    <a href="/profile" class="nav-link"
+                       hx-get="/profile" hx-target="main" hx-push-url="true">{{.User.FirstName}}</a>
+                    <span>|</span>
+                    <a href="/logout" class="nav-link">Logout</a>
+                    {{end}}
+                </div>
             </div>
-            {{else}}
-            <div class="nav-links" role="list">
-                <a class="nav-link" href="/login" hx-get="/login" hx-target="main" hx-push-url="true" role="listitem">
-                    <span class="nav-symbol" aria-hidden="true">&gt;</span> 
-                    <span>LOGIN</span>
-                    <span class="sr-only">Sign in to your account</span>
-                </a>
-                <a class="nav-link" href="/register" hx-get="/register" hx-target="main" hx-push-url="true" role="listitem">
-                    <span class="nav-symbol" aria-hidden="true">+</span> 
-                    <span>REGISTER</span>
-                    <span class="sr-only">Create a new account</span>
-                </a>
-            </div>
-            {{end}}
         </div>
     </nav>
 
-    <main class="main-content" id="main-content" role="main" tabindex="-1">
+    <!-- Classic 1999 main content -->
+    <main id="main-content" class="main-content">
         {{template "content" .}}
     </main>
 
-    {{if and .Community .Community.Attribution.Show}}
-    <footer class="cyber-footer" role="contentinfo">
-        <div class="footer-container">
-            <div class="footer-section">
-                <p>&copy; 2024 {{if .Community}}{{.Community.Name}}{{else}}Samskipnad{{end}}. 
-                <span class="footer-accent" aria-label="System status">[ SYSTEM ACTIVE ]</span></p>
-                <a href="{{.Community.Attribution.Link}}" target="_blank" rel="noopener noreferrer" 
-                   aria-label="{{.Community.Attribution.Text}}, opens in new window">{{.Community.Attribution.Text}}</a>
-            </div>
-        </div>
-    </footer>
-    {{else}}
-    <footer class="cyber-footer" role="contentinfo">
-        <div class="footer-container">
-            <div class="footer-section">
-                <p>&copy; 2024 {{if .Community}}{{.Community.Name}}{{else}}Samskipnad{{end}}. 
-                <span class="footer-accent" aria-label="System status">[ SYSTEM ACTIVE ]</span></p>
-            </div>
-        </div>
-    </footer>
-    {{end}}
-
-    <!-- Non-blocking loading indicator -->
-    <div class="loading-overlay" id="loading-overlay" role="status" aria-live="polite" aria-label="Loading content">
-        <div class="loading-spinner">
-            <div class="spinner-ring" aria-hidden="true"></div>
-            <div class="loading-text">LOADING</div>
-        </div>
+    <!-- Classic 1999 footer -->
+    <hr>
+    <div class="text-center">
+        <p><small>&copy; 1999 {{if .Community}}{{.Community.Name}}{{else}}Samskipnad{{end}}. All rights reserved.</small></p>
+        <p><small>Best viewed with Netscape Navigator 4.0 or Internet Explorer 4.0 at 800x600 resolution.</small></p>
+        {{if and .Community .Community.Attribution.Show}}
+        <p><small><a href="{{.Community.Attribution.Link}}" target="_blank">{{.Community.Attribution.Text}}</a></small></p>
+        {{end}}
     </div>
 
+    <!-- Classic JavaScript -->
     <script>
-        // Global HTMX configuration and cyberpunk effects with accessibility improvements
+        // Simple 1999-style JavaScript
         document.addEventListener('DOMContentLoaded', function() {
-            // Focus management for skip link
-            const skipLink = document.querySelector('.skip-link');
+            // Basic skip link functionality
+            var skipLink = document.querySelector('.skip-link');
             if (skipLink) {
-                skipLink.addEventListener('click', function(e) {
+                skipLink.onclick = function(e) {
                     e.preventDefault();
-                    const target = document.querySelector('#main-content');
+                    var target = document.querySelector('#main-content');
                     if (target) {
                         target.focus();
-                        target.scrollIntoView({ behavior: 'smooth' });
                     }
-                });
+                };
             }
             
-            // Improved loading states for HTMX requests with accessibility
+            // Simple HTMX loading
             document.body.addEventListener('htmx:beforeRequest', function() {
-                const overlay = document.getElementById('loading-overlay');
-                if (overlay) {
-                    overlay.style.display = 'block';
-                    overlay.setAttribute('aria-busy', 'true');
-                }
+                document.title = 'Loading... - ' + document.title;
             });
             
             document.body.addEventListener('htmx:afterRequest', function() {
-                // Small delay to show loading completed, then hide
-                setTimeout(() => {
-                    const overlay = document.getElementById('loading-overlay');
-                    if (overlay) {
-                        overlay.style.display = 'none';
-                        overlay.setAttribute('aria-busy', 'false');
-                        // Brief accessibility announcement for content load completion
-                        const announcement = document.createElement('div');
-                        announcement.setAttribute('aria-live', 'polite');
-                        announcement.setAttribute('aria-atomic', 'true');
-                        announcement.className = 'sr-only';
-                        announcement.textContent = 'Content updated';
-                        document.body.appendChild(announcement);
-                        setTimeout(() => {
-                            if (document.body.contains(announcement)) {
-                                document.body.removeChild(announcement);
-                            }
-                        }, 1000);
-                    }
-                }, 200);
-            });
-
-            // Hide loading overlay on any errors
-            document.body.addEventListener('htmx:responseError', function() {
-                const overlay = document.getElementById('loading-overlay');
-                if (overlay) {
-                    overlay.style.display = 'none';
-                    overlay.setAttribute('aria-busy', 'false');
-                }
-            });
-
-            // Accessible keyboard navigation for nav links
-            const navLinks = document.querySelectorAll('.nav-link');
-            navLinks.forEach(link => {
-                // Enhanced focus indicators
-                link.addEventListener('focus', function() {
-                    this.style.textShadow = '0 0 10px var(--neon-green)';
-                    this.style.transform = 'scale(1.02)';
-                });
-                
-                link.addEventListener('blur', function() {
-                    this.style.textShadow = 'none';
-                    this.style.transform = 'scale(1)';
-                });
-                
-                // Mouse hover effects (non-intrusive for accessibility)
-                link.addEventListener('mouseenter', function() {
-                    if (!this.matches(':focus')) {
-                        this.style.textShadow = '0 0 10px var(--neon-green)';
-                    }
-                });
-                
-                link.addEventListener('mouseleave', function() {
-                    if (!this.matches(':focus')) {
-                        this.style.textShadow = 'none';
-                    }
-                });
-
-                // Keyboard navigation support
-                link.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        this.click();
-                    }
-                });
-            });
-
-            // Improve form accessibility
-            const forms = document.querySelectorAll('form');
-            forms.forEach(form => {
-                form.addEventListener('submit', function() {
-                    // Announce form submission to screen readers
-                    const announcement = document.createElement('div');
-                    announcement.setAttribute('aria-live', 'assertive');
-                    announcement.className = 'sr-only';
-                    announcement.textContent = 'Form submitted, please wait';
-                    document.body.appendChild(announcement);
-                    setTimeout(() => document.body.removeChild(announcement), 3000);
-                });
+                document.title = document.title.replace('Loading... - ', '');
             });
         });
     </script>

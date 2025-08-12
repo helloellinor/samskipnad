@@ -5,226 +5,122 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Samskipnad</title>
     <meta name="description" content="Sign in to your Samskipnad account">
-    <!-- Self-hosted or fallback scripts instead of external CDNs -->
+    <!-- Classic 1999 styling -->
     <script src="/static/js/htmx-lite.js"></script>
     <link rel="stylesheet" href="/static/css/styles.css">
-    <!-- Accessibility improvements -->
     <style>
-        /* High contrast focus styles for accessibility */
-        *:focus {
-            outline: 3px solid #00ff41 !important;
-            outline-offset: 2px !important;
-        }
-        
-        /* Skip link for screen readers */
-        .skip-link {
-            position: absolute;
-            top: -40px;
-            left: 6px;
-            background: #000;
-            color: #00ff41;
-            padding: 8px;
-            text-decoration: none;
-            border: 2px solid #00ff41;
-            border-radius: 4px;
-            font-weight: bold;
-            z-index: 9999;
-        }
-        
-        .skip-link:focus {
-            top: 6px;
-        }
-        
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
+        /* Additional 1999-style overrides */
+        body {
+            background-image: url('data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==');
+            background-repeat: repeat;
         }
     </style>
 </head>
 <body>
-    <!-- Skip to main content link for accessibility -->
+    <!-- Classic skip link -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
     
-    <nav class="cyber-nav" role="navigation" aria-label="Main navigation">
+    <!-- Classic 1999 navigation -->
+    <nav class="navbar">
         <div class="nav-container">
-            <a class="nav-brand" href="/" aria-label="Samskipnad homepage">
-                <span class="brand-symbol" aria-hidden="true">[</span>
+            <a href="/" class="nav-brand" 
+               hx-get="/" hx-target="body" hx-push-url="true">
                 SAMSKIPNAD
-                <span class="brand-symbol" aria-hidden="true">]</span>
             </a>
-            <div class="nav-links" role="list">
-                <a class="nav-link" href="/login" role="listitem" aria-current="page">
-                    <span class="nav-symbol" aria-hidden="true">&gt;</span> 
-                    <span>LOGIN</span>
-                    <span class="sr-only">Sign in to your account</span>
-                </a>
-                <a class="nav-link" href="/register" role="listitem">
-                    <span class="nav-symbol" aria-hidden="true">+</span> 
-                    <span>REGISTER</span>
-                    <span class="sr-only">Create a new account</span>
-                </a>
+            <div class="nav-menu">
+                <div class="nav-links">
+                    <a href="/login" class="nav-link">Login</a> |
+                    <a href="/register" class="nav-link"
+                       hx-get="/register" hx-target="body" hx-push-url="true">Register</a>
+                </div>
             </div>
         </div>
     </nav>
 
-    <main class="main-content" id="main-content" role="main" tabindex="-1">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="cyber-card">
-                    <div class="text-center mb-4">
-                        <h1 style="color: var(--neon-green); text-transform: uppercase; letter-spacing: 2px; font-family: 'Space Mono', monospace;">
-                            [ SYSTEM ACCESS ]
-                        </h1>
-                        <p style="color: var(--secondary-color); font-family: 'Space Mono', monospace;">
-                            Enter credentials to proceed
-                        </p>
-                    </div>
+    <!-- Classic 1999 main content -->
+    <main id="main-content" class="main-content">
+        <div class="text-center">
+            <div class="card">
+                <div class="card-header">
+                    <h1>USER LOGIN</h1>
+                    <p>Enter your credentials below</p>
+                </div>
+                <div class="card-body">
                     
                     {{if .Error}}
-                    <div class="alert alert-danger mb-4" role="alert" aria-live="assertive">
-                        <strong>ACCESS DENIED:</strong> {{.Error}}
+                    <div class="alert alert-danger">
+                        <b>ERROR:</b> {{.Error}}
                     </div>
                     {{end}}
                     
-                    <form method="POST" action="/login" aria-labelledby="login-heading" novalidate>
-                        <div class="mb-3">
-                            <label for="email" class="form-label" id="email-label">
-                                <span style="color: var(--neon-orange);" aria-hidden="true">&gt;</span> EMAIL ADDRESS
-                            </label>
-                            <input type="email" class="form-control" id="email" name="email" 
-                                   value="{{.Email}}" required autocomplete="email"
-                                   placeholder="user@domain.com"
-                                   aria-labelledby="email-label"
-                                   aria-describedby="email-error"
-                                   aria-invalid="{{if .Error}}true{{else}}false{{end}}">
-                            <div id="email-error" class="sr-only">
-                                {{if .Error}}Please check your email address{{end}}
-                            </div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label for="password" class="form-label" id="password-label">
-                                <span style="color: var(--neon-orange);" aria-hidden="true">&gt;</span> PASSWORD
-                            </label>
-                            <input type="password" class="form-control" id="password" name="password" 
-                                   required autocomplete="current-password"
-                                   placeholder="••••••••"
-                                   aria-labelledby="password-label"
-                                   aria-describedby="password-error"
-                                   aria-invalid="{{if .Error}}true{{else}}false{{end}}">
-                            <div id="password-error" class="sr-only">
-                                {{if .Error}}Please check your password{{end}}
-                            </div>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100 mb-4" 
-                                aria-describedby="submit-help">
-                            <span style="margin-right: 0.5rem;" aria-hidden="true">&gt;</span> INITIALIZE SESSION
-                        </button>
-                        <div id="submit-help" class="sr-only">
-                            Press Enter or click to submit the login form
-                        </div>
+                    <form method="POST" action="/login">
+                        <table align="center" cellpadding="4" cellspacing="2" border="0">
+                            <tr>
+                                <td><label for="email" class="form-label"><b>E-mail:</b></label></td>
+                                <td><input type="email" class="form-control" id="email" name="email" 
+                                           value="{{.Email}}" required size="25" maxlength="100"></td>
+                            </tr>
+                            <tr>
+                                <td><label for="password" class="form-label"><b>Password:</b></label></td>
+                                <td><input type="password" class="form-control" id="password" name="password" 
+                                           required size="25" maxlength="50"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" align="center">
+                                    <br>
+                                    <input type="submit" value="LOGIN" class="btn btn-primary">
+                                    <input type="reset" value="CLEAR" class="btn">
+                                </td>
+                            </tr>
+                        </table>
                     </form>
                     
-                    <div class="text-center">
-                        <p style="color: var(--secondary-color); font-family: 'Space Mono', monospace;">
-                            NO ACCOUNT? 
-                            <a href="/register" class="text-decoration-none" 
-                               style="color: var(--neon-green);"
-                               aria-label="Register for a new user account">
-                                [ REGISTER NEW USER ]
-                            </a>
-                        </p>
-                    </div>
+                    <hr>
+                    
+                    <p><b>Don't have an account?</b><br>
+                       <a href="/register">Click here to register</a></p>
                 </div>
             </div>
         </div>
     </main>
 
-    <footer class="cyber-footer" role="contentinfo">
-        <div class="footer-container">
-            <div class="footer-section">
-                <p>&copy; 2024 Samskipnad. 
-                <span class="footer-accent" aria-label="System status">[ SYSTEM ACTIVE ]</span></p>
-            </div>
-        </div>
-    </footer>
+    <!-- Classic 1999 footer -->
+    <hr>
+    <div class="text-center">
+        <p><small>&copy; 1999 Samskipnad. All rights reserved.</small></p>
+        <p><small>Best viewed with Netscape Navigator 4.0 or Internet Explorer 4.0 at 800x600 resolution.</small></p>
+    </div>
 
+    <!-- Classic JavaScript -->
     <script>
-        // Enhanced accessibility features for standalone login
+        // Simple 1999-style form validation
+        function validateForm() {
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
+            
+            if (email == "" || password == "") {
+                alert("Please fill in all fields!");
+                return false;
+            }
+            return true;
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Focus management for skip link
-            const skipLink = document.querySelector('.skip-link');
+            var form = document.querySelector('form');
+            if (form) {
+                form.onsubmit = validateForm;
+            }
+            
+            // Basic skip link functionality
+            var skipLink = document.querySelector('.skip-link');
             if (skipLink) {
-                skipLink.addEventListener('click', function(e) {
+                skipLink.onclick = function(e) {
                     e.preventDefault();
-                    const target = document.querySelector('#main-content');
+                    var target = document.querySelector('#main-content');
                     if (target) {
                         target.focus();
-                        target.scrollIntoView({ behavior: 'smooth' });
                     }
-                });
-            }
-            
-            const emailInput = document.getElementById('email');
-            const passwordInput = document.getElementById('password');
-            
-            // Add real-time validation feedback
-            if (emailInput) {
-                emailInput.addEventListener('blur', function() {
-                    const isValid = this.checkValidity();
-                    this.setAttribute('aria-invalid', !isValid);
-                    
-                    const errorDiv = document.getElementById('email-error');
-                    if (errorDiv) {
-                        if (!isValid) {
-                            errorDiv.textContent = 'Please enter a valid email address';
-                            errorDiv.className = 'text-danger small mt-1';
-                        } else {
-                            errorDiv.className = 'sr-only';
-                            errorDiv.textContent = '';
-                        }
-                    }
-                });
-            }
-            
-            if (passwordInput) {
-                passwordInput.addEventListener('blur', function() {
-                    const isValid = this.value.length > 0;
-                    this.setAttribute('aria-invalid', !isValid);
-                    
-                    const errorDiv = document.getElementById('password-error');
-                    if (errorDiv) {
-                        if (!isValid) {
-                            errorDiv.textContent = 'Password is required';
-                            errorDiv.className = 'text-danger small mt-1';
-                        } else {
-                            errorDiv.className = 'sr-only';
-                            errorDiv.textContent = '';
-                        }
-                    }
-                });
-            }
-
-            // Improve form accessibility
-            const form = document.querySelector('form');
-            if (form) {
-                form.addEventListener('submit', function() {
-                    // Announce form submission to screen readers
-                    const announcement = document.createElement('div');
-                    announcement.setAttribute('aria-live', 'assertive');
-                    announcement.className = 'sr-only';
-                    announcement.textContent = 'Form submitted, please wait';
-                    document.body.appendChild(announcement);
-                    setTimeout(() => document.body.removeChild(announcement), 3000);
-                });
+                };
             }
         });
     </script>
