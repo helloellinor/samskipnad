@@ -1,8 +1,8 @@
-/* EDGY MINIMALIST DESIGN FOR SAMSKIPNAD */
+/* EDGY MINIMALIST DESIGN FOR SAMSKIPNAD WITH ACCESSIBILITY IMPROVEMENTS */
 
 :root {
     --primary-color: #000000;
-    --secondary-color: #666666;
+    --secondary-color: #888888; /* Improved from #666666 for better contrast */
     --accent-color: #ff6b35;
     --success-color: #00ff41;
     --warning-color: #ffff00;
@@ -12,15 +12,41 @@
     --light-dark: #2a2a2a;
     --light-color: #f0f0f0;
     --white: #ffffff;
-    --border-color: #333333;
+    --border-color: #444444; /* Improved from #333333 for better contrast */
     
-    /* New edgy color palette */
+    /* Enhanced color palette with better contrast ratios */
     --neon-green: #00ff41;
     --neon-orange: #ff6b35;
     --neon-red: #ff073a;
     --neon-yellow: #ffff00;
     --electric-blue: #0066ff;
     --cyber-purple: #9966ff;
+    
+    /* High contrast alternatives for accessibility */
+    --high-contrast-bg: #000000;
+    --high-contrast-text: #ffffff;
+    --high-contrast-accent: #00ff00;
+}
+
+/* Accessibility: Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    :root {
+        --primary-color: var(--high-contrast-bg);
+        --secondary-color: #aaaaaa;
+        --light-color: var(--high-contrast-text);
+        --neon-green: var(--high-contrast-accent);
+        --border-color: #666666;
+    }
 }
 
 body {
@@ -128,6 +154,22 @@ body {
     position: relative;
     background: none;
     cursor: pointer;
+    border-radius: 4px; /* Added for better focus visibility */
+    min-height: 44px; /* Ensure minimum touch target size */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Enhanced focus styles for accessibility */
+.nav-link:focus,
+.nav-link:focus-visible {
+    outline: 3px solid var(--neon-green) !important;
+    outline-offset: 2px !important;
+    color: var(--neon-green);
+    border-color: var(--neon-green);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+    background-color: rgba(0, 255, 65, 0.1);
 }
 
 .nav-link:hover {
@@ -135,6 +177,13 @@ body {
     border-color: var(--neon-green);
     box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
     transform: translateY(-2px);
+}
+
+/* Ensure hover doesn't override focus */
+.nav-link:focus:hover {
+    color: var(--neon-green);
+    border-color: var(--neon-green);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
 }
 
 .nav-symbol {
@@ -350,9 +399,9 @@ body {
     font-weight: 600;
 }
 
-/* Buttons */
+/* Buttons with accessibility improvements */
 .btn {
-    border-radius: 0;
+    border-radius: 4px; /* Changed from 0 for better accessibility */
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -361,6 +410,18 @@ body {
     border: 2px solid;
     position: relative;
     overflow: hidden;
+    min-height: 44px; /* Ensure minimum touch target size */
+    padding: 0.75rem 1.5rem; /* Ensure adequate padding */
+    cursor: pointer;
+}
+
+/* Enhanced focus styles for buttons */
+.btn:focus,
+.btn:focus-visible {
+    outline: 3px solid var(--neon-green) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.5) !important;
+    z-index: 1;
 }
 
 .btn-primary {
@@ -369,11 +430,19 @@ body {
     color: var(--dark-color);
 }
 
-.btn-primary:hover {
+.btn-primary:hover,
+.btn-primary:focus:hover {
     background-color: transparent;
     border-color: var(--accent-color);
     color: var(--accent-color);
     transform: translateY(-2px);
+}
+
+/* Ensure focus styles are maintained */
+.btn-primary:focus {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--dark-color);
 }
 
 .btn-outline-primary {
@@ -1260,27 +1329,59 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* CYBERPUNK FORMS AND INPUTS */
+/* Enhanced form controls with accessibility improvements */
 .form-control, .form-select, input[type="text"], input[type="email"], input[type="password"], 
 input[type="number"], textarea, select {
     background-color: var(--dark-color);
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color); /* Increased border width for better visibility */
     color: var(--light-color);
-    border-radius: 0;
+    border-radius: 4px; /* Changed from 0 for better accessibility */
     font-family: 'Space Mono', monospace;
     transition: all 0.3s ease;
+    padding: 0.75rem 1rem; /* Ensure adequate padding */
+    min-height: 44px; /* Ensure minimum touch target size */
+    font-size: 1rem; /* Ensure readable font size */
 }
 
+/* Enhanced focus styles for form controls */
 .form-control:focus, .form-select:focus, input:focus, textarea:focus, select:focus {
     background-color: var(--medium-dark);
     border-color: var(--neon-green);
-    box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+    box-shadow: 0 0 0 3px rgba(0, 255, 65, 0.3) !important; /* Consistent with other focus styles */
     color: var(--white);
+    outline: none; /* Remove default outline since we have custom focus */
 }
 
+/* Improve invalid input styling for better accessibility */
+.form-control:invalid:not(:focus):not(:placeholder-shown),
+input:invalid:not(:focus):not(:placeholder-shown) {
+    border-color: var(--danger-color);
+    box-shadow: 0 0 0 2px rgba(255, 7, 58, 0.3);
+}
+
+/* Valid input styling */
+.form-control:valid:not(:focus):not(:placeholder-shown),
+input:valid:not(:focus):not(:placeholder-shown) {
+    border-color: var(--success-color);
+}
+
+/* Enhanced label styling */
 .form-label {
     color: var(--light-color);
     font-family: 'Space Mono', monospace;
     font-weight: bold;
+    font-size: 0.9rem; /* Slightly larger for better readability */
+    margin-bottom: 0.5rem;
+    display: block; /* Ensure labels are block elements */
+}
+
+/* Placeholder text with better contrast */
+.form-control::placeholder,
+input::placeholder,
+textarea::placeholder {
+    color: var(--secondary-color);
+    opacity: 0.8; /* Slightly higher opacity for better visibility */
+}
     text-transform: uppercase;
     letter-spacing: 1px;
     font-size: 0.8rem;
