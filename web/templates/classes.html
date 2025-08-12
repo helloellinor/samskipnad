@@ -37,8 +37,11 @@
                         </span>
                         <span>
                             {{if gt .Price 0}}
-                            <i class="bi bi-currency-dollar"></i>
-                            ${{printf "%.2f" (divf .Price 100)}}
+                            {{if and $.Community $.Community.Pricing.Currency}}
+                            {{printf "%.0f %s" (divf (float64 .Price) 100.0) $.Community.Pricing.Currency}}
+                            {{else}}
+                            ${{printf "%.2f" (divf (float64 .Price) 100.0)}}
+                            {{end}}
                             {{else}}
                             <span class="text-success">Free</span>
                             {{end}}

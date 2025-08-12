@@ -52,7 +52,11 @@
                         </div>
                         <div>
                             {{if gt .Price 0}}
-                            <span class="badge bg-primary">${{printf "%.2f" (divf .Price 100)}}</span>
+                            {{if and $.Community $.Community.Pricing.Currency}}
+                            <span class="badge bg-primary">{{printf "%.0f %s" (divf (float64 .Price) 100.0) $.Community.Pricing.Currency}}</span>
+                            {{else}}
+                            <span class="badge bg-primary">${{printf "%.2f" (divf (float64 .Price) 100.0)}}</span>
+                            {{end}}
                             {{else}}
                             <span class="badge bg-success">Free</span>
                             {{end}}
@@ -128,7 +132,7 @@
                     <a href="/calendar" class="btn btn-outline-primary">Calendar View</a>
                     <a href="/memberships" class="btn btn-outline-secondary">View Memberships</a>
                     {{if eq .User.Role "admin"}}
-                    <a href="/admin" class="btn btn-warning">Admin Panel</a>
+                    <a href="/admin/" class="btn btn-warning">Admin Panel</a>
                     {{end}}
                 </div>
             </div>
