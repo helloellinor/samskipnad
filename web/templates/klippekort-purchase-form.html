@@ -1,0 +1,144 @@
+{{define "klippekort-purchase-form.html"}}
+<div class="mt-4 p-4" style="background: #0a0a0a; border: 1px solid #333; border-radius: 4px;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="text-white mb-0">PURCHASE CONFIRMATION</h6>
+        <button type="button" class="btn-close btn-close-white" 
+                onclick="document.getElementById('purchase-result').innerHTML = ''"
+                aria-label="Close"></button>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="p-3" style="background: #111; border-radius: 4px;">
+                <h6 class="text-primary mb-2">{{.Category.Name}}</h6>
+                <div class="d-flex justify-content-between">
+                    <span>{{.Package.Klipp}} klipp</span>
+                    <span class="text-white">{{.Community.FormatPrice .Package.Price}}</span>
+                </div>
+                <div class="d-flex justify-content-between text-muted small">
+                    <span>Per klipp:</span>
+                    <span>{{.Community.FormatPrice .Package.PricePerKlipp}}</span>
+                </div>
+                {{if gt .Package.SavePercent 0}}
+                <div class="mt-2">
+                    <span class="badge" style="background: #001a06; color: #00ff41;">
+                        SAVE {{.Package.SavePercent}}%
+                    </span>
+                </div>
+                {{end}}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="p-3" style="background: #111; border-radius: 4px;">
+                <h6 class="text-muted mb-2">PAYMENT</h6>
+                <!-- Stripe Elements will be injected here -->
+                <div id="card-element" style="background: #222; padding: 1rem; border-radius: 4px; border: 1px solid #333;">
+                    <!-- Stripe card element placeholder -->
+                    <div class="text-muted text-center">
+                        <i class="bi bi-credit-card fs-4 d-block mb-2"></i>
+                        <small>Secure payment with Stripe</small>
+                    </div>
+                </div>
+                <div id="card-errors" role="alert" class="text-danger mt-2"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <button type="button" class="btn btn-outline-secondary" 
+                onclick="document.getElementById('purchase-result').innerHTML = ''">
+            CANCEL
+        </button>
+        <button id="submit-payment" class="btn btn-primary">
+            <span id="button-text">PAY {{.Community.FormatPrice .Package.Price}}</span>
+            <div id="spinner" class="spinner-border spinner-border-sm d-none" role="status">
+                <span class="visually-hidden">Processing...</span>
+            </div>
+        </button>
+    </div>
+    
+    <!-- Success/Error Messages -->
+    <div id="payment-messages" class="mt-3"></div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+// Stripe integration
+const stripe = Stripe('{{.Community.StripePublishableKey}}'); // You'll need to add this to config
+const elements = stripe.elements({
+    appearance: {
+        theme: 'night',
+        variables: {
+            colorPrimary: '#ff6b35',
+            colorBackground: '#222',
+            colorText: '#fff',
+            colorDanger: '#ff073a',
+        }
+    }
+});
+
+const cardElement = elements.create('card');
+cardElement.mount('#card-element');
+
+cardElement.on('change', ({error}) => {
+    const displayError = document.getElementById('card-errors');
+    if (error) {
+        displayError.textContent = error.message;
+    } else {
+        displayError.textContent = '';
+    }
+});
+
+// Handle form submission
+const submitButton = document.getElementById('submit-payment');
+submitButton.addEventListener('click', async (event) => {
+    event.preventDefault();
+    setLoading(true);
+
+    const {error} = await stripe.confirmPayment({
+        elements,
+        clientSecret: '{{.PaymentIntent.ClientSecret}}',
+        confirmParams: {
+            return_url: window.location.origin + '/klippekort?success=true',
+        },
+    });
+
+    if (error) {
+        // Show error to customer
+        showMessage(error.message, 'error');
+        setLoading(false);
+    } else {
+        // Payment succeeded
+        showMessage('Payment successful! Your klipp has been added to your account.', 'success');
+        // Refresh balance
+        htmx.ajax('GET', '/api/klippekort/balance', '#balance-display');
+        // Clear purchase form after delay
+        setTimeout(() => {
+            document.getElementById('purchase-result').innerHTML = '';
+        }, 3000);
+    }
+});
+
+function showMessage(messageText, type) {
+    const messageContainer = document.querySelector('#payment-messages');
+    const messageClass = type === 'error' ? 'error-message' : 'success-message';
+    messageContainer.innerHTML = `<div class="${messageClass}">${messageText}</div>`;
+}
+
+function setLoading(isLoading) {
+    const button = document.querySelector('#submit-payment');
+    const buttonText = document.querySelector('#button-text');
+    const spinner = document.querySelector('#spinner');
+    
+    if (isLoading) {
+        button.disabled = true;
+        buttonText.classList.add('d-none');
+        spinner.classList.remove('d-none');
+    } else {
+        button.disabled = false;
+        buttonText.classList.remove('d-none');
+        spinner.classList.add('d-none');
+    }
+}
+</script>
+{{end}}

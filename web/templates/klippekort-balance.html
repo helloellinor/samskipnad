@@ -1,0 +1,31 @@
+{{define "klippekort-balance.html"}}
+<div class="text-start">
+    <h6 class="text-muted mb-3">YOUR KLIPP BALANCE</h6>
+    {{if .Balances}}
+        {{range $categoryID, $balance := .Balances}}
+            {{range $category := $.Community.Pricing.Klippekort.Categories}}
+                {{if eq $category.ID $categoryID}}
+                <div class="balance-item">
+                    <div>
+                        <span class="text-white">{{$category.Name}}</span>
+                        <small class="text-muted d-block">{{$category.Description}}</small>
+                    </div>
+                    <div class="text-end">
+                        <span class="h5 text-primary mb-0">{{$balance}}</span>
+                        <small class="text-muted d-block">klipp</small>
+                    </div>
+                </div>
+                {{end}}
+            {{end}}
+        {{end}}
+    {{else}}
+        <div class="text-center p-4">
+            <div class="text-muted">
+                <i class="bi bi-ticket-perforated fs-1 d-block mb-2"></i>
+                <p>No klipp purchased yet</p>
+                <small>Purchase your first klipp package below</small>
+            </div>
+        </div>
+    {{end}}
+</div>
+{{end}}

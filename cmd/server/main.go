@@ -86,6 +86,11 @@ func main() {
 	api.HandleFunc("/classes/search", handlers.SearchClasses).Methods("GET")
 	api.HandleFunc("/bookings/cancel/{id}", handlers.CancelBooking).Methods("DELETE")
 	api.HandleFunc("/calendar/day/{date}", handlers.CalendarDayDetails).Methods("GET")
+	
+	// Klippekort HTMX API routes
+	api.HandleFunc("/klippekort/balance", handlers.KlippekortBalance).Methods("GET")
+	api.HandleFunc("/klippekort/category", handlers.KlippekortCategory).Methods("GET")
+	api.HandleFunc("/klippekort/purchase", handlers.KlippekortPurchaseInstant).Methods("POST")
 
 	port := os.Getenv("PORT")
 	if port == "" {

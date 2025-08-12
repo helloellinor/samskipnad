@@ -1,4 +1,4 @@
-/* Minimalist/Edgy Design for Samskipnad */
+/* EDGY MINIMALIST DESIGN FOR SAMSKIPNAD */
 
 :root {
     --primary-color: #000000;
@@ -13,14 +13,44 @@
     --light-color: #f0f0f0;
     --white: #ffffff;
     --border-color: #333333;
+    
+    /* New edgy color palette */
+    --neon-green: #00ff41;
+    --neon-orange: #ff6b35;
+    --neon-red: #ff073a;
+    --neon-yellow: #ffff00;
+    --electric-blue: #0066ff;
+    --cyber-purple: #9966ff;
 }
 
 body {
     font-family: 'Space Mono', 'Courier New', monospace;
     background-color: var(--dark-color);
+    background-image: 
+        radial-gradient(circle at 25% 25%, var(--medium-dark) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, var(--light-dark) 0%, transparent 50%);
     color: var(--light-color);
     line-height: 1.5;
     font-weight: 400;
+    min-height: 100vh;
+}
+
+/* Cyberpunk scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--dark-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-color);
+    border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-green);
 }
 
 /* Navigation */
@@ -862,4 +892,187 @@ body {
 ::selection {
     background: var(--accent-color);
     color: var(--dark-color);
+}
+
+/* HTMX Enhancements */
+.htmx-indicator {
+    display: none;
+}
+
+.htmx-request .htmx-indicator {
+    display: inline;
+    animation: spin 1s linear infinite;
+}
+
+.htmx-request {
+    opacity: 0.8;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* HTMX transitions */
+.htmx-settling {
+    opacity: 0;
+}
+
+.htmx-swapping {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+/* Edgy button animations */
+button, .btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+button::before, .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.5s;
+}
+
+button:hover::before, .btn:hover::before {
+    left: 100%;
+}
+
+/* Neon glow effects for interactive elements */
+.neon-glow {
+    box-shadow: 
+        0 0 5px var(--accent-color),
+        0 0 10px var(--accent-color),
+        0 0 15px var(--accent-color);
+    animation: neon-pulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes neon-pulse {
+    from {
+        box-shadow: 
+            0 0 5px var(--accent-color),
+            0 0 10px var(--accent-color),
+            0 0 15px var(--accent-color);
+    }
+    to {
+        box-shadow: 
+            0 0 2px var(--accent-color),
+            0 0 5px var(--accent-color),
+            0 0 8px var(--accent-color);
+    }
+}
+
+/* Glitch effect for errors */
+.glitch {
+    position: relative;
+    animation: glitch 0.3s ease-in-out infinite;
+}
+
+@keyframes glitch {
+    0% {
+        transform: translate(0);
+    }
+    20% {
+        transform: translate(-2px, 2px);
+    }
+    40% {
+        transform: translate(-2px, -2px);
+    }
+    60% {
+        transform: translate(2px, 2px);
+    }
+    80% {
+        transform: translate(2px, -2px);
+    }
+    100% {
+        transform: translate(0);
+    }
+}
+
+/* Matrix-style text effect */
+.matrix-text {
+    background: linear-gradient(90deg, var(--neon-green), var(--electric-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: matrix-flow 2s ease-in-out infinite;
+}
+
+@keyframes matrix-flow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Enhanced focus states */
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 10px rgba(255, 107, 53, 0.3) !important;
+}
+
+/* Dark mode improvements */
+.card, .modal-content, .dropdown-menu {
+    background-color: var(--medium-dark) !important;
+    border-color: var(--border-color) !important;
+    color: var(--light-color) !important;
+}
+
+.dropdown-item {
+    color: var(--light-color) !important;
+}
+
+.dropdown-item:hover {
+    background-color: var(--light-dark) !important;
+    color: var(--accent-color) !important;
+}
+
+/* Loading states */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.cyber-loader {
+    border: 2px solid var(--dark-color);
+    border-top: 2px solid var(--accent-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+    }
+    
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .category-tabs {
+        font-size: 0.8rem;
+    }
+    
+    .package-card {
+        margin-bottom: 1rem;
+    }
+}
 }

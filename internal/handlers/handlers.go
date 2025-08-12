@@ -1612,3 +1612,183 @@ body {
 	
 	fmt.Fprint(w, css)
 }
+
+// HTMX endpoints for klippekort system
+
+func (h *Handlers) KlippekortBalance(w http.ResponseWriter, r *http.Request) {
+	user := middleware.GetUserFromContext(r.Context())
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Get user's klipp balances by category
+	balances, err := h.getUserKlippBalances(user.ID)
+	if err != nil {
+		http.Error(w, "Failed to get balances", http.StatusInternalServerError)
+		return
+	}
+
+	community := config.GetCurrent()
+	data := map[string]interface{}{
+		"Balances":  balances,
+		"Community": community,
+	}
+
+	h.renderTemplate(w, "klippekort-balance.html", data)
+}
+
+func (h *Handlers) KlippekortCategory(w http.ResponseWriter, r *http.Request) {
+	categoryID := r.URL.Query().Get("category")
+	if categoryID == "" {
+		http.Error(w, "Category required", http.StatusBadRequest)
+		return
+	}
+
+	user := middleware.GetUserFromContext(r.Context())
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	community := config.GetCurrent()
+	
+	// Find the specific category
+	var selectedCategory *config.KlippekortCategory
+	for _, category := range community.Pricing.Klippekort.Categories {
+		if category.ID == categoryID {
+			selectedCategory = &category
+			break
+		}
+	}
+
+	if selectedCategory == nil {
+		http.Error(w, "Category not found", http.StatusNotFound)
+		return
+	}
+
+	// Get user's balance for this category
+	balance, err := h.getUserKlippBalance(user.ID, categoryID)
+	if err != nil {
+		balance = 0 // Default to 0 if error
+	}
+
+	data := map[string]interface{}{
+		"Category":  selectedCategory,
+		"Balance":   balance,
+		"Community": community,
+	}
+
+	h.renderTemplate(w, "klippekort-category.html", data)
+}
+
+func (h *Handlers) KlippekortPurchaseInstant(w http.ResponseWriter, r *http.Request) {
+	user := middleware.GetUserFromContext(r.Context())
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	categoryID := r.FormValue("category_id")
+	packageIndex, err := strconv.Atoi(r.FormValue("package_index"))
+	if err != nil {
+		http.Error(w, "Invalid package index", http.StatusBadRequest)
+		return
+	}
+
+	community := config.GetCurrent()
+	
+	// Find the category and package
+	var selectedCategory *config.KlippekortCategory
+	var selectedPackage *config.CardPackage
+	
+	for _, category := range community.Pricing.Klippekort.Categories {
+		if category.ID == categoryID {
+			selectedCategory = &category
+			if packageIndex >= 0 && packageIndex < len(category.Packages) {
+				selectedPackage = &category.Packages[packageIndex]
+			}
+			break
+		}
+	}
+	
+	if selectedCategory == nil || selectedPackage == nil {
+		http.Error(w, "Invalid category or package", http.StatusBadRequest)
+		return
+	}
+
+	// Create payment intent
+	paymentIntent, err := h.paymentService.CreateKlippekortPaymentIntent(
+		user.ID, 
+		categoryID, 
+		selectedPackage.Klipp,
+		int64(selectedPackage.Price),
+	)
+	if err != nil {
+		http.Error(w, "Failed to create payment", http.StatusInternalServerError)
+		return
+	}
+
+	// Return inline payment form
+	data := map[string]interface{}{
+		"PaymentIntent": paymentIntent,
+		"Package":       selectedPackage,
+		"Category":      selectedCategory,
+		"Community":     community,
+	}
+
+	h.renderTemplate(w, "klippekort-purchase-form.html", data)
+}
+
+// Helper functions
+
+func (h *Handlers) getUserKlippBalances(userID int) (map[string]int, error) {
+	query := `
+		SELECT category_id, SUM(klipp_left) as total_klipp 
+		FROM klippekort 
+		WHERE user_id = ? AND klipp_left > 0 
+		GROUP BY category_id
+	`
+	
+	rows, err := h.db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	balances := make(map[string]int)
+	for rows.Next() {
+		var categoryID string
+		var totalKlipp int
+		if err := rows.Scan(&categoryID, &totalKlipp); err != nil {
+			return nil, err
+		}
+		balances[categoryID] = totalKlipp
+	}
+
+	return balances, nil
+}
+
+func (h *Handlers) getUserKlippBalance(userID int, categoryID string) (int, error) {
+	query := `
+		SELECT SUM(klipp_left) as total_klipp 
+		FROM klippekort 
+		WHERE user_id = ? AND category_id = ? AND klipp_left > 0
+	`
+	
+	var totalKlipp sql.NullInt64
+	err := h.db.QueryRow(query, userID, categoryID).Scan(&totalKlipp)
+	if err != nil {
+		return 0, err
+	}
+
+	if totalKlipp.Valid {
+		return int(totalKlipp.Int64), nil
+	}
+	return 0, nil
+}

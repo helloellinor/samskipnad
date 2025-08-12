@@ -1,270 +1,313 @@
 {{define "content"}}
 <style>
-    .klipp-concept {
-        background: linear-gradient(135deg, {{.Community.Colors.Primary}}15, {{.Community.Colors.Secondary}}15);
-        border-left: 4px solid {{.Community.Colors.Primary}};
-        border-radius: 8px;
-        padding: 1.5rem;
+    /* Edgy minimalist klippekort design */
+    .klipp-header {
+        background: linear-gradient(45deg, #000, #1a1a1a);
+        border: 1px solid #333;
         margin-bottom: 2rem;
-        position: sticky;
-        top: 20px;
-        z-index: 100;
+        position: relative;
+        overflow: hidden;
     }
     
-    .category-section {
-        margin-bottom: 3rem;
-    }
-    
-    .category-header {
-        border-bottom: 3px solid;
-        padding-bottom: 1rem;
-        margin-bottom: 2rem;
-    }
-    
-    .pricing-card {
-        border: 2px solid transparent;
-        border-radius: 12px;
-        transition: all 0.3s ease;
+    .klipp-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
         height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        animation: shine 3s infinite;
     }
     
-    .pricing-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    @keyframes shine {
+        0% { left: -100%; }
+        100% { left: 100%; }
     }
     
-    .pricing-card.best-deal {
-        border-color: {{.Community.Colors.Success}};
-        position: relative;
-        transform: scale(1.05);
-    }
-    
-    .best-deal-badge {
-        position: absolute;
-        top: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: {{.Community.Colors.Success}};
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: bold;
-    }
-    
-    .savings-chart {
-        background: {{.Community.Colors.Background}};
-        border-radius: 8px;
-        padding: 1.5rem;
-        margin-top: 2rem;
-    }
-    
-    .savings-bar {
-        background: linear-gradient(90deg, {{.Community.Colors.Danger}}, {{.Community.Colors.Warning}}, {{.Community.Colors.Success}});
-        height: 40px;
-        border-radius: 20px;
-        position: relative;
-        margin: 1rem 0;
-    }
-    
-    .price-marker {
-        position: absolute;
-        top: -30px;
-        transform: translateX(-50%);
-        background: white;
-        padding: 0.25rem 0.5rem;
+    .balance-display {
+        background: #0a0a0a;
+        border: 1px solid #333;
         border-radius: 4px;
-        font-size: 0.8rem;
-        font-weight: bold;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 1rem;
+        margin-bottom: 2rem;
     }
     
-    .special-sessions {
-        background: {{.Community.Colors.Surface}};
-        border-radius: 12px;
-        padding: 2rem;
-        margin-top: 3rem;
+    .balance-item {
+        padding: 0.5rem;
+        border-bottom: 1px solid #222;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
     
-    .trust-text {
-        background: {{.Community.Colors.Primary}}10;
-        border-radius: 6px;
-        padding: 0.75rem;
-        margin-top: 1rem;
+    .balance-item:last-child {
+        border-bottom: none;
+    }
+    
+    .category-tabs {
+        display: flex;
+        border-bottom: 1px solid #333;
+        margin-bottom: 2rem;
+        overflow-x: auto;
+    }
+    
+    .category-tab {
+        background: transparent;
+        border: none;
+        color: #666;
+        padding: 1rem 2rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: 'Space Mono', monospace;
+        text-transform: uppercase;
+        letter-spacing: 1px;
         font-size: 0.9rem;
-        color: {{.Community.Colors.Muted}};
+        border-bottom: 2px solid transparent;
+        white-space: nowrap;
+    }
+    
+    .category-tab:hover {
+        color: #fff;
+        background: #111;
+    }
+    
+    .category-tab.active {
+        color: #ff6b35;
+        border-bottom-color: #ff6b35;
+        background: #0a0a0a;
+    }
+    
+    .category-content {
+        min-height: 400px;
+        background: #0a0a0a;
+        border: 1px solid #333;
+        border-radius: 4px;
+    }
+    
+    .package-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .package-card {
+        background: #111;
+        border: 1px solid #333;
+        border-radius: 4px;
+        padding: 1.5rem;
+        transition: all 0.3s;
+        position: relative;
+        cursor: pointer;
+    }
+    
+    .package-card:hover {
+        border-color: #ff6b35;
+        box-shadow: 0 0 20px rgba(255,107,53,0.2);
+        transform: translateY(-2px);
+    }
+    
+    .package-card.best-deal {
+        border-color: #00ff41;
+        background: #001a06;
+    }
+    
+    .package-card.best-deal::before {
+        content: 'BEST';
+        position: absolute;
+        top: -1px;
+        right: -1px;
+        background: #00ff41;
+        color: #000;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.7rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+    
+    .package-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #333;
+    }
+    
+    .package-klipp {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #fff;
+    }
+    
+    .package-price {
+        text-align: right;
+    }
+    
+    .total-price {
+        font-size: 1.5rem;
+        color: #ff6b35;
+        font-weight: bold;
+    }
+    
+    .per-klipp {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .savings {
+        background: #001a06;
+        color: #00ff41;
+        padding: 0.25rem 0.5rem;
+        border-radius: 2px;
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+        display: inline-block;
+    }
+    
+    .purchase-btn {
+        width: 100%;
+        background: transparent;
+        border: 1px solid #ff6b35;
+        color: #ff6b35;
+        padding: 0.75rem;
+        font-family: 'Space Mono', monospace;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-top: 1rem;
+    }
+    
+    .purchase-btn:hover {
+        background: #ff6b35;
+        color: #000;
+    }
+    
+    .purchase-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+    
+    .error-message {
+        background: #1a0606;
+        border: 1px solid #ff073a;
+        color: #ff073a;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 4px;
+    }
+    
+    .success-message {
+        background: #061a06;
+        border: 1px solid #00ff41;
+        color: #00ff41;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 4px;
     }
     
     @media (max-width: 768px) {
-        .klipp-concept {
-            position: relative;
-            top: 0;
+        .category-tabs {
+            flex-wrap: wrap;
         }
         
-        .pricing-card.best-deal {
-            transform: none;
+        .category-tab {
+            flex: 1;
+            min-width: 120px;
         }
         
-        .category-section {
-            margin-bottom: 2rem;
+        .package-grid {
+            grid-template-columns: 1fr;
         }
     }
 </style>
 
-<!-- Bootstrap Icons CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-
-<!-- Klipp Concept Explanation -->
-<div class="klipp-concept">
-    <div class="row align-items-center">
-        <div class="col-md-8">
-            <h4 class="mb-2">
-                <i class="bi bi-ticket-perforated" style="color: {{.Community.Colors.Primary}};"></i>
-                Hva er klipp?
-            </h4>
-            <p class="mb-0">
-                <strong>1 klipp = 1 treningsøkt (60 min).</strong> 
-                Kjøp flere klipp om gangen for lavere pris per økt.
-            </p>
+<!-- HTMX Klippekort Interface -->
+<div class="klipp-header p-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-1 text-white">KLIPPEKORT</h1>
+            <p class="mb-0 text-muted">1 KLIPP = 1 SESSION · NO EXPIRY</p>
         </div>
-        <div class="col-md-4 text-md-end">
-            <div class="d-inline-flex align-items-center bg-white rounded px-3 py-2">
-                <i class="bi bi-infinity text-primary me-2"></i>
-                <small class="text-muted">Ingen utløpsdato</small>
-            </div>
+        <div class="text-end">
+            <button class="btn btn-outline-light btn-sm" 
+                    hx-get="/api/klippekort/balance"
+                    hx-target="#balance-display"
+                    hx-indicator="#balance-loading">
+                <span id="balance-loading" class="htmx-indicator">⟳</span>
+                REFRESH BALANCE
+            </button>
         </div>
     </div>
 </div>
 
-{{range .Community.Pricing.Klippekort.Categories}}
-<div class="category-section">
-    <!-- Category Header -->
-    <div class="category-header" style="border-color: {{.Color}};">
-        <div class="row align-items-center">
-            <div class="col">
-                <h2 class="mb-1" style="color: {{.Color}};">
-                    <i class="bi bi-{{.Icon}} me-2"></i>
-                    {{.Name}}
-                </h2>
-                <p class="text-muted mb-0">{{.Description}}</p>
-            </div>
+<!-- Balance Display -->
+<div id="balance-display" class="balance-display"
+     hx-get="/api/klippekort/balance"
+     hx-trigger="load">
+    <div class="text-center p-4">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
         </div>
     </div>
+</div>
 
-    <!-- Pricing Cards -->
-    <div class="row g-4 mb-4">
-        {{range $index, $package := .Packages}}
-        <div class="col-md-4">
-            <div class="card pricing-card {{if $package.Badge}}best-deal{{end}}">
-                {{if $package.Badge}}
-                <div class="best-deal-badge">{{$package.Badge}}</div>
-                {{end}}
-                
-                <div class="card-header text-center" style="background-color: {{$.Color}}20; border-color: {{$.Color}};">
-                    <h5 class="mb-0" style="color: {{$.Color}};">{{$package.Name}}</h5>
-                </div>
-                
-                <div class="card-body text-center">
-                    <div class="display-6 fw-bold mb-2" style="color: {{$.Color}};">
-                        {{$.Community.FormatPrice $package.Price}}
-                    </div>
-                    
-                    <div class="text-muted mb-3">
-                        {{$.Community.FormatPrice $package.PricePerKlipp}} per klipp
-                    </div>
-                    
-                    {{if gt $package.SavePercent 0}}
-                    <div class="alert alert-success py-2 mb-3">
-                        <i class="bi bi-piggy-bank me-1"></i>
-                        Spar {{$package.SavePercent}}%
-                    </div>
-                    {{end}}
-                    
-                    <div class="d-grid">
-                        <button class="btn btn-outline-primary" 
-                                style="border-color: {{$.Color}}; color: {{$.Color}};"
-                                hx-post="/klippekort/purchase"
-                                hx-vals='{"category_id": "{{$.ID}}", "package_index": {{$index}}}'
-                                hx-target="#purchase-result"
-                                hx-swap="innerHTML">
-                            Kjøp nå
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {{end}}
-    </div>
-
-    <!-- Visual Savings Chart -->
-    {{if gt (len .Packages) 1}}
-    <div class="savings-chart">
-        <h6 class="mb-3">
-            <i class="bi bi-graph-down text-success me-2"></i>
-            Pris per klipp synker med større pakker
-        </h6>
-        <div class="savings-bar">
-            {{range $index, $package := .Packages}}
-            <div class="price-marker" style="left: {{if eq (len $.Packages) 1}}50{{else}}{{mul (div $index (sub1 (len $.Packages))) 100}}{{end}}%;">
-                {{$.Community.FormatPrice $package.PricePerKlipp}}
-            </div>
-            {{end}}
-        </div>
-        <div class="d-flex justify-content-between text-muted small">
-            <span>Høyere pris</span>
-            <span>Lavere pris</span>
-        </div>
-    </div>
-    {{end}}
-
-    <!-- Trust Text -->
-    {{if .InfoText}}
-    <div class="trust-text">
-        <i class="bi bi-shield-check text-success me-2"></i>
-        {{.InfoText}}
-    </div>
+<!-- Category Navigation -->
+<div class="category-tabs">
+    {{range $index, $category := .Community.Pricing.Klippekort.Categories}}
+    <button class="category-tab {{if eq $index 0}}active{{end}}"
+            hx-get="/api/klippekort/category?category={{$category.ID}}"
+            hx-target="#category-content"
+            hx-indicator="#category-loading"
+            onclick="setActiveTab(this)">
+        {{$category.Name}}
+    </button>
     {{end}}
 </div>
-{{end}}
 
-<!-- Special Sessions Section -->
-<div class="special-sessions">
-    <h3 class="mb-3" style="color: {{.Community.Colors.Muted}};">
-        <i class="bi bi-star me-2"></i>
-        Spesielle tjenester
-    </h3>
-    <div class="row">
-        <div class="col-md-6">
-            <div class="d-flex align-items-center mb-3">
-                <div class="flex-shrink-0">
-                    <i class="bi bi-mortarboard fs-4" style="color: {{.Community.Colors.Secondary}};"></i>
-                </div>
-                <div class="flex-grow-1 ms-3">
-                    <h6 class="mb-1">Introduksjonstimer</h6>
-                    <p class="text-muted mb-0 small">Gratis for nye medlemmer</p>
-                </div>
-                <div class="flex-shrink-0">
-                    <span class="badge bg-success">Gratis</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="d-flex align-items-center mb-3">
-                <div class="flex-shrink-0">
-                    <i class="bi bi-people fs-4" style="color: {{.Community.Colors.Secondary}};"></i>
-                </div>
-                <div class="flex-grow-1 ms-3">
-                    <h6 class="mb-1">Gruppetimer</h6>
-                    <p class="text-muted mb-0 small">Inkludert i medlemskap</p>
-                </div>
-                <div class="flex-shrink-0">
-                    <a href="/memberships" class="btn btn-sm btn-outline-secondary">Se medlemskap</a>
-                </div>
-            </div>
+<!-- Category Content -->
+<div id="category-content" class="category-content">
+    <div class="text-center p-5">
+        <div id="category-loading" class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
         </div>
     </div>
 </div>
 
 <!-- Purchase Result -->
-<div id="purchase-result" class="mt-4"></div>
+<div id="purchase-result"></div>
+
+<script>
+function setActiveTab(button) {
+    // Remove active class from all tabs
+    document.querySelectorAll('.category-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Add active class to clicked tab
+    button.classList.add('active');
+}
+
+// Load first category on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const firstCategory = '{{if .Community.Pricing.Klippekort.Categories}}{{(index .Community.Pricing.Klippekort.Categories 0).ID}}{{end}}';
+    if (firstCategory) {
+        htmx.ajax('GET', '/api/klippekort/category?category=' + firstCategory, '#category-content');
+    }
+});
+
+// Auto-refresh balance after purchase
+document.body.addEventListener('htmx:afterRequest', function(evt) {
+    if (evt.detail.pathInfo.requestPath.includes('/klippekort/purchase')) {
+        htmx.ajax('GET', '/api/klippekort/balance', '#balance-display');
+    }
+});
+</script>
 {{end}}
