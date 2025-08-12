@@ -1,53 +1,103 @@
+{{template "base" .}}
+
 {{define "content"}}
-<div class="cyber-hero" style="padding: 2rem;">
+<div class="hero-section" style="padding: var(--space-12) 0; background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);">
     <div class="hero-content">
-        <h1 style="font-size: 2rem;">WELCOME BACK, {{.User.FirstName | upper}}!</h1>
-        <p style="color: var(--secondary-color); margin-bottom: 0;">System dashboard initialized</p>
+        <h1 class="text-center" style="color: white;">Welcome back, {{.User.FirstName}}!</h1>
+        <p class="text-center lead" style="color: rgba(255, 255, 255, 0.8); margin-bottom: 0;">Your dashboard is ready</p>
     </div>
 </div>
 
-<div class="row mt-4">
+<div class="dashboard-grid">
     <!-- User Profile Card -->
-    <div class="col-md-4">
-        <div class="cyber-card">
-            <div class="text-center mb-3">
-                <div style="
-                    width: 80px; 
-                    height: 80px; 
-                    border-radius: 50%; 
-                    background: linear-gradient(45deg, var(--neon-green), var(--neon-orange)); 
-                    color: var(--dark-color); 
-                    display: flex; 
-                    align-items: center; 
-                    justify-content: center; 
-                    font-size: 1.5rem; 
-                    font-weight: bold; 
-                    margin: 0 auto 1rem;
-                    font-family: 'Space Mono', monospace;
-                ">
-                    {{substr .User.FirstName 0 1}}{{substr .User.LastName 0 1}}
-                </div>
-                <h4 style="color: var(--white); font-family: 'Space Mono', monospace; text-transform: uppercase;">
-                    {{.User.FirstName}} {{.User.LastName}}
-                </h4>
-                <span style="
-                    background: var(--neon-orange); 
-                    color: var(--dark-color); 
-                    padding: 0.25rem 0.5rem; 
-                    font-family: 'Space Mono', monospace; 
-                    font-size: 0.75rem; 
-                    font-weight: bold; 
-                    text-transform: uppercase;
-                ">
-                    {{.User.Role}}
-                </span>
-                <p style="color: var(--secondary-color); font-family: 'Space Mono', monospace; margin-top: 1rem;">
-                    Member since {{.User.CreatedAt.Format "Jan 2006"}}
-                </p>
+    <div class="dashboard-card">
+        <div class="dashboard-card-header">
+            <h4>Your Profile</h4>
+        </div>
+        <div class="dashboard-card-body text-center">
+            <div class="user-avatar">
+                {{substr .User.FirstName 0 1}}{{substr .User.LastName 0 1}}
             </div>
-            
-            <div class="user-stats" style="border-top: 1px solid var(--border-color); padding-top: 1rem;">
-                <div class="row text-center">
+            <h4 class="mb-2">{{.User.FirstName}} {{.User.LastName}}</h4>
+            <span class="badge bg-primary">{{.User.Role | title}}</span>
+            <p class="text-muted mt-4">
+                Member since {{.User.CreatedAt.Format "January 2006"}}
+            </p>
+        </div>
+    </div>
+
+    <!-- Quick Stats Card -->
+    <div class="dashboard-card">
+        <div class="dashboard-card-header">
+            <h4>Quick Stats</h4>
+        </div>
+        <div class="dashboard-card-body">
+            <div class="dashboard-stat">
+                <span class="dashboard-stat-number">0</span>
+                <span class="dashboard-stat-label">Classes Booked</span>
+            </div>
+            <div class="dashboard-stat">
+                <span class="dashboard-stat-number">{{if .User.Klippekort}}{{.User.Klippekort.Balance}}{{else}}0{{end}}</span>
+                <span class="dashboard-stat-label">Klippekort Balance</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Card -->
+    <div class="dashboard-card">
+        <div class="dashboard-card-header">
+            <h4>Quick Actions</h4>
+        </div>
+        <div class="dashboard-card-body">
+            {{if .Community.Features.Classes}}
+            <a href="/classes" class="btn btn-primary w-full mb-3" 
+               hx-get="/classes" hx-target="main" hx-push-url="true">
+                Browse Classes
+            </a>
+            {{end}}
+            {{if .Community.Features.Memberships}}
+            <a href="/memberships" class="btn btn-secondary w-full mb-3"
+               hx-get="/memberships" hx-target="main" hx-push-url="true">
+                View Memberships
+            </a>
+            {{end}}
+            <a href="/klippekort" class="btn btn-outline-primary w-full mb-3"
+               hx-get="/klippekort" hx-target="main" hx-push-url="true">
+                Manage Klippekort
+            </a>
+            <a href="/profile" class="btn btn-outline-secondary w-full"
+               hx-get="/profile" hx-target="main" hx-push-url="true">
+                Edit Profile
+            </a>
+        </div>
+    </div>
+</div>
+
+{{if .Community}}
+<div class="mt-8">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="mb-0">Welcome to {{.Community.Name}}</h3>
+        </div>
+        <div class="card-body">
+            <p class="mb-4">{{.Community.Description}}</p>
+            {{if .Community.Content.Features}}
+            <div class="features-grid">
+                {{range $index, $feature := .Community.Content.Features}}
+                {{if lt $index 3}}
+                <div class="feature-box">
+                    <h4>{{$feature.Title}}</h4>
+                    <p>{{$feature.Description}}</p>
+                </div>
+                {{end}}
+                {{end}}
+            </div>
+            {{end}}
+        </div>
+    </div>
+</div>
+{{end}}
+{{end}}
                     <div class="col-6">
                         <div style="color: var(--neon-green); font-family: 'Space Mono', monospace; font-size: 1.5rem; font-weight: bold;">
                             {{len .UserBookings}}

@@ -1,147 +1,238 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{if .Community}}{{.Community.Locale.Language}}{{else}}en{{end}}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Samskipnad</title>
-    <meta name="description" content="Create a new Samskipnad account">
-    <!-- Classic 1999 styling -->
-    <script src="/static/js/htmx-lite.js"></script>
+    <title>{{.Title}}{{if .Community}} - {{.Community.Name}}{{end}}</title>
+    
+    <!-- Modern CSS with community theming -->
     <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="/static/js/htmx-lite.js"></script>
+    
+    <!-- Meta tags for SEO and social -->
+    <meta name="description" content="Create a new {{if .Community}}{{.Community.Name}}{{else}}Samskipnad{{end}} account">
+    <meta name="theme-color" content="{{if .Community}}{{.Community.Colors.Primary}}{{else}}#2e3440{{end}}">
+    
+    {{if .Community}}
+    <!-- Dynamic community theming -->
     <style>
-        /* Additional 1999-style overrides */
-        body {
-            background-image: url('data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==');
-            background-repeat: repeat;
+        :root {
+            --primary-color: {{.Community.Colors.Primary}};
+            --secondary-color: {{.Community.Colors.Secondary}};
+            --accent-color: {{.Community.Colors.Accent}};
+            --success-color: {{.Community.Colors.Success}};
+            --warning-color: {{.Community.Colors.Warning}};
+            --danger-color: {{.Community.Colors.Danger}};
+            --background-color: {{.Community.Colors.Background}};
+            --surface-color: {{.Community.Colors.Surface}};
+            --text-color: {{.Community.Colors.Text}};
+            --text-muted: {{.Community.Colors.Muted}};
+            
+            {{if .Community.Fonts.Primary}}
+            --font-primary: '{{.Community.Fonts.Primary}}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            {{end}}
+            {{if .Community.Fonts.Secondary}}
+            --font-secondary: '{{.Community.Fonts.Secondary}}', 'SF Mono', Monaco, Consolas, monospace;
+            {{end}}
         }
     </style>
+    {{end}}
 </head>
 <body>
-    <!-- Classic skip link -->
+    <!-- Skip link for accessibility -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
     
-    <!-- Classic 1999 navigation -->
+    <!-- Modern navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <a href="/" class="nav-brand" 
                hx-get="/" hx-target="body" hx-push-url="true">
-                SAMSKIPNAD
+                {{if .Community}}{{.Community.Name}}{{else}}Samskipnad{{end}}
             </a>
+            
+            <!-- Mobile navigation toggle -->
+            <button class="nav-toggle" aria-label="Toggle navigation menu">
+                ☰
+            </button>
+            
             <div class="nav-menu">
-                <div class="nav-links">
+                <nav class="nav-links" role="navigation">
                     <a href="/login" class="nav-link"
-                       hx-get="/login" hx-target="body" hx-push-url="true">Login</a> |
-                    <a href="/register" class="nav-link">Register</a>
-                </div>
+                       hx-get="/login" hx-target="body" hx-push-url="true">Login</a>
+                    <span class="nav-separator">•</span>
+                    <a href="/register" class="nav-link active">Register</a>
+                </nav>
             </div>
         </div>
     </nav>
 
-    <!-- Classic 1999 main content -->
+    <!-- Main content area -->
     <main id="main-content" class="main-content">
-        <div class="text-center">
-            <div class="card">
-                <div class="card-header">
-                    <h1>NEW USER REGISTRATION</h1>
-                    <p>Create your account below</p>
-                </div>
-                <div class="card-body">
-                    
-                    {{if .Error}}
-                    <div class="alert alert-danger">
-                        <b>REGISTRATION ERROR:</b> {{.Error}}
+        <div class="row justify-center">
+            <div class="col-12 col-md-8 col-lg-6">
+                <div class="card">
+                    <div class="card-header text-center">
+                        <h1 class="mb-0">Create Account</h1>
+                        <p class="text-muted mt-2 mb-0">Join {{if .Community}}{{.Community.Name}}{{else}}Samskipnad{{end}} today</p>
                     </div>
-                    {{end}}
-                    
-                    <form method="POST" action="/register">
-                        <table align="center" cellpadding="4" cellspacing="2" border="0">
-                            <tr>
-                                <td><label for="first_name" class="form-label"><b>First Name:</b></label></td>
-                                <td><input type="text" class="form-control" id="first_name" name="first_name" 
-                                           value="{{.FirstName}}" required size="25" maxlength="50"></td>
-                            </tr>
-                            <tr>
-                                <td><label for="last_name" class="form-label"><b>Last Name:</b></label></td>
-                                <td><input type="text" class="form-control" id="last_name" name="last_name" 
-                                           value="{{.LastName}}" required size="25" maxlength="50"></td>
-                            </tr>
-                            <tr>
-                                <td><label for="email" class="form-label"><b>E-mail:</b></label></td>
-                                <td><input type="email" class="form-control" id="email" name="email" 
-                                           value="{{.Email}}" required size="30" maxlength="100"></td>
-                            </tr>
-                            <tr>
-                                <td><label for="password" class="form-label"><b>Password:</b></label></td>
-                                <td><input type="password" class="form-control" id="password" name="password" 
-                                           minlength="6" required size="25" maxlength="50"></td>
-                            </tr>
-                            <tr>
-                                <td colspan="2"><small>Password must be at least 6 characters long</small></td>
-                            </tr>
-                            <tr>
-                                <td colspan="2" align="center">
-                                    <br>
-                                    <input type="submit" value="CREATE ACCOUNT" class="btn btn-primary">
-                                    <input type="reset" value="CLEAR FORM" class="btn">
-                                </td>
-                            </tr>
-                        </table>
-                    </form>
-                    
-                    <hr>
-                    
-                    <p><b>Already have an account?</b><br>
-                       <a href="/login">Click here to login</a></p>
+                    <div class="card-body">
+                        {{if .Error}}
+                        <div class="alert alert-danger">
+                            {{.Error}}
+                        </div>
+                        {{end}}
+                        
+                        <form method="POST" action="/register">
+                            <div class="row">
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        <label for="first_name" class="form-label">First Name</label>
+                                        <input type="text" 
+                                               id="first_name" 
+                                               name="first_name" 
+                                               class="form-control {{if .Error}}is-invalid{{end}}" 
+                                               value="{{.FirstName}}"
+                                               placeholder="Enter your first name"
+                                               required>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        <label for="last_name" class="form-label">Last Name</label>
+                                        <input type="text" 
+                                               id="last_name" 
+                                               name="last_name" 
+                                               class="form-control {{if .Error}}is-invalid{{end}}" 
+                                               value="{{.LastName}}"
+                                               placeholder="Enter your last name"
+                                               required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input type="email" 
+                                       id="email" 
+                                       name="email" 
+                                       class="form-control {{if .Error}}is-invalid{{end}}" 
+                                       value="{{.Email}}"
+                                       placeholder="your@email.com"
+                                       required>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        <label for="password" class="form-label">Password</label>
+                                        <input type="password" 
+                                               id="password" 
+                                               name="password" 
+                                               class="form-control {{if .Error}}is-invalid{{end}}" 
+                                               placeholder="Create a strong password"
+                                               required>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="form-group">
+                                        <label for="confirm_password" class="form-label">Confirm Password</label>
+                                        <input type="password" 
+                                               id="confirm_password" 
+                                               name="confirm_password" 
+                                               class="form-control {{if .Error}}is-invalid{{end}}" 
+                                               placeholder="Confirm your password"
+                                               required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-full btn-lg">
+                                Create Account
+                            </button>
+                        </form>
+                        
+                        <div class="text-center mt-6">
+                            <p class="text-muted">
+                                Already have an account? 
+                                <a href="/login" class="text-primary font-medium">Sign in here</a>
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Classic 1999 footer -->
-    <hr>
-    <div class="text-center">
-        <p><small>&copy; 1999 Samskipnad. All rights reserved.</small></p>
-        <p><small>Best viewed with Netscape Navigator 4.0 or Internet Explorer 4.0 at 800x600 resolution.</small></p>
-    </div>
+    <!-- Modern footer -->
+    <footer class="mt-8 py-8 text-center text-sm text-muted">
+        <div class="container">
+            <hr class="mb-6">
+            <p>&copy; {{if .Community}}{{.Community.Name}}{{else}}Samskipnad{{end}} 2024. All rights reserved.</p>
+            {{if and .Community .Community.Attribution.Show}}
+            <p class="mt-2">
+                <a href="{{.Community.Attribution.Link}}" target="_blank" class="text-muted">{{.Community.Attribution.Text}}</a>
+            </p>
+            {{end}}
+        </div>
+    </footer>
 
-    <!-- Classic JavaScript -->
+    <!-- Enhanced JavaScript -->
     <script>
-        // Simple 1999-style form validation
-        function validateForm() {
-            var firstName = document.getElementById('first_name').value;
-            var lastName = document.getElementById('last_name').value;
-            var email = document.getElementById('email').value;
-            var password = document.getElementById('password').value;
-            
-            if (firstName == "" || lastName == "" || email == "" || password == "") {
-                alert("Please fill in all fields!");
-                return false;
-            }
-            
-            if (password.length < 6) {
-                alert("Password must be at least 6 characters long!");
-                return false;
-            }
-            
-            return true;
-        }
-
         document.addEventListener('DOMContentLoaded', function() {
-            var form = document.querySelector('form');
-            if (form) {
-                form.onsubmit = validateForm;
+            // Mobile navigation toggle
+            const navToggle = document.querySelector('.nav-toggle');
+            const navMenu = document.querySelector('.nav-menu');
+            
+            if (navToggle && navMenu) {
+                navToggle.addEventListener('click', function() {
+                    navMenu.classList.toggle('open');
+                    const isOpen = navMenu.classList.contains('open');
+                    navToggle.setAttribute('aria-expanded', isOpen);
+                });
+                
+                // Close mobile menu when clicking a link
+                navMenu.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('nav-link')) {
+                        navMenu.classList.remove('open');
+                        navToggle.setAttribute('aria-expanded', 'false');
+                    }
+                });
             }
             
-            // Basic skip link functionality
-            var skipLink = document.querySelector('.skip-link');
+            // Skip link functionality
+            const skipLink = document.querySelector('.skip-link');
             if (skipLink) {
-                skipLink.onclick = function(e) {
+                skipLink.addEventListener('click', function(e) {
                     e.preventDefault();
-                    var target = document.querySelector('#main-content');
+                    const target = document.querySelector('#main-content');
                     if (target) {
                         target.focus();
+                        target.scrollIntoView();
                     }
-                };
+                });
+            }
+            
+            // Focus first input field
+            const firstInput = document.querySelector('input[type="text"]');
+            if (firstInput) {
+                firstInput.focus();
+            }
+            
+            // Password confirmation validation
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirm_password');
+            
+            function validatePasswordMatch() {
+                if (password.value !== confirmPassword.value) {
+                    confirmPassword.setCustomValidity('Passwords do not match');
+                } else {
+                    confirmPassword.setCustomValidity('');
+                }
+            }
+            
+            if (password && confirmPassword) {
+                password.addEventListener('input', validatePasswordMatch);
+                confirmPassword.addEventListener('input', validatePasswordMatch);
             }
         });
     </script>
