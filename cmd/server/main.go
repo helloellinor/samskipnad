@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"samskipnad/internal/auth"
+	"samskipnad/internal/config"
 	"samskipnad/internal/database"
 	"samskipnad/internal/handlers"
 	"samskipnad/internal/middleware"
@@ -15,6 +16,14 @@ import (
 )
 
 func main() {
+	// Load community configuration
+	communityName := os.Getenv("COMMUNITY")
+	community, err := config.Load(communityName)
+	if err != nil {
+		log.Fatal("Failed to load community config:", err)
+	}
+	log.Printf("Loaded community config: %s", community.Name)
+
 	// Initialize database
 	db, err := database.Init()
 	if err != nil {
@@ -32,6 +41,9 @@ func main() {
 	
 	// Static files
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./web/static/"))))
+	
+	// Dynamic CSS based on community config
+	r.HandleFunc("/css/community.css", handlers.DynamicCSS).Methods("GET")
 
 	// Public routes
 	r.HandleFunc("/", handlers.Home).Methods("GET")

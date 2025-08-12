@@ -13,7 +13,7 @@
                 <h4>Monthly Membership</h4>
             </div>
             <div class="card-body text-center">
-                <h2 class="text-primary">$99<small class="text-muted">/month</small></h2>
+                <h2 class="text-primary">{{.Community.FormatPrice .Community.Pricing.Monthly}}<small class="text-muted">/month</small></h2>
                 <ul class="list-unstyled mt-3">
                     <li><i class="bi bi-check-circle text-success"></i> Unlimited classes</li>
                     <li><i class="bi bi-check-circle text-success"></i> Priority booking</li>
@@ -22,12 +22,12 @@
                 </ul>
             </div>
             <div class="card-footer">
-                <button class="btn btn-primary w-100" 
-                        hx-post="/memberships/monthly" 
-                        hx-target="#membership-result"
-                        hx-swap="innerHTML">
-                    Get Monthly Membership
-                </button>
+                <form method="POST" action="/payment/membership">
+                    <input type="hidden" name="type" value="monthly">
+                    <button type="submit" class="btn btn-primary w-100">
+                        Get Monthly Membership
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -39,8 +39,8 @@
                 <span class="badge bg-light text-success">Best Value</span>
             </div>
             <div class="card-body text-center">
-                <h2 class="text-success">$999<small class="text-muted">/year</small></h2>
-                <p class="text-success">Save $189!</p>
+                <h2 class="text-success">{{.Community.FormatPrice .Community.Pricing.Yearly}}<small class="text-muted">/year</small></h2>
+                <p class="text-success">Save {{.Community.FormatPrice (subtract (multiply .Community.Pricing.Monthly 12) .Community.Pricing.Yearly)}}!</p>
                 <ul class="list-unstyled mt-3">
                     <li><i class="bi bi-check-circle text-success"></i> All monthly benefits</li>
                     <li><i class="bi bi-check-circle text-success"></i> 2 months free</li>
@@ -49,12 +49,12 @@
                 </ul>
             </div>
             <div class="card-footer">
-                <button class="btn btn-success w-100" 
-                        hx-post="/memberships/yearly" 
-                        hx-target="#membership-result"
-                        hx-swap="innerHTML">
-                    Get Yearly Membership
-                </button>
+                <form method="POST" action="/payment/membership">
+                    <input type="hidden" name="type" value="yearly">
+                    <button type="submit" class="btn btn-success w-100">
+                        Get Yearly Membership
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -72,7 +72,7 @@
                             <p class="text-muted mb-0">Perfect for trying us out</p>
                         </div>
                         <div class="text-end">
-                            <h5 class="text-info">$25</h5>
+                            <h5 class="text-info">{{.Community.FormatPrice .Community.Pricing.DropIn}}</h5>
                             <button class="btn btn-sm btn-info" 
                                     hx-post="/tickets/single" 
                                     hx-target="#ticket-result"
@@ -87,10 +87,10 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h5>5-Class Pack</h5>
-                            <p class="text-muted mb-0">Save $25 on individual classes</p>
+                            <p class="text-muted mb-0">Save money on individual classes</p>
                         </div>
                         <div class="text-end">
-                            <h5 class="text-info">$100</h5>
+                            <h5 class="text-info">{{.Community.FormatPrice (multiply .Community.Pricing.DropIn 4)}}</h5>
                             <button class="btn btn-sm btn-info" 
                                     hx-post="/tickets/pack_5" 
                                     hx-target="#ticket-result"
@@ -108,7 +108,7 @@
                             <p class="text-muted mb-0">Best value for regular practice</p>
                         </div>
                         <div class="text-end">
-                            <h5 class="text-info">$180</h5>
+                            <h5 class="text-info">{{.Community.FormatPrice (multiply .Community.Pricing.DropIn 8)}}</h5>
                             <button class="btn btn-sm btn-info" 
                                     hx-post="/tickets/pack_10" 
                                     hx-target="#ticket-result"

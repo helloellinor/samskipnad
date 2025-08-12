@@ -12,4 +12,5 @@ require (
 require (
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/stripe/stripe-go/v76 v76.25.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

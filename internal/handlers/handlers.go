@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"samskipnad/internal/auth"
+	"samskipnad/internal/config"
 	"samskipnad/internal/middleware"
 	"samskipnad/internal/models"
 	"samskipnad/internal/payments"
@@ -49,6 +50,15 @@ func New(db *sql.DB, authService *auth.Service, paymentService *payments.Service
 			}
 			return strings.ToUpper(s[start:end])
 		},
+		"replace": func(s, old, new string) string {
+			return strings.ReplaceAll(s, old, new)
+		},
+		"multiply": func(a, b int) int {
+			return a * b
+		},
+		"subtract": func(a, b int) int {
+			return a - b
+		},
 	}
 	
 	templates := template.Must(template.New("").Funcs(funcMap).ParseGlob("web/templates/*.html"))
@@ -67,17 +77,22 @@ func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	community := config.GetCurrent()
 	data := map[string]interface{}{
-		"Title": "Samskipnad - Yoga Community Platform",
+		"Title":     community.Content.Home.Title,
+		"Community": community,
 	}
 
 	h.renderTemplate(w, "home-standalone.html", data)
 }
 
 func (h *Handlers) Login(w http.ResponseWriter, r *http.Request) {
+	community := config.GetCurrent()
+	
 	if r.Method == "GET" {
 		data := map[string]interface{}{
-			"Title": "Login",
+			"Title":     "Login",
+			"Community": community,
 		}
 		h.renderTemplate(w, "login-standalone.html", data)
 		return
@@ -90,9 +105,10 @@ func (h *Handlers) Login(w http.ResponseWriter, r *http.Request) {
 	user, err := h.authService.Login(email, password)
 	if err != nil {
 		data := map[string]interface{}{
-			"Title": "Login",
-			"Error": "Invalid email or password",
-			"Email": email,
+			"Title":     "Login",
+			"Error":     "Invalid email or password",
+			"Email":     email,
+			"Community": community,
 		}
 		h.renderTemplate(w, "login-standalone.html", data)
 		return
@@ -371,9 +387,11 @@ func (h *Handlers) Memberships(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	community := config.GetCurrent()
 	data := map[string]interface{}{
-		"Title": "Memberships",
-		"User":  user,
+		"Title":     "Memberships",
+		"User":      user,
+		"Community": community,
 	}
 
 	h.renderTemplate(w, "memberships.html", data)
@@ -950,13 +968,14 @@ func (h *Handlers) MembershipPayment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Set prices based on type
+	// Set prices based on type from community config
+	community := config.GetCurrent()
 	var amount int64
 	switch membershipType {
 	case "monthly":
-		amount = 9900 // $99.00
+		amount = int64(community.Pricing.Monthly * 100) // Convert to cents
 	case "yearly":
-		amount = 99900 // $999.00
+		amount = int64(community.Pricing.Yearly * 100) // Convert to cents
 	default:
 		http.Error(w, "Invalid membership type", http.StatusBadRequest)
 		return
@@ -1091,4 +1110,358 @@ func (h *Handlers) getUserBookings(userID int) ([]models.Booking, error) {
 	}
 
 	return bookings, nil
+}
+
+// DynamicCSS generates CSS based on community configuration
+func (h *Handlers) DynamicCSS(w http.ResponseWriter, r *http.Request) {
+	community := config.GetCurrent()
+	
+	w.Header().Set("Content-Type", "text/css")
+	
+	css := fmt.Sprintf(`/* Dynamic CSS for %s */
+
+/* CSS Variables from Community Config */
+:root {
+    --primary-color: %s;
+    --secondary-color: %s;
+    --accent-color: %s;
+    --success-color: %s;
+    --warning-color: %s;
+    --danger-color: %s;
+    --background-color: %s;
+    --surface-color: %s;
+    --text-color: %s;
+    --muted-color: %s;
+    --font-primary: '%s', system-ui, -apple-system, sans-serif;
+    --font-secondary: '%s', 'Monaco', 'Menlo', monospace;
+    --font-size-base: %s;
+}
+
+/* Scandinavian-inspired base styles */
+body {
+    font-family: var(--font-primary);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    font-size: var(--font-size-base);
+    margin: 0;
+    padding: 0;
+}
+
+/* Navigation */
+.navbar {
+    background-color: var(--surface-color) !important;
+    border-bottom: 1px solid var(--primary-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: var(--primary-color) !important;
+    text-decoration: none;
+}
+
+.navbar-nav .nav-link {
+    color: var(--text-color) !important;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+    margin: 0 0.5rem;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--accent-color) !important;
+}
+
+/* Cards */
+.card {
+    background-color: var(--surface-color);
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+    transform: scaleX(0);
+    transition: transform 0.2s ease;
+}
+
+.card:hover::before {
+    transform: scaleX(1);
+}
+
+.card-header {
+    background: var(--surface-color);
+    border-bottom: 1px solid #e5e7eb;
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+}
+
+.card-body {
+    color: var(--text-color);
+}
+
+.card-title {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    border: 1px solid;
+    padding: 0.625rem 1.25rem;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-outline-secondary {
+    background-color: transparent;
+    border-color: var(--muted-color);
+    color: var(--muted-color);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--muted-color);
+    color: white;
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+    color: white;
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    border-color: var(--warning-color);
+    color: var(--primary-color);
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+    color: white;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, var(--surface-color) 0%%, var(--background-color) 100%%);
+    padding: 4rem 2rem;
+    text-align: center;
+    border-radius: 12px;
+    margin: 2rem 0;
+}
+
+.hero-section h1 {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.hero-section .lead {
+    color: var(--muted-color);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    line-height: 1.6;
+}
+
+/* Feature boxes */
+.feature-box {
+    background-color: var(--surface-color);
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.2s ease;
+    border: 1px solid #e5e7eb;
+    height: 100%%;
+}
+
+.feature-box:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.feature-box h3 {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+}
+
+.feature-box p {
+    color: var(--muted-color);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Forms */
+.form-control {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 0.75rem;
+    background-color: var(--surface-color);
+    color: var(--text-color);
+    transition: border-color 0.2s ease;
+}
+
+.form-control:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(208, 135, 112, 0.1);
+    outline: none;
+}
+
+.form-label {
+    color: var(--primary-color);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+/* Profile Card */
+.profile-card {
+    background: linear-gradient(135deg, var(--surface-color) 0%%, var(--background-color) 100%%);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+.profile-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%%;
+    background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+}
+
+.profile-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.profile-stat {
+    text-align: center;
+}
+
+.profile-stat-number {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    line-height: 1;
+}
+
+.profile-stat-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--muted-color);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.25rem;
+}
+
+/* Attribution */
+.attribution {
+    text-align: center;
+    padding: 1rem;
+    color: var(--muted-color);
+    font-size: 0.8rem;
+    border-top: 1px solid #e5e7eb;
+    margin-top: 2rem;
+}
+
+.attribution a {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+.attribution a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .feature-box {
+        margin-bottom: 1rem;
+    }
+    
+    .profile-stats {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}`,
+		community.Name,
+		community.Colors.Primary,
+		community.Colors.Secondary,
+		community.Colors.Accent,
+		community.Colors.Success,
+		community.Colors.Warning,
+		community.Colors.Danger,
+		community.Colors.Background,
+		community.Colors.Surface,
+		community.Colors.Text,
+		community.Colors.Muted,
+		community.Fonts.Primary,
+		community.Fonts.Secondary,
+		community.Fonts.SizeBase,
+	)
+	
+	fmt.Fprint(w, css)
 }
