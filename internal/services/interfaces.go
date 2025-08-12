@@ -178,4 +178,22 @@ type ServiceContainer struct {
 	ItemManagement      ItemManagementService
 	Payment             PaymentService
 	EventBus            EventBusService
+	
+	// Plugin system (Phase 2)
+	PluginHost          PluginHostService
+}
+
+// PluginHostService manages the plugin system lifecycle
+type PluginHostService interface {
+	// Plugin Management
+	LoadPlugin(ctx context.Context, name, path string) error
+	UnloadPlugin(ctx context.Context, name string) error
+	GetLoadedPlugins(ctx context.Context) []string
+	
+	// Plugin Execution
+	ExecutePlugin(ctx context.Context, name string, params map[string]interface{}) (map[string]interface{}, error)
+	
+	// Lifecycle
+	Initialize(ctx context.Context) error
+	Shutdown(ctx context.Context) error
 }

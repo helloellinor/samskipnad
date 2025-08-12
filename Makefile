@@ -1,8 +1,10 @@
-.PHONY: build run dev test clean deps
+.PHONY: build run dev test clean deps proto proto-install
 
 # Variables
 BINARY_NAME=samskipnad
 MAIN_PATH=./cmd/server
+PROTO_DIR=./pkg/proto
+PROTO_OUT_DIR=./pkg/proto/v1
 
 # Build the application
 build:
@@ -76,17 +78,34 @@ run-port:
 	@echo "Running on port $(PORT)..."
 	PORT=$(PORT) ./bin/$(BINARY_NAME)
 
+# Generate gRPC code from protobuf files
+proto: proto-install
+	@echo "Generating gRPC code from protobuf files..."
+	mkdir -p $(PROTO_OUT_DIR)
+	cd $(PROTO_DIR) && protoc --go_out=../proto/v1 --go_opt=paths=source_relative \
+		--go-grpc_out=../proto/v1 --go-grpc_opt=paths=source_relative \
+		*.proto
+
+# Install protobuf compiler and plugins
+proto-install:
+	@echo "Installing protobuf tools..."
+	@which protoc > /dev/null || (echo "protoc not found. Install protobuf compiler first." && exit 1)
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+
 # Help
 help:
 	@echo "Available commands:"
-	@echo "  build     - Build the application"
-	@echo "  run       - Build and run the application"
-	@echo "  dev       - Run in development mode with hot reload"
-	@echo "  test      - Run tests"
-	@echo "  deps      - Download dependencies"
-	@echo "  clean     - Clean build artifacts"
-	@echo "  setup     - Setup development environment"
-	@echo "  fmt       - Format code"
-	@echo "  lint      - Lint code"
-	@echo "  db-reset  - Reset database"
-	@echo "  help      - Show this help"
+	@echo "  build       - Build the application"
+	@echo "  run         - Build and run the application"
+	@echo "  dev         - Run in development mode with hot reload"
+	@echo "  test        - Run tests"
+	@echo "  deps        - Download dependencies"
+	@echo "  clean       - Clean build artifacts"
+	@echo "  setup       - Setup development environment"
+	@echo "  fmt         - Format code"
+	@echo "  lint        - Lint code"
+	@echo "  db-reset    - Reset database"
+	@echo "  proto       - Generate gRPC code from protobuf files"
+	@echo "  proto-install - Install protobuf tools"
+	@echo "  help        - Show this help"

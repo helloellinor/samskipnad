@@ -1,0 +1,162 @@
+syntax = "proto3";
+
+package samskipnad.core.v1;
+
+option go_package = "github.com/helloellinor/samskipnad/pkg/proto/v1";
+
+import "common.proto";
+
+// UserProfileService provides user authentication, profile management, and role-based access control
+service UserProfileService {
+  // Authentication
+  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  
+  // Profile Management
+  rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
+  rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse);
+  rpc DeleteProfile(DeleteProfileRequest) returns (DeleteProfileResponse);
+  
+  // Role and Permission Management
+  rpc AssignRole(AssignRoleRequest) returns (AssignRoleResponse);
+  rpc GetUserRoles(GetUserRolesRequest) returns (GetUserRolesResponse);
+  rpc HasPermission(HasPermissionRequest) returns (HasPermissionResponse);
+  
+  // Session Management
+  rpc CreateSession(CreateSessionRequest) returns (CreateSessionResponse);
+  rpc ValidateSession(ValidateSessionRequest) returns (ValidateSessionResponse);
+  rpc RevokeSession(RevokeSessionRequest) returns (RevokeSessionResponse);
+  
+  // Password Management
+  rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
+}
+
+// Authentication requests and responses
+message AuthenticateRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message AuthenticateResponse {
+  User user = 1;
+  string error = 2;
+}
+
+message RegisterRequest {
+  User user = 1;
+  string password = 2;
+}
+
+message RegisterResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+// Profile management requests and responses
+message GetProfileRequest {
+  int32 user_id = 1;
+}
+
+message GetProfileResponse {
+  User user = 1;
+  string error = 2;
+}
+
+message UpdateProfileRequest {
+  int32 user_id = 1;
+  User updates = 2;
+}
+
+message UpdateProfileResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message DeleteProfileRequest {
+  int32 user_id = 1;
+}
+
+message DeleteProfileResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+// Role management requests and responses
+message AssignRoleRequest {
+  int32 user_id = 1;
+  string role = 2;
+}
+
+message AssignRoleResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message GetUserRolesRequest {
+  int32 user_id = 1;
+}
+
+message GetUserRolesResponse {
+  repeated string roles = 1;
+  string error = 2;
+}
+
+message HasPermissionRequest {
+  int32 user_id = 1;
+  string permission = 2;
+}
+
+message HasPermissionResponse {
+  bool has_permission = 1;
+  string error = 2;
+}
+
+// Session management requests and responses
+message CreateSessionRequest {
+  int32 user_id = 1;
+}
+
+message CreateSessionResponse {
+  string session_id = 1;
+  string error = 2;
+}
+
+message ValidateSessionRequest {
+  string session_id = 1;
+}
+
+message ValidateSessionResponse {
+  User user = 1;
+  string error = 2;
+}
+
+message RevokeSessionRequest {
+  string session_id = 1;
+}
+
+message RevokeSessionResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+// Password management requests and responses
+message ChangePasswordRequest {
+  int32 user_id = 1;
+  string old_password = 2;
+  string new_password = 3;
+}
+
+message ChangePasswordResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message ResetPasswordRequest {
+  string email = 1;
+}
+
+message ResetPasswordResponse {
+  bool success = 1;
+  string error = 2;
+}

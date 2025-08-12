@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package samskipnad.core.v1;
+
+option go_package = "github.com/helloellinor/samskipnad/pkg/proto/v1";
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+// Common message types used across multiple services
+
+// User message representing a user in the system
+message User {
+  int32 id = 1;
+  string email = 2;
+  string first_name = 3;
+  string last_name = 4;
+  string phone = 5;
+  bool is_admin = 6;
+  bool is_instructor = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  int32 tenant_id = 10;
+}
+
+// Tenant message representing a community/tenant in the system
+message Tenant {
+  int32 id = 1;
+  string slug = 2;
+  string name = 3;
+  string description = 4;
+  string domain = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  google.protobuf.Struct settings = 8;
+}
