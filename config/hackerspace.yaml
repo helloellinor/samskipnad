@@ -1,0 +1,199 @@
+# Hackerspace - Community tech workspace and learning hub
+# Collaborative space for makers, coders, and creators
+
+# Basic Information
+name: "Oslo Hackerspace"
+description: "A collaborative workspace for makers, coders, and creators"
+tagline: "Build, Learn, Share, Repeat"
+
+# Branding - Neo 1999 theme (tech variation)
+colors:
+  primary: "#00FF00"        # Classic green (terminal/matrix style)
+  secondary: "#FF00FF"      # Classic magenta
+  accent: "#FFFF00"         # Classic yellow
+  success: "#00FF00"        # Classic green
+  warning: "#FFA500"        # Classic orange
+  danger: "#FF0000"         # Classic red
+  background: "#000000"     # Classic black
+  surface: "#222222"        # Dark gray
+  text: "#00FF00"           # Classic green text
+  muted: "#888888"          # Gray muted
+
+# Typography - Neo 1999 fonts (tech style)
+fonts:
+  primary: "Courier New"        # Monospace terminal font
+  secondary: "Arial"            # Sans-serif for readability
+  size_base: "14px"
+
+# Community Features
+features:
+  classes: true               # Workshops and learning sessions
+  memberships: true           # Member access levels
+  community: true             # Community features
+  payments: true              # Payment processing
+  calendar: true              # Event scheduling
+
+# Content Configuration
+content:
+  home:
+    title: "Welcome to Oslo Hackerspace"
+    subtitle: "Your collaborative workspace for innovation and learning"
+    description: "Join our community of makers, programmers, and creative minds. Access tools, attend workshops, collaborate on projects, and turn your ideas into reality."
+    
+  features:
+    - title: "24/7 Workshop Access"
+      description: "Round-the-clock access to 3D printers, laser cutters, electronics lab, and collaborative workspaces for members."
+      
+    - title: "Learning & Workshops"
+      description: "Regular workshops on programming, electronics, 3D design, cybersecurity, and emerging technologies led by community experts."
+      
+    - title: "Project Collaboration"
+      description: "Find collaborators for your projects, share knowledge, and contribute to open-source initiatives in our supportive community."
+
+# Pricing (in NOK)
+pricing:
+  currency: "NOK"
+  monthly: 599             # Monthly membership
+  yearly: 5990             # Annual membership
+  drop_in: 199             # Day pass
+
+  # Klippekort system for workshops and events
+  klippekort:
+    categories:
+      - id: "workshops"
+        name: "Technical Workshops"
+        description: "Hands-on learning sessions covering programming, electronics, and maker skills"
+        icon: "code"
+        color: "#00FF00"
+        info_text: "Includes all skill levels from beginner to advanced. Materials often included."
+        packages:
+          - name: "1 workshop"
+            klipp: 1
+            price: 299
+            price_per_klipp: 299
+            save_percent: 0
+          - name: "5 workshops"
+            klipp: 5
+            price: 1349
+            price_per_klipp: 270
+            save_percent: 10
+          - name: "10 workshops"
+            klipp: 10
+            price: 2392
+            price_per_klipp: 239
+            save_percent: 20
+            badge: "Best Value"
+            
+      - id: "3d_printing"
+        name: "3D Printing Credits"
+        description: "Credits for 3D printer usage and materials"
+        icon: "box"
+        color: "#FF00FF"
+        info_text: "Pay per gram of filament used. Credits never expire."
+        packages:
+          - name: "100g credit"
+            klipp: 1
+            price: 89
+            price_per_klipp: 89
+            save_percent: 0
+          - name: "500g credit"
+            klipp: 5
+            price: 399
+            price_per_klipp: 80
+            save_percent: 10
+          - name: "1kg credit"
+            klipp: 10
+            price: 712
+            price_per_klipp: 71
+            save_percent: 20
+            badge: "Popular"
+            
+      - id: "laser_cutting"
+        name: "Laser Cutter Time"
+        description: "Machine time for laser cutting and engraving projects"
+        icon: "zap"
+        color: "#FFFF00"
+        info_text: "Priced per minute of laser time. Includes basic materials."
+        packages:
+          - name: "30 minutes"
+            klipp: 1
+            price: 199
+            price_per_klipp: 199
+            save_percent: 0
+          - name: "2 hours"
+            klipp: 4
+            price: 716
+            price_per_klipp: 179
+            save_percent: 10
+          - name: "5 hours"
+            klipp: 10
+            price: 1592
+            price_per_klipp: 159
+            save_percent: 20
+            badge: "Best Deal"
+            
+      - id: "events"
+        name: "Special Events & Hackathons"
+        description: "Access to exclusive events, competitions, and networking sessions"
+        icon: "calendar"
+        color: "#FFA500"
+        info_text: "Includes food, prizes, and swag for major events."
+        packages:
+          - name: "1 event"
+            klipp: 1
+            price: 499
+            price_per_klipp: 499
+            save_percent: 0
+          - name: "3 events"
+            klipp: 3
+            price: 1348
+            price_per_klipp: 449
+            save_percent: 10
+          - name: "Annual pass"
+            klipp: 12
+            price: 4491
+            price_per_klipp: 374
+            save_percent: 25
+            badge: "Annual"
+
+      - id: "mentorship"
+        name: "1-on-1 Mentorship"
+        description: "Personal guidance from experienced developers and makers"
+        icon: "person"
+        color: "#00FFFF"
+        info_text: "Career guidance, code review, project planning, and skill development."
+        packages:
+          - name: "1 hour"
+            klipp: 1
+            price: 799
+            price_per_klipp: 799
+            save_percent: 0
+          - name: "5 hours"
+            klipp: 5
+            price: 3596
+            price_per_klipp: 719
+            save_percent: 10
+          - name: "10 hours"
+            klipp: 10
+            price: 6393
+            price_per_klipp: 639
+            save_percent: 20
+            badge: "Mentee Special"
+
+# Locale
+locale:
+  language: "en"
+  country: "NO"
+  timezone: "Europe/Oslo"
+
+# Admin settings
+admin:
+  registration_open: true
+  require_approval: false    # Open community
+  default_role: "member"
+
+# Attribution
+attribution:
+  show: true
+  text: "Built with Samskipnad"
+  link: "https://github.com/helloellinor/samskipnad"

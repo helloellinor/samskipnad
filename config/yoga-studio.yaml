@@ -1,0 +1,228 @@
+# Zen Flow Yoga Studio - A modern mindful movement community
+# Contemporary yoga practice with traditional values
+
+# Basic Information
+name: "Zen Flow Yoga Studio"
+description: "Modern mindful movement in the heart of the city"
+tagline: "Flow with Purpose, Live with Intention"
+
+# Branding - Neo 1999 theme (wellness variation)
+colors:
+  primary: "#800080"        # Classic purple (spiritual)
+  secondary: "#4B0082"      # Classic indigo
+  accent: "#FF69B4"         # Classic hot pink
+  success: "#32CD32"        # Classic lime green
+  warning: "#FFD700"        # Classic gold
+  danger: "#DC143C"         # Classic crimson
+  background: "#F5F5DC"     # Classic beige
+  surface: "#E6E6FA"        # Classic lavender
+  text: "#2F4F4F"           # Classic dark slate gray
+  muted: "#708090"          # Classic slate gray
+
+# Typography - Neo 1999 fonts (wellness style)
+fonts:
+  primary: "Georgia"            # Elegant serif
+  secondary: "Verdana"          # Readable sans-serif
+  size_base: "16px"
+
+# Community Features
+features:
+  classes: true               # Yoga classes and workshops
+  memberships: true           # Membership packages
+  community: true             # Community features
+  payments: true              # Payment processing
+  calendar: true              # Class scheduling
+
+# Content Configuration
+content:
+  home:
+    title: "Welcome to Zen Flow Yoga Studio"
+    subtitle: "Where ancient wisdom meets modern life"
+    description: "Discover your inner strength and find balance in our welcoming community. From gentle restorative sessions to challenging power flows, we offer something for every body and every stage of your yoga journey."
+    
+  features:
+    - title: "Diverse Class Styles"
+      description: "From gentle Hatha to challenging Ashtanga, hot yoga to prenatal classes. All levels welcome with expert modifications and guidance."
+      
+    - title: "Experienced Teachers"
+      description: "Learn from certified instructors with 500+ hour training, ongoing education, and years of dedicated practice in various yoga traditions."
+      
+    - title: "Holistic Wellness"
+      description: "More than just asana - explore meditation, breathwork, philosophy, and lifestyle workshops to support your complete wellbeing journey."
+
+# Pricing (in USD)
+pricing:
+  currency: "USD"
+  monthly: 129             # Unlimited monthly
+  yearly: 1290             # Annual unlimited
+  drop_in: 28              # Single class
+
+  # Klippekort system for flexible practice
+  klippekort:
+    categories:
+      - id: "all_levels"
+        name: "All Levels Classes"
+        description: "Beginner-friendly classes including Hatha, gentle flow, and restorative yoga"
+        icon: "heart"
+        color: "#800080"
+        info_text: "Perfect for new students or those seeking a gentler practice. No experience necessary."
+        packages:
+          - name: "1 class"
+            klipp: 1
+            price: 28
+            price_per_klipp: 28
+            save_percent: 0
+          - name: "5 classes"
+            klipp: 5
+            price: 133
+            price_per_klipp: 27
+            save_percent: 4
+          - name: "10 classes"
+            klipp: 10
+            price: 252
+            price_per_klipp: 25
+            save_percent: 11
+            badge: "Best Value"
+          - name: "20 classes"
+            klipp: 20
+            price: 476
+            price_per_klipp: 24
+            save_percent: 14
+            badge: "Most Popular"
+            
+      - id: "advanced_flow"
+        name: "Advanced Vinyasa & Power"
+        description: "Dynamic, challenging classes for experienced practitioners"
+        icon: "zap"
+        color: "#FF69B4"
+        info_text: "Strong, athletic practice. Previous yoga experience recommended."
+        packages:
+          - name: "1 class"
+            klipp: 1
+            price: 32
+            price_per_klipp: 32
+            save_percent: 0
+          - name: "5 classes"
+            klipp: 5
+            price: 152
+            price_per_klipp: 30
+            save_percent: 6
+          - name: "10 classes"
+            klipp: 10
+            price: 288
+            price_per_klipp: 29
+            save_percent: 9
+            badge: "Popular"
+            
+      - id: "hot_yoga"
+        name: "Heated Classes"
+        description: "Hot yoga classes in our heated studio (95-105°F)"
+        icon: "thermometer"
+        color: "#DC143C"
+        info_text: "Bring water and a towel. Heat helps deepen stretches and promote detox."
+        packages:
+          - name: "1 class"
+            klipp: 1
+            price: 35
+            price_per_klipp: 35
+            save_percent: 0
+          - name: "5 classes"
+            klipp: 5
+            price: 166
+            price_per_klipp: 33
+            save_percent: 6
+          - name: "10 classes"
+            klipp: 10
+            price: 315
+            price_per_klipp: 32
+            save_percent: 9
+            
+      - id: "prenatal"
+        name: "Prenatal & Postnatal"
+        description: "Specialized classes for expecting and new mothers"
+        icon: "baby"
+        color: "#FFD700"
+        info_text: "Safe, supportive practice designed for all stages of pregnancy and recovery."
+        packages:
+          - name: "1 class"
+            klipp: 1
+            price: 30
+            price_per_klipp: 30
+            save_percent: 0
+          - name: "5 classes"
+            klipp: 5
+            price: 143
+            price_per_klipp: 29
+            save_percent: 3
+          - name: "8 classes"
+            klipp: 8
+            price: 216
+            price_per_klipp: 27
+            save_percent: 10
+            badge: "Pregnancy Package"
+
+      - id: "workshops"
+        name: "Workshops & Special Events"
+        description: "Extended sessions, teacher trainings, and special workshops"
+        icon: "star"
+        color: "#32CD32"
+        info_text: "Deepen your practice with specialized workshops and continuing education."
+        packages:
+          - name: "1 workshop"
+            klipp: 1
+            price: 65
+            price_per_klipp: 65
+            save_percent: 0
+          - name: "3 workshops"
+            klipp: 3
+            price: 186
+            price_per_klipp: 62
+            save_percent: 5
+          - name: "6 workshops"
+            klipp: 6
+            price: 351
+            price_per_klipp: 59
+            save_percent: 9
+            badge: "Workshop Series"
+
+      - id: "private_sessions"
+        name: "Private & Semi-Private"
+        description: "Personal instruction and small group sessions"
+        icon: "person"
+        color: "#4B0082"
+        info_text: "Customized practice designed for your specific needs and goals."
+        packages:
+          - name: "1 private session"
+            klipp: 1
+            price: 125
+            price_per_klipp: 125
+            save_percent: 0
+          - name: "4 sessions"
+            klipp: 4
+            price: 475
+            price_per_klipp: 119
+            save_percent: 5
+          - name: "8 sessions"
+            klipp: 8
+            price: 900
+            price_per_klipp: 113
+            save_percent: 10
+            badge: "Teacher Special"
+
+# Locale
+locale:
+  language: "en"
+  country: "US"
+  timezone: "America/New_York"
+
+# Admin settings
+admin:
+  registration_open: true
+  require_approval: false
+  default_role: "member"
+
+# Attribution
+attribution:
+  show: true
+  text: "Built with Samskipnad"
+  link: "https://github.com/helloellinor/samskipnad"

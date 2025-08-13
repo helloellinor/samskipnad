@@ -128,13 +128,14 @@ else
     exit 1
 fi
 
-# Test 7: Verify demo documentation exists
+# Test 7: Documentation validation
 echo -e "${BLUE}🔧 Test 7: Documentation validation${NC}"
 
 docs_to_check=(
     "demos/README.md"
     "demos/phase1/README.md"
     "demos/phase2/README.md"
+    "demos/multi-community/README.md"
 )
 
 all_docs_exist=true
@@ -151,6 +152,52 @@ if [ "$all_docs_exist" = false ]; then
     exit 1
 fi
 
+# Test 8: Multi-Community demo validation
+echo -e "${BLUE}🔧 Test 8: Multi-Community demo validation${NC}"
+
+# Check that multi-community demo script is executable
+if [ -x "demos/multi-community/run-demo.sh" ]; then
+    echo -e "${GREEN}✅ Multi-community demo script is executable${NC}"
+else
+    echo -e "${RED}❌ Multi-community demo script is not executable${NC}"
+    exit 1
+fi
+
+# Check that community configuration files exist
+configs_to_check=(
+    "config/yoga-studio.yaml"
+    "config/hackerspace.yaml"
+)
+
+all_configs_exist=true
+for config in "${configs_to_check[@]}"; do
+    if [ -f "$config" ]; then
+        echo -e "${GREEN}✅ $config exists${NC}"
+    else
+        echo -e "${RED}❌ $config missing${NC}"
+        all_configs_exist=false
+    fi
+done
+
+if [ "$all_configs_exist" = false ]; then
+    exit 1
+fi
+
+# Test that configurations load correctly
+if COMMUNITY=yoga-studio timeout 3s ./bin/samskipnad > /dev/null 2>&1; then
+    echo -e "${GREEN}✅ Yoga studio configuration loads successfully${NC}"
+else
+    echo -e "${RED}❌ Yoga studio configuration failed to load${NC}"
+    exit 1
+fi
+
+if COMMUNITY=hackerspace timeout 3s ./bin/samskipnad > /dev/null 2>&1; then
+    echo -e "${GREEN}✅ Hackerspace configuration loads successfully${NC}"
+else
+    echo -e "${RED}❌ Hackerspace configuration failed to load${NC}"
+    exit 1
+fi
+
 # Summary
 echo ""
 echo -e "${GREEN}🎉 All demo validation tests passed!${NC}"
@@ -163,13 +210,16 @@ echo "  ✅ Protocol buffers generate correctly"
 echo "  ✅ All tests pass"
 echo "  ✅ Demo scripts are executable"
 echo "  ✅ Documentation is complete"
+echo "  ✅ Multi-community configurations validated"
 echo ""
 echo -e "${YELLOW}🚀 Ready to run demos:${NC}"
 echo "  • Phase 1: cd demos/phase1 && ./run-demo.sh"
 echo "  • Phase 2: cd demos/phase2 && ./run-demo.sh"
+echo "  • Multi-Community: cd demos/multi-community && ./run-demo.sh"
 echo ""
 echo -e "${BLUE}📚 Next Steps:${NC}"
 echo "  • Run the Phase 1 demo to see the core platform"
 echo "  • Run the Phase 2 demo to see the plugin system"
+echo "  • Run the Multi-Community demo to see yoga studio & hackerspace"
 echo "  • Explore the documentation in demos/README.md"
 echo "  • Try creating your own plugins using the SDK"

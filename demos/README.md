@@ -14,15 +14,22 @@ This directory contains demonstrations of the Samskipnad platform functionality 
 - **Description**: Demonstrates the plugin system architecture with gRPC APIs, process isolation, and example plugins
 - **Technologies**: Go, gRPC, Protocol Buffers, HashiCorp go-plugin
 
+### Multi-Community Demo: Yoga Studio & Hackerspace
+- **Location**: `multi-community/`
+- **Description**: Showcases multi-tenant capabilities with two distinct community types: yoga studio and hackerspace
+- **Technologies**: YAML-driven configuration, hot-reload, dynamic theming, multi-tenant architecture
+
 ## Quick Start
 
 Each phase demo includes its own README with specific instructions. To run a demo:
 
 ```bash
-# Navigate to the desired phase
-cd demos/phase1  # or phase2
+# Navigate to the desired demo
+cd demos/phase1         # Core platform demo
+cd demos/phase2         # Plugin system demo  
+cd demos/multi-community # Multi-tenant community demo
 
-# Follow the instructions in that phase's README.md
+# Follow the instructions in that demo's README.md
 cat README.md
 ```
 
@@ -47,7 +54,8 @@ These demos are designed to:
 The demos show the evolution of the Samskipnad platform:
 
 1. **Phase 1** establishes the core platform with essential features
-2. **Phase 2** introduces the plugin system foundation for extensibility
-3. **Phase 3** (future) will demonstrate the Creator Studio and advanced plugin ecosystem
+2. **Phase 2** introduces the plugin system foundation for extensibility  
+3. **Multi-Community Demo** demonstrates real-world multi-tenant usage with distinct community types
+4. **Phase 3** (future) will demonstrate the Creator Studio and advanced plugin ecosystem
 
 Each phase builds upon the previous one while maintaining stability and backward compatibility.
