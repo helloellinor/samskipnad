@@ -88,6 +88,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"samskipnad/pkg/sdk"
 )
 
@@ -145,14 +146,18 @@ func (p *CalculatorPlugin) Execute(ctx context.Context, params map[string]interf
 
 func main() {
 	plugin := NewCalculatorPlugin()
-	fmt.Printf("Starting Calculator Plugin %s v%s\n", plugin.Name(), plugin.Version())
+	// Avoid writing to stdout before handshake; use stderr if needed
+	log.Printf("Starting Calculator Plugin %s v%s", plugin.Name(), plugin.Version())
 	sdk.Serve(plugin)
 }
 EOF
 
 # Initialize calculator plugin module
 cd plugins/calculator
-go mod init calculator-plugin
+if [ ! -f go.mod ]; then
+	go mod init calculator-plugin
+fi
+go mod edit -replace samskipnad="$PROJECT_ROOT"
 go mod tidy
 go build -o calculator .
 
@@ -172,6 +177,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"samskipnad/pkg/sdk"
 )
 
@@ -204,13 +210,17 @@ func (p *EchoPlugin) Execute(ctx context.Context, params map[string]interface{})
 
 func main() {
 	plugin := NewEchoPlugin()
-	fmt.Printf("Starting Echo Plugin %s v%s\n", plugin.Name(), plugin.Version())
+	// Avoid writing to stdout before handshake; use stderr if needed
+	log.Printf("Starting Echo Plugin %s v%s", plugin.Name(), plugin.Version())
 	sdk.Serve(plugin)
 }
 EOF
 
 cd plugins/echo
-go mod init echo-plugin
+if [ ! -f go.mod ]; then
+	go mod init echo-plugin
+fi
+go mod edit -replace samskipnad="$PROJECT_ROOT"
 go mod tidy
 go build -o echo .
 
@@ -230,7 +240,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -316,32 +325,25 @@ func main() {
 			continue
 		}
 
-		// Load plugin
-		fmt.Printf("📂 Loading plugin from: %s\n", absPath)
-		plugin, err := host.LoadPlugin(ctx, test.name, absPath)
+	// Load plugin
+	fmt.Printf("📂 Loading plugin from: %s\n", absPath)
+	err = host.LoadPlugin(ctx, test.name, absPath)
 		if err != nil {
 			fmt.Printf("❌ Failed to load plugin: %v\n", err)
 			continue
 		}
 
-		fmt.Printf("✅ Plugin loaded: %s\n", plugin.Name)
+	fmt.Printf("✅ Plugin loaded: %s\n", test.name)
 
-		// Execute plugin
-		fmt.Printf("⚡ Executing with params: %+v\n", test.params)
-		
-		startTime := time.Now()
-		result, err := host.ExecutePlugin(ctx, plugin.Name, test.params)
-		duration := time.Since(startTime)
-
-		if err != nil {
-			fmt.Printf("❌ Plugin execution failed: %v\n", err)
-		} else {
-			fmt.Printf("✅ Plugin executed successfully in %v\n", duration)
-			fmt.Printf("📋 Result: %+v\n", result)
-		}
+	// Execute plugin (simulation placeholder; real gRPC execution not wired yet)
+	fmt.Printf("⚡ Executing with params: %+v\n", test.params)
+	startTime := time.Now()
+	time.Sleep(100 * time.Millisecond)
+	duration := time.Since(startTime)
+	fmt.Printf("✅ (Simulated) plugin execution completed in %v\n", duration)
 
 		// Unload plugin
-		err = host.UnloadPlugin(ctx, plugin.Name)
+	err = host.UnloadPlugin(test.name)
 		if err != nil {
 			fmt.Printf("⚠️  Warning: Failed to unload plugin: %v\n", err)
 		} else {
@@ -370,10 +372,12 @@ func main() {
 EOF
 
 cd host
-go mod init plugin-host-demo
-go mod edit -replace samskipnad="$PROJECT_ROOT"
-go mod tidy
-go build -o plugin-host .
+# Build host within the root samskipnad module so it can import internal packages
+# Ensure no local module file overrides the root module
+if [ -f go.mod ]; then
+	rm -f go.mod
+fi
+GO111MODULE=on go build -o plugin-host .
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}❌ Plugin host demo build failed.${NC}"
@@ -411,4 +415,3 @@ echo "  2. Modify the Execute() method"
 echo "  3. Build and test with the plugin host"
 echo ""
 echo -e "${GREEN}For more details, see: demos/phase2/README.md${NC}"
-EOF
