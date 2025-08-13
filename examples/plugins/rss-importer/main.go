@@ -68,8 +68,9 @@ func (p *RSSImporterPlugin) Execute(ctx context.Context, params map[string]inter
 func main() {
 	// Create and serve the plugin
 	plugin := NewRSSImporterPlugin()
+	// Avoid writing to stdout before handshake; use stderr (log)
 	log.Printf("Starting RSS Importer Plugin %s v%s", plugin.Name(), plugin.Version())
-	
+
 	// Start serving the plugin
 	sdk.Serve(plugin)
 }

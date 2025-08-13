@@ -2,10 +2,6 @@
 
 Always follow these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.
 
-## Current Repository State
-
-This repository is currently in minimal state with only a README.MD file containing a single newline character. There is no established technology stack, build system, or application code yet.
-
 ## Working Effectively
 
 ### Initial Setup and Exploration
