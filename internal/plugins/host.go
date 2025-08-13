@@ -4,13 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os/exec"
+	"os"
 
-	"github.com/hashicorp/go-hclog"
-	"github.com/hashicorp/go-plugin"
-	"google.golang.org/grpc"
-
-	pb "samskipnad/pkg/proto/v1"
+	"samskipnad/pkg/sdk"
 )
 
 // PluginHost manages the lifecycle of plugins
@@ -23,20 +19,12 @@ type PluginHost struct {
 type Plugin struct {
 	Name     string
 	Path     string
-	Client   *plugin.Client
-	Process  *exec.Cmd
 	Services PluginServices
 }
 
 // PluginServices contains the gRPC clients for core services exposed to plugins
-type PluginServices struct {
-	UserProfile pb.UserProfileServiceClient
-	// TODO: Add other services as we generate their protobuf definitions
-	// CommunityManagement pb.CommunityManagementServiceClient
-	// ItemManagement     pb.ItemManagementServiceClient
-	// Payment            pb.PaymentServiceClient
-	// EventBus           pb.EventBusServiceClient
-}
+// Use shared PluginServices from SDK
+type PluginServices = sdk.PluginServices
 
 // PluginConfig contains configuration for the plugin system
 type PluginConfig struct {
@@ -70,72 +58,31 @@ func (h *PluginHost) LoadPlugin(ctx context.Context, name, path string) error {
 	if len(h.plugins) >= h.config.MaxPlugins {
 		return fmt.Errorf("maximum number of plugins (%d) reached", h.config.MaxPlugins)
 	}
-
-	// Create plugin client configuration
-	pluginConfig := &plugin.ClientConfig{
-		HandshakeConfig: HandshakeConfig,
-		Plugins:         PluginMap,
-		Cmd:             exec.Command(path),
-		AllowedProtocols: []plugin.Protocol{
-			plugin.ProtocolGRPC,
-		},
-		Logger: hclog.New(&hclog.LoggerOptions{
-			Name:   "plugin",
-			Output: log.Writer(),
-			Level:  hclog.Info,
-		}),
+	// Verify the plugin binary exists
+	if _, err := os.Stat(path); err != nil {
+		return fmt.Errorf("plugin not found at path %s: %v", path, err)
 	}
 
-	// Start the plugin
-	client := plugin.NewClient(pluginConfig)
-	rpcClient, err := client.Client()
-	if err != nil {
-		client.Kill()
-		return fmt.Errorf("failed to create RPC client: %v", err)
-	}
-
-	// Get the plugin interface
-	raw, err := rpcClient.Dispense("samskipnad_plugin")
-	if err != nil {
-		client.Kill()
-		return fmt.Errorf("failed to dispense plugin: %v", err)
-	}
-
-	// Type assert to our plugin interface
-	pluginInterface, ok := raw.(SamskipnadPlugin)
-	if !ok {
-		client.Kill()
-		return fmt.Errorf("plugin does not implement SamskipnadPlugin interface")
-	}
-
-	// Initialize the plugin with core services
+	// For this demo, we won't start the process yet; we just prepare services
 	services := h.createPluginServices(ctx)
-	if err := pluginInterface.Initialize(ctx, services); err != nil {
-		client.Kill()
-		return fmt.Errorf("failed to initialize plugin: %v", err)
-	}
 
 	// Store the plugin
 	h.plugins[name] = &Plugin{
 		Name:     name,
 		Path:     path,
-		Client:   client,
 		Services: services,
 	}
 
-	log.Printf("Plugin %s loaded successfully from %s", name, path)
+	log.Printf("Plugin %s registered from %s", name, path)
 	return nil
 }
 
 // UnloadPlugin unloads a plugin
 func (h *PluginHost) UnloadPlugin(name string) error {
-	plugin, exists := h.plugins[name]
+	_, exists := h.plugins[name]
 	if !exists {
 		return fmt.Errorf("plugin %s is not loaded", name)
 	}
-
-	// Kill the plugin process
-	plugin.Client.Kill()
 
 	// Remove from our map
 	delete(h.plugins, name)
@@ -173,53 +120,4 @@ func (h *PluginHost) createPluginServices(ctx context.Context) PluginServices {
 	}
 }
 
-// Plugin interface and handshake configuration
-var (
-	// HandshakeConfig is the configuration for the plugin handshake
-	HandshakeConfig = plugin.HandshakeConfig{
-		ProtocolVersion:  1,
-		MagicCookieKey:   "SAMSKIPNAD_PLUGIN",
-		MagicCookieValue: "samskipnad_v1",
-	}
-
-	// PluginMap is the map of plugins we can dispense
-	PluginMap = map[string]plugin.Plugin{
-		"samskipnad_plugin": &SamskipnadPluginGRPC{},
-	}
-)
-
-// SamskipnadPlugin is the interface that all plugins must implement
-type SamskipnadPlugin interface {
-	// Initialize is called when the plugin is loaded
-	Initialize(ctx context.Context, services PluginServices) error
-
-	// Name returns the plugin's name
-	Name() string
-
-	// Version returns the plugin's version
-	Version() string
-
-	// Execute performs the plugin's main functionality
-	Execute(ctx context.Context, params map[string]interface{}) (map[string]interface{}, error)
-
-	// Shutdown is called when the plugin is being unloaded
-	Shutdown(ctx context.Context) error
-}
-
-// SamskipnadPluginGRPC is the gRPC implementation of the plugin interface
-type SamskipnadPluginGRPC struct {
-	plugin.Plugin
-	Impl SamskipnadPlugin
-}
-
-func (p *SamskipnadPluginGRPC) GRPCServer(broker *plugin.GRPCBroker, s *grpc.Server) error {
-	// TODO: Register the plugin service with the gRPC server
-	// This would require defining a plugin-specific protobuf service
-	return nil
-}
-
-func (p *SamskipnadPluginGRPC) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (interface{}, error) {
-	// TODO: Return a gRPC client for the plugin service
-	// This would require implementing the client-side of the plugin protocol
-	return nil, nil
-}
+// Use the SDK's SamskipnadPlugin interface and GRPC wrapper; no local types needed here
