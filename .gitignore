@@ -7,11 +7,21 @@ tmp/
 *.so
 *.dylib
 
+# Go binaries (executables without extension)
+server
+calculator
+calculator-plugin
+rss-importer
+
 # Test binary, built with `go test -c`
 *.test
 
 # Output of the go coverage tool
 *.out
+
+# Go module cache and workspace files
+go.work
+go.work.sum
 
 # Dependency directories
 vendor/

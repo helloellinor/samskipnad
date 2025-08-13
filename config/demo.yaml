@@ -1,0 +1,124 @@
+# Demo Community Configuration
+# This configuration creates a sample yoga studio for demonstration
+
+name: "Yoga Studio Oslo"
+description: "A peaceful community yoga studio in the heart of Oslo"
+location: "Oslo, Norway"
+website: "https://yogastudio-oslo.example.com"
+
+# Visual branding
+theme:
+  primary_color: "#6B73FF"      # Calming purple-blue
+  secondary_color: "#9B59B6"    # Soft purple
+  accent_color: "#E74C3C"       # Warm red for highlights
+  background_color: "#F8F9FA"   # Light gray background
+  text_color: "#2C3E50"         # Dark blue-gray for text
+
+# Community settings
+settings:
+  currency: "NOK"
+  timezone: "Europe/Oslo"
+  language: "no"
+  booking_window_days: 14       # How far ahead users can book
+  cancellation_hours: 24       # Hours before class to allow cancellation
+  
+# Membership types
+memberships:
+  - name: "Monthly Unlimited"
+    price: 89900  # 899 NOK in øre
+    duration_days: 30
+    unlimited: true
+    description: "Unlimited classes for one month"
+    
+  - name: "3-Month Pass"
+    price: 229900  # 2299 NOK in øre  
+    duration_days: 90
+    unlimited: true
+    description: "Unlimited classes for three months"
+    popular: true
+    
+  - name: "Annual Membership"
+    price: 799900  # 7999 NOK in øre
+    duration_days: 365
+    unlimited: true
+    description: "Full year unlimited access"
+    best_value: true
+
+# Klippekort (punch card) options
+klippekort:
+  - name: "5-Class Card"
+    price: 59900   # 599 NOK in øre
+    classes: 5
+    validity_days: 60
+    description: "Perfect for trying out different classes"
+    
+  - name: "10-Class Card" 
+    price: 109900  # 1099 NOK in øre
+    classes: 10
+    validity_days: 90
+    description: "Great value for regular practice"
+    popular: true
+    
+  - name: "20-Class Card"
+    price: 199900  # 1999 NOK in øre
+    classes: 20
+    validity_days: 120
+    description: "Maximum flexibility for dedicated yogis"
+
+# Class types offered
+class_types:
+  - name: "Hatha Yoga"
+    description: "Gentle, slow-paced class focusing on basic postures"
+    duration_minutes: 60
+    max_participants: 12
+    
+  - name: "Vinyasa Flow"
+    description: "Dynamic sequences linking breath with movement"
+    duration_minutes: 75
+    max_participants: 15
+    
+  - name: "Yin Yoga"
+    description: "Meditative practice with long-held passive poses"
+    duration_minutes: 90
+    max_participants: 10
+    
+  - name: "Power Yoga"
+    description: "Vigorous, fitness-based approach to yoga"
+    duration_minutes: 60
+    max_participants: 15
+    
+  - name: "Restorative Yoga"
+    description: "Deeply relaxing practice using props for support"
+    duration_minutes: 75
+    max_participants: 8
+
+# Sample instructors
+instructors:
+  - name: "Elena Andersson"
+    bio: "Certified yoga instructor with 8 years of experience"
+    specialties: ["Hatha", "Restorative"]
+    
+  - name: "Magnus Eriksen"
+    bio: "Former athlete turned yoga teacher, specializes in power yoga"
+    specialties: ["Power Yoga", "Vinyasa"]
+    
+  - name: "Astrid Larsen"
+    bio: "Meditation teacher and yin yoga specialist"
+    specialties: ["Yin", "Meditation"]
+
+# Payment settings
+payment:
+  provider: "stripe"  # For demo, payments are simulated
+  currency: "NOK"
+  test_mode: true
+  
+# Contact information
+contact:
+  email: "hello@yogastudio-oslo.example.com"
+  phone: "+47 123 45 678"
+  address: "Storgata 123, 0182 Oslo, Norway"
+  
+# Social media (for demo)
+social:
+  instagram: "@yogastudiooslo"
+  facebook: "YogaStudioOslo"name: "Hot Reload Demo"

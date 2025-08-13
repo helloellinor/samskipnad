@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"samskipnad/internal/auth"
 	"samskipnad/internal/config"
@@ -18,7 +20,33 @@ import (
 func main() {
 	// Load community configuration
 	communityName := os.Getenv("COMMUNITY")
-	community, err := config.Load(communityName)
+	
+	// Initialize hot-reload if enabled
+	hotReloadEnabled := os.Getenv("HOT_RELOAD_ENABLED") == "true"
+	if hotReloadEnabled {
+		err := config.InitializeHotReload("config")
+		if err != nil {
+			log.Printf("Warning: Failed to initialize hot-reload: %v", err)
+			log.Println("Falling back to static configuration loading")
+		} else {
+			log.Println("Hot-reload configuration system initialized")
+			
+			// Set up reload callback to log configuration changes
+			config.SetGlobalReloadCallback(func(name string, cfg *config.Community) {
+				log.Printf("🔥 Hot-reload: Configuration '%s' updated - %s", name, cfg.Name)
+			})
+		}
+	}
+	
+	var community *config.Community
+	var err error
+	
+	if hotReloadEnabled {
+		community, err = config.LoadWithHotReload(communityName)
+	} else {
+		community, err = config.Load(communityName)
+	}
+	
 	if err != nil {
 		log.Fatal("Failed to load community config:", err)
 	}
@@ -97,6 +125,29 @@ func main() {
 		port = "8080"
 	}
 
-	log.Printf("Server starting on port %s", port)
-	log.Fatal(http.ListenAndServe(":"+port, r))
+	// Set up graceful shutdown
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		log.Printf("Server starting on port %s", port)
+		if err := http.ListenAndServe(":"+port, r); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	// Wait for shutdown signal
+	<-stop
+	log.Println("Shutting down server...")
+	
+	// Cleanup hot-reload system if enabled
+	if hotReloadEnabled {
+		if err := config.ShutdownHotReload(); err != nil {
+			log.Printf("Error shutting down hot-reload: %v", err)
+		} else {
+			log.Println("Hot-reload system shut down gracefully")
+		}
+	}
+	
+	log.Println("Server stopped")
 }
