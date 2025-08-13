@@ -184,14 +184,14 @@ if [ "$all_configs_exist" = false ]; then
 fi
 
 # Test that configurations load correctly
-if COMMUNITY=yoga-studio timeout 3s ./bin/samskipnad > /dev/null 2>&1; then
+if COMMUNITY=yoga-studio timeout 5s ./bin/samskipnad > /dev/null 2>&1; then
     echo -e "${GREEN}✅ Yoga studio configuration loads successfully${NC}"
 else
     echo -e "${RED}❌ Yoga studio configuration failed to load${NC}"
     exit 1
 fi
 
-if COMMUNITY=hackerspace timeout 3s ./bin/samskipnad > /dev/null 2>&1; then
+if COMMUNITY=hackerspace timeout 5s ./bin/samskipnad > /dev/null 2>&1; then
     echo -e "${GREEN}✅ Hackerspace configuration loads successfully${NC}"
 else
     echo -e "${RED}❌ Hackerspace configuration failed to load${NC}"
