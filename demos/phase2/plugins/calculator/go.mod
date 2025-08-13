@@ -2,7 +2,7 @@ module calculator-plugin
 
 go 1.24.5
 
-replace samskipnad => /Users/eg/rørsla/samskipnad
+replace samskipnad => ../../../../
 
 require samskipnad v0.0.0-00010101000000-000000000000
 
